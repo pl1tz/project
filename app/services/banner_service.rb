@@ -27,4 +27,22 @@ class BannerService
         text_2: text_2
       }
     end
+    def self.fetch_all_banners
+      banners = Banner.all
+      banners.map do |banner|
+        {
+          id: banner.id,
+          images: banner.image,
+          status: banner.status,
+          text: {
+            main_text: banner.main_text,
+            second_text: banner.second_text
+          },
+          text_2: {
+            main_2_text: banner.main_2_text,
+            second_2_text: banner.second_2_text
+          }
+        }
+      end
+    end
   end

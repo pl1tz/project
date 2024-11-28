@@ -41,6 +41,11 @@ class BannersController < ApplicationController
     end
   end
 
+  def banner_all
+  @banners =  BannerService.fetch_all_banners
+  render json: @banners 
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_banner

@@ -1,5 +1,9 @@
 Rails.application.routes.draw do
-  resources :banners
+  resources :banners do 
+    collection do 
+    get :banner_all
+    end 
+  end 
   resources :engine_capacity_types
   resources :engine_power_types
   resources :engine_name_types
@@ -23,7 +27,6 @@ Rails.application.routes.draw do
       get :all_extras
       post :update_multiple
       patch :update_multiple 
-      
     end
   end
   resources :categories
