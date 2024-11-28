@@ -1,0 +1,22 @@
+<%= form_with(model: gearbox_type) do |form| %>
+  <% if gearbox_type.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(gearbox_type.errors.count, "error") %> prohibited this gearbox_type from being saved:</h2>
+
+      <ul>
+        <% gearbox_type.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :name, style: "display: block" %>
+    <%= form.text_field :name %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

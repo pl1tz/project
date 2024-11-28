@@ -1,0 +1,2 @@
+json.extract! history_car, :id, :car_id, :vin, :registration_number, :last_mileage, :registration_restrictions, :wanted_status, :pledge_status, :previous_owners, :accidents_found, :repair_estimates_found, :taxi_usage, :carsharing_usage, :diagnostics_found, :technical_inspection_found, :imported, :insurance_found, :recall_campaigns_found, :created_at, :updated_at
+json.url history_car_url(history_car, format: :json)

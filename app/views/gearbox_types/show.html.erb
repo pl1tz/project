@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @gearbox_type %>
+
+<div>
+  <%= link_to "Edit this gearbox type", edit_gearbox_type_path(@gearbox_type) %> |
+  <%= link_to "Back to gearbox types", gearbox_types_path %>
+
+  <%= button_to "Destroy this gearbox type", @gearbox_type, method: :delete %>
+</div>

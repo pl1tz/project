@@ -1,0 +1,12 @@
+<% content_for :title, "Editing engine type" %>
+
+<h1>Editing engine type</h1>
+
+<%= render "form", engine_type: @engine_type %>
+
+<br>
+
+<div>
+  <%= link_to "Show this engine type", @engine_type %> |
+  <%= link_to "Back to engine types", engine_types_path %>
+</div>

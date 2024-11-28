@@ -1,0 +1,16 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "History cars" %>
+
+<h1>History cars</h1>
+
+<div id="history_cars">
+  <% @history_cars.each do |history_car| %>
+    <%= render history_car %>
+    <p>
+      <%= link_to "Show this history car", history_car %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New history car", new_history_car_path %>

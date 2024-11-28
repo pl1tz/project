@@ -1,0 +1,22 @@
+<%= form_with(model: engine_capacity_type) do |form| %>
+  <% if engine_capacity_type.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(engine_capacity_type.errors.count, "error") %> prohibited this engine_capacity_type from being saved:</h2>
+
+      <ul>
+        <% engine_capacity_type.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :capacity, style: "display: block" %>
+    <%= form.number_field :capacity %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

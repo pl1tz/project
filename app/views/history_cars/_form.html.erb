@@ -1,0 +1,102 @@
+<%= form_with(model: history_car) do |form| %>
+  <% if history_car.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(history_car.errors.count, "error") %> prohibited this history_car from being saved:</h2>
+
+      <ul>
+        <% history_car.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :car_id, style: "display: block" %>
+    <%= form.text_field :car_id %>
+  </div>
+
+  <div>
+    <%= form.label :vin, style: "display: block" %>
+    <%= form.text_field :vin %>
+  </div>
+
+  <div>
+    <%= form.label :registration_number, style: "display: block" %>
+    <%= form.text_field :registration_number %>
+  </div>
+
+  <div>
+    <%= form.label :last_mileage, style: "display: block" %>
+    <%= form.number_field :last_mileage %>
+  </div>
+
+  <div>
+    <%= form.label :registration_restrictions, style: "display: block" %>
+    <%= form.check_box :registration_restrictions %>
+  </div>
+
+  <div>
+    <%= form.label :wanted_status, style: "display: block" %>
+    <%= form.check_box :wanted_status %>
+  </div>
+
+  <div>
+    <%= form.label :pledge_status, style: "display: block" %>
+    <%= form.check_box :pledge_status %>
+  </div>
+
+  <div>
+    <%= form.label :previous_owners, style: "display: block" %>
+    <%= form.number_field :previous_owners %>
+  </div>
+
+  <div>
+    <%= form.label :accidents_found, style: "display: block" %>
+    <%= form.check_box :accidents_found %>
+  </div>
+
+  <div>
+    <%= form.label :repair_estimates_found, style: "display: block" %>
+    <%= form.check_box :repair_estimates_found %>
+  </div>
+
+  <div>
+    <%= form.label :taxi_usage, style: "display: block" %>
+    <%= form.check_box :taxi_usage %>
+  </div>
+
+  <div>
+    <%= form.label :carsharing_usage, style: "display: block" %>
+    <%= form.check_box :carsharing_usage %>
+  </div>
+
+  <div>
+    <%= form.label :diagnostics_found, style: "display: block" %>
+    <%= form.check_box :diagnostics_found %>
+  </div>
+
+  <div>
+    <%= form.label :technical_inspection_found, style: "display: block" %>
+    <%= form.check_box :technical_inspection_found %>
+  </div>
+
+  <div>
+    <%= form.label :imported, style: "display: block" %>
+    <%= form.check_box :imported %>
+  </div>
+
+  <div>
+    <%= form.label :insurance_found, style: "display: block" %>
+    <%= form.check_box :insurance_found %>
+  </div>
+
+  <div>
+    <%= form.label :recall_campaigns_found, style: "display: block" %>
+    <%= form.check_box :recall_campaigns_found %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

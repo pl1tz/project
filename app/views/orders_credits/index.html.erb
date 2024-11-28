@@ -1,0 +1,16 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Orders credits" %>
+
+<h1>Orders credits</h1>
+
+<div id="orders_credits">
+  <% @orders_credits.each do |orders_credit| %>
+    <%= render orders_credit %>
+    <p>
+      <%= link_to "Show this orders credit", orders_credit %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New orders credit", new_orders_credit_path %>

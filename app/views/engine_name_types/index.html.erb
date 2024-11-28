@@ -1,0 +1,16 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Engine name types" %>
+
+<h1>Engine name types</h1>
+
+<div id="engine_name_types">
+  <% @engine_name_types.each do |engine_name_type| %>
+    <%= render engine_name_type %>
+    <p>
+      <%= link_to "Show this engine name type", engine_name_type %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New engine name type", new_engine_name_type_path %>

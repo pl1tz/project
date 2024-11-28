@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @orders_buyout %>
+
+<div>
+  <%= link_to "Edit this orders buyout", edit_orders_buyout_path(@orders_buyout) %> |
+  <%= link_to "Back to orders buyouts", orders_buyouts_path %>
+
+  <%= button_to "Destroy this orders buyout", @orders_buyout, method: :delete %>
+</div>

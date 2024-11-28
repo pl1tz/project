@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @drive_type %>
+
+<div>
+  <%= link_to "Edit this drive type", edit_drive_type_path(@drive_type) %> |
+  <%= link_to "Back to drive types", drive_types_path %>
+
+  <%= button_to "Destroy this drive type", @drive_type, method: :delete %>
+</div>

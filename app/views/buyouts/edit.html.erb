@@ -1,0 +1,12 @@
+<% content_for :title, "Editing buyout" %>
+
+<h1>Editing buyout</h1>
+
+<%= render "form", buyout: @buyout %>
+
+<br>
+
+<div>
+  <%= link_to "Show this buyout", @buyout %> |
+  <%= link_to "Back to buyouts", buyouts_path %>
+</div>

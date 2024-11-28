@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @orders_call_request %>
+
+<div>
+  <%= link_to "Edit this orders call request", edit_orders_call_request_path(@orders_call_request) %> |
+  <%= link_to "Back to orders call requests", orders_call_requests_path %>
+
+  <%= button_to "Destroy this orders call request", @orders_call_request, method: :delete %>
+</div>

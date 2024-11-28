@@ -1,0 +1,11 @@
+<% content_for :title, "New order status" %>
+
+<h1>New order status</h1>
+
+<%= render "form", order_status: @order_status %>
+
+<br>
+
+<div>
+  <%= link_to "Back to order statuses", order_statuses_path %>
+</div>

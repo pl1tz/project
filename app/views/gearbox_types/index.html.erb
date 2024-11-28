@@ -1,0 +1,16 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Gearbox types" %>
+
+<h1>Gearbox types</h1>
+
+<div id="gearbox_types">
+  <% @gearbox_types.each do |gearbox_type| %>
+    <%= render gearbox_type %>
+    <p>
+      <%= link_to "Show this gearbox type", gearbox_type %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New gearbox type", new_gearbox_type_path %>

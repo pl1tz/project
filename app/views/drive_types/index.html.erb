@@ -1,0 +1,16 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Drive types" %>
+
+<h1>Drive types</h1>
+
+<div id="drive_types">
+  <% @drive_types.each do |drive_type| %>
+    <%= render drive_type %>
+    <p>
+      <%= link_to "Show this drive type", drive_type %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New drive type", new_drive_type_path %>

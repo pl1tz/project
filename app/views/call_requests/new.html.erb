@@ -1,0 +1,11 @@
+<% content_for :title, "New call request" %>
+
+<h1>New call request</h1>
+
+<%= render "form", call_request: @call_request %>
+
+<br>
+
+<div>
+  <%= link_to "Back to call requests", call_requests_path %>
+</div>

@@ -1,0 +1,16 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Orders buyouts" %>
+
+<h1>Orders buyouts</h1>
+
+<div id="orders_buyouts">
+  <% @orders_buyouts.each do |orders_buyout| %>
+    <%= render orders_buyout %>
+    <p>
+      <%= link_to "Show this orders buyout", orders_buyout %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New orders buyout", new_orders_buyout_path %>

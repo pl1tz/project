@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @engine_capacity_type %>
+
+<div>
+  <%= link_to "Edit this engine capacity type", edit_engine_capacity_type_path(@engine_capacity_type) %> |
+  <%= link_to "Back to engine capacity types", engine_capacity_types_path %>
+
+  <%= button_to "Destroy this engine capacity type", @engine_capacity_type, method: :delete %>
+</div>

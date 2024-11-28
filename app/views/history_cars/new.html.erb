@@ -1,0 +1,11 @@
+<% content_for :title, "New history car" %>
+
+<h1>New history car</h1>
+
+<%= render "form", history_car: @history_car %>
+
+<br>
+
+<div>
+  <%= link_to "Back to history cars", history_cars_path %>
+</div>

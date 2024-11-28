@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @installment %>
+
+<div>
+  <%= link_to "Edit this installment", edit_installment_path(@installment) %> |
+  <%= link_to "Back to installments", installments_path %>
+
+  <%= button_to "Destroy this installment", @installment, method: :delete %>
+</div>

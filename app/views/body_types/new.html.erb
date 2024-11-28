@@ -1,0 +1,11 @@
+<% content_for :title, "New body type" %>
+
+<h1>New body type</h1>
+
+<%= render "form", body_type: @body_type %>
+
+<br>
+
+<div>
+  <%= link_to "Back to body types", body_types_path %>
+</div>

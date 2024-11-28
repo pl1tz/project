@@ -1,0 +1,22 @@
+<%= form_with(model: about_company) do |form| %>
+  <% if about_company.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(about_company.errors.count, "error") %> prohibited this about_company from being saved:</h2>
+
+      <ul>
+        <% about_company.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :description, style: "display: block" %>
+    <%= form.text_field :description %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

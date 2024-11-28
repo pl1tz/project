@@ -1,0 +1,12 @@
+<% content_for :title, "Editing order status" %>
+
+<h1>Editing order status</h1>
+
+<%= render "form", order_status: @order_status %>
+
+<br>
+
+<div>
+  <%= link_to "Show this order status", @order_status %> |
+  <%= link_to "Back to order statuses", order_statuses_path %>
+</div>

@@ -1,0 +1,12 @@
+<% content_for :title, "Editing gearbox type" %>
+
+<h1>Editing gearbox type</h1>
+
+<%= render "form", gearbox_type: @gearbox_type %>
+
+<br>
+
+<div>
+  <%= link_to "Show this gearbox type", @gearbox_type %> |
+  <%= link_to "Back to gearbox types", gearbox_types_path %>
+</div>

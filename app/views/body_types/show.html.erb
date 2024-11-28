@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @body_type %>
+
+<div>
+  <%= link_to "Edit this body type", edit_body_type_path(@body_type) %> |
+  <%= link_to "Back to body types", body_types_path %>
+
+  <%= button_to "Destroy this body type", @body_type, method: :delete %>
+</div>

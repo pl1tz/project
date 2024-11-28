@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        h2 { color: #555; }
+        p { margin: 5px 0; }
+        code { background-color: #f4f4f4; padding: 2px 4px; }
+        ul { margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>API Documentation</h1>
+    
+    <h2 onclick="toggleSection(this)">Cars</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /cars?page=1</code> - Список автомобилей</p>
+        <p><code>GET /cars?coll=all</code> - Список автомобилей без пагинации</p>
+        <p><code>GET /car_ids?id=30</code> - Список автомобилей для редактирования по id</p>
+        <p><code>GET /cars/:id</code> - Показать автомобиль</p>
+        <p><code>GET /cars?newest=true</code> - Список автомобилей новых</p>
+        <p><code>GET /cars?mileage=true</code> - Список автомобилей по пробегу</p>
+        <p><code>GET /cars?price_desc=true</code> - Список автомобилей по убыванию цены</p>
+        <p><code>GET /cars?price_asc=true</code> - Список автомобилей по возрастанию цены</p>
+
+        <p><code>POST /cars</code> - Создать новый автомобиль</p>
+        <pre>
+        {
+            "car": {
+                "model_id": 2,
+                "brand_id": 2,
+                "year": 2020,
+                "price": 20000,
+                "description": "Описание автомобиля",
+                "color_id": 2,
+                "body_type_id": 2,
+                "engine_power_type_id": 2,
+                "engine_name_type_id": 2,
+                "engine_capacity_type_id": 2,
+                "gearbox_type_id": 2,
+                "drive_type_id": 2,
+                "generation_id": 2,
+                "online_view_available": true,
+                "complectation_name": "Полная комплектация"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /cars/:id</code> - Обновить информацию о конкретном автомобиле</p>
+        <pre>
+        {
+            "car": {
+                "model_id": 2,
+                "brand_id": 1,
+                "year": 2021,
+                "price": 22000,
+                "description": "Обновленное описание",
+                "color_id": 2,
+                "body_type_id": 1,
+                "engine_power_type_id": 1,
+                "engine_name_type_id": 1,
+                "engine_capacity_type_id": 1,
+                "gearbox_type_id": 1,
+                "drive_type_id": 1,
+                "generation_id": 1,
+                "online_view_available": false,
+                "complectation_name": "Обновленная комплектация"
+            }
+        }
+        </pre>
+        <p><code>DELETE /cars/:id</code> - Удалить конкретный автомобиль (возвращает 200)</p>
+
+        <p><code>GET /cars/total_pages</code> - Количество страниц(такие же фильтры как и на список автомобилей)</p>
+        <p><code>GET /last_cars</code> - Последние 20 автомобилей</p>
+        <p><code>GET /cars_count</code> - Количество автомобилей</p>
+        <pre>
+            {
+                "brand": "Ford",
+                "total": 1,
+                "models": [
+                    {
+                        "name": "Focus",
+                        "total": 1,
+                        "generations": [
+                            {
+                                "name": "III Рестайлинг",
+                                "count": 1
+                            }
+                        ]
+                    }
+                ]
+            }
+        </pre>
+        <p><code>GET /car_details?brand_name=(НАЗВАНИЕ БРЕНДА)&model_name=(НАЗВАНИЕ МОДЕЛИ)&generation_name=(НАЗВАНИЕ ПОКОЛЕНИЯ)</code> - Детали автомобилей про бренду, модели и поколения</p>
+        <p><code>GET /filters</code> - Фильтры для автомобилей(фильтры принимаются такие же как и на список автомобилей)</p>
+        <pre>
+            {
+                "brand_name": "Ford",
+                "model_name": "Focus",
+                "generation_name": "III Рестайлинг",
+                "year_from": 2015,
+                "max_price": 30000,
+                "gearbox_type_name": "Автоматическая",
+                "body_type_name": "Седан",
+                "drive_type_name": "Полный",
+                "owners_count": 1,
+                "engine_name_type_name": "Дизель"
+            }
+        </pre>
+        
+        <h3>Фильтры для автомобилей</h3>
+        <ul>
+            <li><code>brand_name</code> - Название бренда автомобиля</li>
+            <li><code>model_name</code> - Название модели автомобиля</li>
+            <li><code>generation_name</code> - Название поколения автомобиля</li>
+            <li><code>year_from</code> - Год выпуска, начиная с</li>
+            <li><code>max_price</code> - Максимальная цена</li>
+            <li><code>gearbox_type_name</code> - Тип коробки передач</li>
+            <li><code>body_type_name</code> - Тип кузова</li>
+            <li><code>drive_type_name</code> - Тип привода</li>
+            <li><code>owners_count</code> - Количество владельцев</li>
+            <li><code>engine_name_type_name</code> - Тип двигателя</li>
+        </ul>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Brands</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /brands</code> - Список всех брендов</p>
+        <p><code>GET /brands/:id</code> - Показать информацию о конкретном бренде</p>
+        <p><code>POST /brands</code> - Создать новый бренд</p>
+        <pre>
+        {
+            "brand": {
+                "name": "Ford"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /brands/:id</code> - Обновить информацию о бренде</p>
+        <pre>
+        {
+            "brand": {
+                "name": "Updated Ford"
+            }
+        }
+        </pre>
+        <p><code>DELETE /brands/:id</code> - Удалить бренд(возвращает 200)</p>
+    </div>
+    
+    <h2 onclick="toggleSection(this)">Models</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /models</code> - Список всех моделей</p>
+        <p><code>GET /models/:id</code> - Показать информацию о конкретной модели</p>
+        <p><code>POST /models</code> - Создать новую модель</p>
+        <pre>
+        {
+            "model": {
+                "name": "Focus",
+                "brand_id": 1
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /models/:id</code> - Обновить информацию о модели</p>
+        <pre>
+        {
+            "model": {
+                "name": "Updated Focus",
+                "brand_id": 2
+            }
+        }
+        </pre>
+        <p><code>DELETE /models/:id</code> - Удалить модель(возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Generations</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /generations</code> - Список всех поколений</p>
+        <p><code>GET /generations/:id</code> - Показать информацию о конкретном поколении</p>
+        <p><code>POST /generations</code> - Создать новое поколение</p>
+        <pre>
+        {
+            "generation": {
+                "name": "New Generation",
+                "model_id": 1
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /generations/:id</code> - Обновить информацию о поколении</p>
+        <pre>
+        {
+            "generation": {
+                "name": "Updated Generation",
+                "model_id": 2
+            }
+        }
+        </pre>
+        <p><code>DELETE /generations/:id</code> - Удалить поколение (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Body Types</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /body_types</code> - Список всех типов кузовов</p>
+        <p><code>GET /body_types/:id</code> - Показать информацию о конкретном типе кузова</p>
+        <p><code>POST /body_types</code> - Создать новый тип кузова</p>
+        <pre>
+        {
+            "body_type": {
+                "name": "Седан"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /body_types/:id</code> - Обновить информацию о типе кузова</p>
+        <pre>
+        {
+            "body_type": {
+                "name": "Хэтчбек"
+            }
+        }
+        </pre>
+        <p><code>DELETE /body_types/:id</code> - Удалить тип кузова (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Colors</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /colors</code> - Список всех цветов</p>
+        <p><code>GET /colors/:id</code> - Показать информацию о конкретном цвете</p>
+        <p><code>POST /colors</code> - Создать новый цвет</p>
+        <pre>
+        {
+            "color": {
+                "name": "Синий",
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /colors/:id</code> - Обновить информацию о цвете</p>
+        <pre>
+        {
+            "color": {
+                "name": "Обновленный Красный",
+                "hex_value": "#FF4444"
+            }
+        }
+        </pre>
+        <p><code>DELETE /colors/:id</code> - Удалить цвет (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Drive Types</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /drive_types</code> - Список всех типов привода</p>
+        <p><code>GET /drive_types/:id</code> - Показать информацию о конкретном типе привода</p>
+        <p><code>POST /drive_types</code> - Создать новый тип привода</p>
+        <pre>
+        {
+            "drive_type": {
+                "name": "Полный"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /drive_types/:id</code> - Обновить информацию о типе привода</p>
+        <pre>
+        {
+            "drive_type": {
+                "name": "Обновленный Передний"
+            }
+        }
+        </pre>
+        <p><code>DELETE /drive_type/:id</code> - Удалить тип привода (возвращает 200)</p>
+    </div>
+    
+    <h2 onclick="toggleSection(this)">Engine Power Types</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /engine_power_types</code> - Список всех типов мощности двигателей</p>
+        <p><code>GET /engine_power_types/:id</code> - Показать информацию о конкретном типе мощности двигателя</p>
+        <p><code>POST /engine_power_types</code> - Создать новый тип мощности двигателя</p>
+        <pre>
+        {
+            "engine_power_type": {
+                "power": 150
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /engine_power_types/:id</code> - Обновить информацию о типе мощности двигателя</p>
+        <pre>
+        {
+            "engine_power_type": {
+                "power": 160
+            }
+        }
+        </pre>
+        <p><code>DELETE /engine_power_types/:id</code> - Удалить тип мощности двигателя (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Engine Name Types</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /engine_name_types</code> - Список всех типов названий двигателей</p>
+        <p><code>GET /engine_name_types/:id</code> - Показать информацию о конкретном типе названия двигателя</p>
+        <p><code>POST /engine_name_types</code> - Создать новый тип названия двигателя</p>
+        <pre>
+        {
+            "engine_name_type": {
+                "name": "Дизель"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /engine_name_types/:id</code> - Обновить информацию о типе названия двигателя</p>
+        <pre>
+        {
+            "engine_name_type": {
+                "name": "Обновленный Дизель"
+            }
+        }
+        </pre>
+        <p><code>DELETE /engine_name_types/:id</code> - Удалить тип названия двигателя (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Engine Capacity Types</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /engine_capacity_types</code> - Список всех типов объема двигателей</p>
+        <p><code>GET /engine_capacity_types/:id</code> - Показать информацию о конкретном типе объема двигателя</p>
+        <p><code>POST /engine_capacity_types</code> - Создать новый тип объема двигателя</p>
+        <pre>
+        {
+            "engine_capacity_type": {
+                "capacity": 2.0
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /engine_capacity_types/:id</code> - Обновить информацию о типе объема двигателя</p>
+        <pre>
+        {
+            "engine_capacity_type": {
+                "capacity": 2.2
+            }
+        }
+        </pre>
+        <p><code>DELETE /engine_capacity_types/:id</code> - Удалить тип объема двигателя (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Gearbox Types</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /gearbox_types</code> - Список всех типов коробок передач</p>
+        <p><code>GET /gearbox_types/:id</code> - Показать информацию о конкретном типе коробки передач</p>
+        <p><code>POST /gearbox_types</code> - Создать новый тип коробки передач</p>
+        <pre>
+        {
+            "gearbox_type": {
+                "name": "Автоматическая",
+                "abbreviation": "Авт"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /gearbox_types/:id</code> - Обновить информацию о типе коробки передач</p>
+        <pre>
+        {
+            "gearbox_type": {
+                "name": "Обновленная Автоматическая",
+                "abbreviation": "ОбнАвт"
+            }
+        }
+        </pre>
+        <p><code>DELETE /gearbox_types/:id</code> - Удалить тип коробки передач (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">History Cars</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /history_cars</code> - Список всех историй автомобилей</p>
+        <p><code>GET /history_cars/:id</code> - Показать информацию о конкретной истории автомобиля</p>
+        <p><code>POST /history_cars</code> - Создать новую историю автомобиля</p>
+        <pre>
+        {
+            "history_car": {
+                "car_id": 1,
+                "vin": "1HGCM82633A123456",
+                "last_mileage": 50000,
+                "previous_owners": 1,
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /history_cars/:id</code> - Обновить информацию о истории автомобиля</p>
+        <pre>
+        {
+            "history_car": {
+                "car_id": 12,
+                "vin": "1HGCM82633A123456qweeqwwfqq2aacawawd",
+                "last_mileage": 50000,
+                "previous_owners": 1
+              }  
+        }
+        {
+            (другие параметры по дефолту)
+            "history_car": {
+                "registration_number": "Отсутствует",
+                "registration_restrictions": "Не найдены ограничения на регистрацию",
+                "registration_restrictions_info": "Запрет регистрационных действий на машину накладывается, если у автовладельца есть неоплаченные штрафы и налоги, либо если имущество стало предметом спора.",
+                "wanted_status": "Нет сведений о розыске",
+                "wanted_status_info": "Покупка разыскиваемого автомобиля грозит тем, что его отберут в ГИБДД при регистрации, и пока будет идти следствие, а это может затянуться на долгий срок, автомобиль будет стоять на штрафплощадке.",
+                "pledge_status": "Залог не найден",
+                "pledge_status_info": "Мы проверили базы данных Федеральной нотариальной палаты (ФНП) и Национального бюро кредитных историй (НБКИ).",
+                "accidents_found": "ДТП не найдены",
+                "accidents_found_info": "В отчёт не попадут аварии, которые произошли раньше 2015 года или не оформлялись в ГИБДД.",
+                "repair_estimates_found": "Не найдены расчёты стоимости ремонта",
+                "repair_estimates_found_info": "Мы проверяем, во сколько эксперты страховых компаний оценили восстановление автомобиля после ДТП. Расчёт не означает, что машину ремонтировали.",
+                "taxi_usage": "Не найдено разрешение на работу в такси",
+                "taxi_usage_info": "Данные представлены из региональных баз по регистрации автомобиля в качестве такси.",
+                "carsharing_usage": "Не найдены сведения об использовании в каршеринге",
+                "carsharing_usage_info": "На каршеринговых авто ездят практически круглосуточно. Они много времени проводят в пробках — от этого двигатель и сцепление быстро изнашиваются. Салон тоже страдает от большого количества водителей и пассажиров.",
+                "diagnostics_found": "Не найдены сведения о диагностике",
+                "diagnostics_found_info": "В блоке представлены данные по оценке состояния автомобиля по результатам офлайн диагностики. В ходе диагностики специалисты проверяют состояние ЛКП, всех конструкций автомобиля, состояние салона, фактическую комплектацию и проводят небольшой тест-драйв.",
+                "technical_inspection_found": "Не найдены сведения о техосмотрах",
+                "technical_inspection_found_info": "В данном блоке отображаются данные о прохождении техосмотра на основании данных диагностических карт ТС. Срок прохождения технического осмотра для автомобилей категории «B»: — первые четыре года — не требуется; — возраст от 4 до 10 лет — каждые 2 года; — старше 10 лет — ежегодно.",
+                "imported": "Нет сведений о ввозе из-за границы",
+                "imported_info": "Данные из таможенной декларации, которую заполняет компания, осуществляющая ввоз транспортного средства на территорию РФ.",
+                "insurance_found": "Нет полиса ОСАГО",
+                "recall_campaigns_found": "Не найдены сведения об отзывных кампаниях",
+                "recall_campaigns_found_info": "Для данного автомобиля не проводилось или нет действующих отзывных кампаний. Отзыв автомобиля представляет собой устранение выявленного брака. Практически все автомобильные производители периодически отзывают свои продукты для устранения дефектов."
+
+            }
+        }
+        </pre>
+        <p><code>DELETE /history_cars/:id</code> - Удалить историю автомобиля (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Images</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /images</code> - Список всех изображений</p>
+        <p><code>GET /images/:id</code> - Показать информацию о конкретном изображении</p>
+        <p><code>POST /images</code> - Создать новое изображение</p>
+        <pre>
+        {
+            "image": {
+                "car_id": 1,
+                "url": "http://example.com/image.jpg"
+            }
+        }
+        </pre>
+        <p></p><code>POST /images/update_multiple</code> - Обновить информацию о нескольких изображениях</p>
+        <pre>
+            {
+                "images": [
+                  {
+                    "car_id": 10,
+                    "url": "http://example.com/image1.jpg"
+                  },
+                  {
+                    "car_id": 10,
+                    "url": "http://example.com/image2.jpg"
+                  }
+                ]
+              }
+        </pre>
+        <p><code>PATCH/PUT /images/:id</code> - Обновить информацию о изображении</p>
+        <pre>
+        {
+            "image": {
+                "car_id": 1,
+                "url": "http://example.com/updated_image.jpg"
+            }
+        }
+        </pre>
+        <p><code>PATCH /images/update_multiple</code> - Обновить информацию о нескольких изображениях</p>
+        <pre>
+            {
+                "images": [
+                  {
+                    "id": 1,
+                    "car_id": 10,
+                    "url": "http://example.com/updated_image1.jpg"
+                  },
+                  {
+                    "id": 2,
+                    "car_id": 10,
+                    "url": "http://example.com/updated_image2.jpg"
+                  }
+                ]
+            }
+        </pre>
+        <p><code>DELETE /images/:id</code> - Удалить изображение (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Extras</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /extras</code> - Список всех дополнительных названий</p>
+        <p><code>GET /extras/:id</code> - Показать информацию о конкретном дополнительном названии</p>
+        <p><code>GET /extras/car_show?car_id=10</code> - Показать информацию о автомобиле 10, со списком категорий и названий </p>
+        <p><code>GET /extras/all_extras</code> - Показать информацию о всех категориях и названиях</p>
+        <p><code>POST /extras</code> - Создать новое дополнительное название</p>
+        <pre>
+        {
+            "extra": {
+                "car_id": 1,
+                "category_id": 2,
+                "extra_name_id": 2
+            }
+        }
+        </pre>
+        <p><code>POST /extras/update_multiple</code> - Обновить информацию о нескольких дополнительных названиях</p>
+        <pre>
+            {
+                "extras": [
+                  {
+                    "car_id": 10,
+                    "category_id": 2,
+                    "extra_name_id": 2
+                  },
+                  {
+                    "car_id": 10,
+                    "category_id": 3,
+                    "extra_name_id": 3
+                  }
+                ]
+            }          
+        </pre>
+        <p><code>PATCH/PUT /extras/:id</code> - Обновить информацию о дополнительном названии</p>
+        <pre>
+        {
+            "extra": {
+                "car_id": 2,
+                "category_id": 3,
+                "extra_name_id": 3
+            }
+        }
+        </pre>
+        <p><code>PATCH /extras/update_multiple</code> - Обновить информацию о нескольких дополнительных названиях</p>
+        <pre>
+            {
+                "extras": [
+                  {
+                    "id": 1,
+                    "car_id": 10,
+                    "category_id": 2,
+                    "extra_name_id": 2
+                  },
+                  {
+                    "id": 2,
+                    "car_id": 10,
+                    "category_id": 3,
+                    "extra_name_id": 3
+                  }
+                ]
+            }
+        </pre>
+        <p><code>DELETE /extras/:id</code> - Удалить дополнительное оборудование (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Categories</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /categories</code> - Список всех категорий</p>
+        <p><code>GET /categories/:id</code> - Показать информацию о конкретной категории</p>
+        <p><code>POST /categories</code> - Создать новую категорию</p>
+        <pre>
+        {
+            "category": {
+                "name": "Новая категория"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /categories/:id</code> - Обновить информацию о категории</p>
+        <pre>
+        {
+            "category": {
+                "name": "Обновленная категория"
+            }
+        }
+        </pre>
+        <p><code>DELETE /categories/:id</code> - Удалить категорию (возвращает 200)</p>
+        <p>Если категория используется, возвращает ошибку 422 с сообщением: "Категория не может быть удалена, так как используется."</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Extra Names</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /extra_names</code> - Список всех дополнительных названий</p>
+        <p><code>GET /extra_names/:id</code> - Показать информацию о конкретном дополнительном названии</p>
+        <p><code>POST /extra_names</code> - Создать новое дополнительное название</p>
+        <pre>
+        {
+            "extra_name": {
+                "name": "Новое название"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /extra_names/:id</code> - Обновить информацию о дополнительном названии</p>
+        <pre>
+        {
+            "extra_name": {
+                "name": "Обновленное название"
+            }
+        }
+        </pre>
+        <p><code>DELETE /extra_names/:id</code> - Удалить дополнительное название (возвращает 200)</p>
+        <p>Если название используется, возвращает ошибку 422 с сообщением: "Название дополнительного оборудования не может быть удалено, так как используется."</p>
+    </div>
+    <h2 onclick="toggleSection(this)">Banks</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /banks</code> - Список всех банков</p>
+        <p><code>GET /banks/:id</code> - Показать информацию о конкретном банке</p>
+        <p><code>POST /banks</code> - Создать новый банк</p>
+        <pre>
+        {
+            "bank": {
+                "name": "Название банка",
+                "country": "Страна банка"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /banks/:id</code> - Обновить информацию о банке</p>
+        <pre>
+        {
+            "bank": {
+                "name": "Обновленное название банка",
+                "country": "Обновленная страна"
+            }
+        }
+        </pre>
+        <p><code>DELETE /banks/:id</code> - Удалить банк (возвращает 200)</p>
+        <p>Если банк используется в таблице программ, возвращает ошибку 422 с сообщением: "Банк не может быть удален, так как используется в таблице программ".</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Programs</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /programs</code> - Список всех программ</p>
+        <p><code>GET /programs/:id</code> - Показать информацию о конкретной программе</p>
+        <p><code>POST /programs</code> - Создать новую программу</p>
+        <pre>
+        {
+            "program": {
+                "bank_id": 1,
+                "program_name": "Программа 1",
+                "interest_rate": 5.5,
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /programs/:id</code> - Обновить информацию о программе</p>
+        <pre>
+        {
+            "program": {
+                "bank_id": 1,
+                "program_name": "Обновленная Программа",
+                "interest_rate": 6.0,
+            }
+        }
+        </pre>
+        <p><code>DELETE /programs/:id</code> - Удалить программу (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Call Requests</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /call_requests</code> - Список всех заявок на обратный звонок</p>
+        <p><code>GET /call_requests/:id</code> - Показать информацию о конкретной заявке</p>
+        <p><code>POST /call_requests</code> - Создать новую заявку на обратный звонок</p>
+        <pre>
+        {
+            "call_request": {
+                "car_id": 1,
+                "name": "Иван Иванов",
+                "phone": "79991234567",
+                "preferred_time": "с 11.00 до 12.00"
+            }
+        }
+        или 
+        {
+            "call_request": {
+                "name": "Иван Иванов",
+                "phone": "79991234567",
+                "preferred_time": "с 11.00 до 12.00"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /call_requests/:id</code> - Обновить информацию о конкретной заявке</p>
+        <pre>
+        {
+            "call_request": {
+                "car_id": 1,
+                "name": "Обновленный Ива�� Иванов",
+                "phone": "79991234568",
+                "preferred_time": "с 12.00 до 13.00"
+            }
+        }
+        или 
+        {
+            "call_request": {
+                "name": "ОбновленныйИван Иванов",
+                "phone": "79991234567",
+                "preferred_time": "с 11.00 до 12.00"
+            }
+        }
+        </pre>
+        <p><code>DELETE /call_requests/:id</code> - Удалить конкретную заявку (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Orders Call Requests</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /orders_call_requests</code> - Список всех заявок на обратный звонок</p>
+        <p><code>GET /orders_call_requests/:id</code> - Показать информацию о конкретной заявке</p>
+        <p><code>POST /orders_call_requests</code> - Создать новую заявку на обратный звонок</p>
+        <pre>
+        {
+            "orders_call_request": {
+                "call_request_id": 1,
+                "description": "Заявка создана и ожидает обработки",
+                "order_status_id": 1
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /orders_call_requests/:id</code> - Обновить информацию о конкретной заявке</p>
+        <pre>
+        {
+            "orders_call_request": {
+                "call_request_id": 1,
+                "description": "Обновленное описание заявки",
+                "order_status_id": 2
+            }
+        }
+        </pre>
+        <p><code>DELETE /orders_call_requests/:id</code> - Удалить конкретную заявку (возвращает 200)</p>
+    </div>
+    
+    <h2 onclick="toggleSection(this)">Credits</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /credits</code> - Список всех кредитов</p>
+        <p><code>GET /credits/:id</code> - Показать информацию о конкретном кредите</p>
+        <p><code>POST /credits</code> - Создать новый кредит</p>
+        <pre>
+            {
+                "credit": {
+                    "car_id": 1,
+                    "name": "Sergey",
+                    "phone": "37533605016",
+                    "credit_term": 36,
+                    "initial_contribution": 20000,
+                    "banks_id": null,
+                    "programs_id": 1
+                }
+            }
+        </pre>
+        <p><code>PATCH/PUT /credits/:id</code> - Обновить информацию о кредите</p>
+        <pre>
+        {
+            "credit": {
+                "car_id": 1,
+                "name": "Обновленный Сергей",
+                "phone": "37533605017",
+                "credit_term": 24,
+                "initial_contribution": 15000,
+                "banks_id": 1,
+                "programs_id": 2
+            }
+        }
+        </pre>
+        <p><code>DELETE /credits/:id</code> - Удалить кредит (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Orders Credits</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /orders_credits</code> - Список всех заявок на кредит</p>
+        <p><code>GET /orders_credits/:id</code> - Показать информацию о конкретной заявке на кредит</p>
+        <p><code>POST /orders_credits</code> - Создать новую заявку на кредит</p>
+        <pre>
+        {
+            "orders_credit": {
+                "credit_id": 1,
+                "order_status_id": 1,
+                "description": "Описание заявки"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /orders_credits/:id</code> - Обновить информацию о заявке на кредит</p>
+        <pre>
+        {
+            "orders_credit": {
+                "credit_id": 1,
+                "order_status_id": 2,
+                "description": "Обновленное описание заявки"
+            }
+        }
+        </pre>
+        <p><code>DELETE /orders_credits/:id</code> - Удалить заявку на кредит (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Buyouts</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /buyouts</code> - Список всех выкупов</p>
+        <p><code>GET /buyouts/:id</code> - Показать информацию о конкретном выкупе</p>
+        <p><code>POST /buyouts</code> - Создать новый выкуп</p>
+        <pre>
+        {
+            "buyout": {
+                "name": "Toyota",
+                "phone": "John Doe",
+                "brand": "Toyota",
+                "model": "Corola 3.5",
+                "year": 2006,
+                "mileage": 130000
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /buyouts/:id</code> - Обновить информацию о выкупе</p>
+        <pre>
+        {
+            "buyout": {
+                "name": "Обновленный Toyota",
+                "phone": "John Doe",
+                "brand": "Toyota",
+                "model": "Corola 3.5",
+                "year": 2007,
+                "mileage": 120000
+            }
+        }
+        </pre>
+        <p><code>DELETE /buyouts/:id</code> - Удалить выкуп (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Orders Buyouts</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /orders_buyouts</code> - Список всех заявок на выкуп</p>
+        <p><code>GET /orders_buyouts/:id</code> - Показать информацию о конкретной заявке на выкуп</p>
+        <p><code>POST /orders_buyouts</code> - Создать новую заявку на выкуп</p>
+        <pre>
+        {
+            "orders_buyout": {
+                "buyout_id": 1,
+                "order_status_id": 1,
+                "description": "Описание заявки"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /orders_buyouts/:id</code> - Обновить информацию о заявке на выкуп</p>
+        <pre>
+        {
+            "orders_buyout": {
+                "buyout_id": 1,
+                "order_status_id": 2,
+                "description": "Обновленное описание заявки"
+            }
+        }
+        </pre>
+        <p><code>DELETE /orders_buyouts/:id</code> - Удалить заявку на выкуп (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Exchanges</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /exchanges</code> - Список всех обменов</p>
+        <p><code>GET /exchanges/:id</code> - Показать информацию о конкретном обмене</p>
+        <p><code>POST /exchanges</code> - Создать новый обмен</p>
+        <pre>
+        {
+            "exchange": {
+                "car_id": 1,
+                "customer_car": "toyota corola 3.5",
+                "name": "Sergei",
+                "phone": "375336085016",
+                "credit_term": 36,
+                "initial_contribution": 500000
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /exchanges/:id</code> - Обновить информацию об обмене</p>
+        <pre>
+        {
+            "exchange": {
+                "car_id": 1,
+                "customer_car": "Обновленный toyota corola 3.5",
+                "name": "Обновленный Sergei",
+                "phone": "375336085017",
+                "credit_term": 24,
+                "initial_contribution": 600000
+            }
+        }
+        </pre>
+        <p><code>DELETE /exchanges/:id</code> - Удалить обмен (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Orders Exchanges</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /orders_exchanges</code> - Список всех заявок на обмен</p>
+        <p><code>GET /orders_exchanges/:id</code> - Показать информацию о конкретной заявке на обмен</p>
+        <p><code>POST /orders_exchanges</code> - Создать новую заявку на обмен</p>
+        <pre>
+        {
+            "orders_exchange": {
+                "exchange_id": 1,
+                "order_status_id": 1,
+                "description": "Описание заявки"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /orders_exchanges/:id</code> - Обновить информацию о заявке на обмен</p>
+        <pre>
+        {
+            "orders_exchange": {
+                "exchange_id": 1,
+                "order_status_id": 2,
+                "description": "Обновленное описание заявки"
+            }
+        }
+        </pre>
+        <p><code>DELETE /orders_exchanges/:id</code> - Удалить заявку на обмен (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Installments</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /installments</code> - Список всех рассрочек</p>
+        <p><code>GET /installments/:id</code> - Показать информацию о конкретной рассрочке</p>
+        <p><code>POST /installments</code> - Создать новую рассрочку</p>
+        <pre>
+        {
+            "installment": {
+                "car_id": 1,
+                "name": "John Doe",
+                "phone": "1234567890",
+                "credit_term": 24,
+                "initial_contribution": 30000
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /installments/:id</code> - Обновить информацию о рассрочке</p>
+        <pre>
+        {
+            "installment": {
+                "car_id": 1,
+                "name": "Обновленный John Doe",
+                "phone": "1234567891",
+                "credit_term": 12,
+                "initial_contribution": 25000
+            }
+        }
+        </pre>
+        <p><code>DELETE /installments/:id</code> - Удалить рассрочку (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Orders Installments</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /orders_installments</code> - Список всех заявок на рассрочку</p>
+        <p><code>GET /orders_installments/:id</code> - Показать информацию о конкретной заявке на рассрочку</p>
+        <p><code>POST /orders_installments</code> - Создать новую заявку на рассрочку</p>
+        <pre>
+        {
+            "orders_installment": {
+                "installment_id": 1,
+                "order_status_id": 1,
+                "description": "Описание заявки"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /orders_installments/:id</code> - Обновить информацию о заявке на рассрочку</p>
+        <pre>
+        {
+            "orders_installment": {
+                "installment_id": 1,
+                "order_status_id": 2,
+                "description": "Обновленное описание заявки"
+            }
+        }
+        </pre>
+        <p><code>DELETE /orders_installments/:id</code> - Удалить заявку на рассрочку (возвращает 200)</p>
+    </div>
+
+
+    <h2 onclick="toggleSection(this)">Order Statuses</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /order_statuses</code> - Список всех статусов заказов</p>
+        <p><code>GET /order_statuses/:id</code> - Показать информацию о конкретном статусе заказа</p>
+        <p><code>POST /order_statuses</code> - Создать новый статус заказа</p>
+        <pre>
+        {
+            "order_status": {
+                "name": "Новый статус"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /order_statuses/:id</code> - Обновить информацию о статусе заказа</p>
+        <pre>
+        {
+            "order_status": {
+                "name": "Обновленный статус"
+            }
+        }
+        </pre>
+        <p><code>DELETE /order_statuses/:id</code> - Удалить статус заказа (возвращает 200)</p>
+    </div>
+
+
+    <h2 onclick="toggleSection(this)">Admins</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>POST /admins/login</code> - Авторизация(если нет такого пользователя то возвращает 401, если есть то возвращает 200)</p>
+        <pre>
+            {
+                "email": "admin1@gmail.com",
+                "password": "password"
+            }
+            {
+                "email": "admin2@gmail.com",
+                "password": "123456"
+            }
+        </pre>
+    </div>
+
+    <h2 onclick="toggleSection(this)">About Companies</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /about_companies</code> - Список всей информации о компании</p>
+        <p><code>GET /about_companies/:id</code> - Показать конкретную информацию о компании</p>
+        
+        <p><code>POST /about_companies</code> - Создать новую информацию о компании</p>
+        <pre>
+        {
+            "about_company": {
+                "description": "Описание компании"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /about_companies/:id</code> - Обновить информацию о компании</p>
+        <pre>
+        {
+            "about_company": {
+                "description": "Обновленное описание компании"
+            }
+        }
+        </pre>
+        <p><code>PATCH /about_companies/update_multiple</code> - Обновить информацию о нескольких компаниях</p>
+        <pre>
+            {
+                "about_companies": [
+                  {
+                    "id": 1,
+                    "description": "Компания «YouAuto» на автомобильном рынке функционирует с 2013 года. Мы посвятили много времени и усилий нашему профессионализму в продажах и обслуживании за эти годы. В автопарке нашего автосалона мы собрали множество автомобилей с пробегом, которые прошли техническую и юридическую экспертизу. Проверка каждого автомобиля начинается с этапа закупки и продолжается во время предпродажной подготовки."
+                  },
+                  {
+                    "id": 2,
+                    "description": "В «YouAuto» представлены автомобили более 40 марок, что позволит Вам найти подходящий вариант в стенах одного автосалона. Мы создали комфортные и доступные условия для своих покупателей, позволяющие безопасно совершить покупку. Выгодные кредитные условия, подробная информация об автомобилях, техническая гарантия и подарки — то, ради чего люди приходят в наш автосалон."
+                  },
+                  {
+                    "id": 3,
+                    "description": "Ждем Вас в «YouAuto»!"
+                  }
+                ]
+              }
+        </pre>
+        <p><code>DELETE /about_companies/:id</code> - Удалить информацию о компании (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Contacts</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /contacts</code> - Список всех контактов</p>
+        <p><code>GET /contacts/:id</code> - Показать информацию о конкретном контакте</p>
+        <p><code>POST /contacts</code> - Создать новый контакт</p>
+        <pre>
+        {
+            "contact": {
+                "phone": "1234567890",
+                "mode_operation": "Режим работы",
+                "auto_address": "Адрес авто"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /contacts/:id</code> - Обновить информацию о контакте</p>
+        <pre>
+        {
+            "contact": {
+                "phone": "0987654321",
+                "mode_operation": "Обновленный режим работы",
+                "auto_address": "Обновленный адрес авто"
+            }
+        }
+        </pre>
+        <p><code>DELETE /contacts/:id</code> - Удалить контакт (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">Banners</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /banners</code> - Список всех баннеров</p>
+        <p><code>GET /banners/:id</code> - Показать информацию о конкретном баннере</p>
+        <p><code>POST /banners</code> - Создать новый баннер</p>
+        <pre>
+        {
+            "banner": {
+                "main_text": "Основной текст",
+                "second_text": "Второстепенный текст",
+                "images": "url изображение",
+                "status": "true/false"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /banners/:id</code> - Обновить информацию о баннере</p>
+        <pre>
+        {
+            "banner": {
+                "main_text": "Обновленный основной текст",
+                "second_text": "Обновленный второстепенный текст",
+                "images": "url изображение",
+                "status": "true/false"
+            }
+        }
+        </pre>
+        <p><code>DELETE /banners/:id</code> - Удалить баннер (возвращает 200)</p>
+    </div>
+
+
+    <script>
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            if (content.style.display === "none") {
+                content.style.display = "block";
+            } else {
+                content.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>

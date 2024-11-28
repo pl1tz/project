@@ -1,0 +1,12 @@
+<% content_for :title, "Editing extra name" %>
+
+<h1>Editing extra name</h1>
+
+<%= render "form", extra_name: @extra_name %>
+
+<br>
+
+<div>
+  <%= link_to "Show this extra name", @extra_name %> |
+  <%= link_to "Back to extra names", extra_names_path %>
+</div>

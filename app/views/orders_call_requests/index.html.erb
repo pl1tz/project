@@ -1,0 +1,16 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Orders call requests" %>
+
+<h1>Orders call requests</h1>
+
+<div id="orders_call_requests">
+  <% @orders_call_requests.each do |orders_call_request| %>
+    <%= render orders_call_request %>
+    <p>
+      <%= link_to "Show this orders call request", orders_call_request %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New orders call request", new_orders_call_request_path %>

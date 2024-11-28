@@ -1,0 +1,16 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Body types" %>
+
+<h1>Body types</h1>
+
+<div id="body_types">
+  <% @body_types.each do |body_type| %>
+    <%= render body_type %>
+    <p>
+      <%= link_to "Show this body type", body_type %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New body type", new_body_type_path %>

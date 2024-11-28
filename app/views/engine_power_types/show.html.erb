@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @engine_power_type %>
+
+<div>
+  <%= link_to "Edit this engine power type", edit_engine_power_type_path(@engine_power_type) %> |
+  <%= link_to "Back to engine power types", engine_power_types_path %>
+
+  <%= button_to "Destroy this engine power type", @engine_power_type, method: :delete %>
+</div>
