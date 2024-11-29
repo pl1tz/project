@@ -2,23 +2,27 @@ class CarsController < ApplicationController
   before_action :set_car, only: [:show, :update, :destroy]
   skip_before_action :verify_authenticity_token
 
+  # Инициализация LRU кэша
+  CACHE_SIZE = 100 # Максимальный размер кэша
+  @@car_cache = LruRedux::Cache.new(CACHE_SIZE)
+
   def index
     per_page = 18
-    filtered_cars = CarFilterService.new(filter_params, per_page).call
-    paginated_cars = filtered_cars.page(params[:page]).per(params[:per_page] || per_page)
-    
-    if params[:price_asc] == 'true'
-      paginated_cars = paginated_cars.order(price: :asc)
+    cache_key = filter_params.to_s # Используем параметры фильтрации как ключ кэша
+
+    # Проверяем, есть ли данные в кэше
+    if @@car_cache.key?(cache_key)
+      paginated_cars = @@car_cache[cache_key]
+    else
+      filtered_cars = CarFilterService.new(filter_params, per_page).call
+      paginated_cars = filtered_cars.page(params[:page]).per(params[:per_page] || per_page)
+
+      # Сохраняем результаты в кэш
+      @@car_cache[cache_key] = paginated_cars
     end
-    if params[:price_desc] == 'true'
-      paginated_cars = paginated_cars.order(price: :desc)
-    end
-    if params[:mileage] == 'true'
-      paginated_cars = paginated_cars.order('history_cars.last_mileage ASC')
-    end
-    if params[:newest] == 'true'
-      paginated_cars = paginated_cars.order(year: :desc)
-    end
+
+    # Сортировка
+    paginated_cars = sort_cars(paginated_cars)
 
     if request.format.html?
       render file: "#{Rails.root}/public/index.html", layout: false
@@ -27,7 +31,6 @@ class CarsController < ApplicationController
     else
       render json: paginated_cars, each_serializer: CarSerializer
     end
-
   end
 
   def show
@@ -184,6 +187,19 @@ class CarsController < ApplicationController
       pdf.text "Details for #{car.brand}"
       # Добавьте другие детали автомобиля
     end
+  end
+
+  def sort_cars(paginated_cars)
+    if params[:price_asc] == 'true'
+      paginated_cars = paginated_cars.order(price: :asc)
+    elsif params[:price_desc] == 'true'
+      paginated_cars = paginated_cars.order(price: :desc)
+    elsif params[:mileage] == 'true'
+      paginated_cars = paginated_cars.order('history_cars.last_mileage ASC')
+    elsif params[:newest] == 'true'
+      paginated_cars = paginated_cars.order(year: :desc)
+    end
+    paginated_cars
   end
 end
 
