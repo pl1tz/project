@@ -1,9 +1,11 @@
+require 'lru_redux'
+
 class CarsController < ApplicationController
   before_action :set_car, only: [:show, :update, :destroy]
   skip_before_action :verify_authenticity_token
 
   # Инициализация LRU кэша
-  CACHE_SIZE = 100 # Максимальный размер кэша
+  CACHE_SIZE = 100000 # Максимальный размер кэша
   @@car_cache = LruRedux::Cache.new(CACHE_SIZE)
 
   def index
@@ -27,9 +29,9 @@ class CarsController < ApplicationController
     if request.format.html?
       render file: "#{Rails.root}/public/index.html", layout: false
     elsif params[:coll] == 'all'
-      render json: filtered_cars, each_serializer: CarSerializer
+      render json: filtered_cars, each_serializer: CarDetailSerializer
     else
-      render json: paginated_cars, each_serializer: CarSerializer
+      render json: paginated_cars, each_serializer: CarDetailSerializer
     end
   end
 
