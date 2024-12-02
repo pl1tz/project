@@ -2,11 +2,11 @@ class CarFilterDataService
   def self.call(filters = {})
     cars = Car.all
     cars = apply_filters(cars, filters)
-    all_brands = Car.joins(:brand).distinct.pluck('brands.name')
+    all_brands = Car.joins(:brand).distinct.pluck('brands.name').sort
 
     # Получаем модели для выбранного бренда, если он выбран
-    selected_brand_models = filters[:brand_name].present? ? Model.joins(:brand).where('brands.name = ?', filters[:brand_name]).distinct.pluck('models.name') : []
-    selected_model_generations = filters[:model_name].present? ? Generation.joins(:model).where('models.name = ?', filters[:model_name]).distinct.pluck('generations.name') : []
+    selected_brand_models = filters[:brand_name].present? ? Model.joins(:brand).where('brands.name = ?', filters[:brand_name]).distinct.pluck('models.name').sort : []
+    selected_model_generations = filters[:model_name].present? ? Generation.joins(:model).where('models.name = ?', filters[:model_name]).distinct.pluck('generations.name').sort : []
 
     # Получаем доступные значения для различных параметров
     available_years = fetch_available_values(cars, filters, :year)
