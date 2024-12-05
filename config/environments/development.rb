@@ -80,7 +80,7 @@ Rails.application.configure do
   # config.generators.apply_rubocop_autocorrect_after_generate!
 
   config.hosts << "youautoplus.ru"
-  config.hosts << "www.youautoplus.ru"
+  config.hosts << "www.youautoplus.ruкфшд"
 
 #  config.hosts << "usecar.ru"
 #  config.hosts << "www.usecar.ru"
