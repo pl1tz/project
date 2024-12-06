@@ -1,5 +1,5 @@
 class CarsController < ApplicationController
-  before_action :set_car, only: [:show, :update, :destroy]
+  before_action :set_car, only: [ :show, :update, :destroy ]
   skip_before_action :verify_authenticity_token
 
   def index
@@ -7,27 +7,26 @@ class CarsController < ApplicationController
     filtered_cars = CarFilterService.new(filter_params, per_page).call
     paginated_cars = filtered_cars.page(params[:page]).per(params[:per_page] || per_page)
 
-    if params[:price_asc] == 'true'
+    if params[:price_asc] == "true"
       paginated_cars = paginated_cars.order(price: :asc)
     end
-    if params[:price_desc] == 'true'
+    if params[:price_desc] == "true"
       paginated_cars = paginated_cars.order(price: :desc)
     end
-    if params[:mileage] == 'true'
-      paginated_cars = paginated_cars.order('history_cars.last_mileage ASC')
+    if params[:mileage] == "true"
+      paginated_cars = paginated_cars.order("history_cars.last_mileage ASC")
     end
-    if params[:newest] == 'true'
+    if params[:newest] == "true"
       paginated_cars = paginated_cars.order(year: :desc)
     end
 
     if request.format.html?
       render file: "#{Rails.root}/public/index.html", layout: false
-    elsif params[:coll] == 'all'
+    elsif params[:coll] == "all"
       render json: filtered_cars, each_serializer: CarSerializer
     else
       render json: paginated_cars, each_serializer: CarSerializer
     end
-
   end
 
   def show
@@ -114,16 +113,16 @@ class CarsController < ApplicationController
                              :year_from, :max_price, :gearbox_type_name, :body_type_name,
                              :drive_type_name, :owners_count, :engine_name_type_name) # Добавлено
     result = CarFilterDataService.call(filters)
-    if params[:price_asc] == 'true'
+    if params[:price_asc] == "true"
       result = result.order(price: :asc)
     end
-    if params[:price_desc] == 'true'
+    if params[:price_desc] == "true"
       result = result.order(price: :desc)
     end
-    if params[:mileage] == 'true'
-      result = result.order('history_cars.last_mileage ASC')
+    if params[:mileage] == "true"
+      result = result.order("history_cars.last_mileage ASC")
     end
-    if params[:newest] == 'true'
+    if params[:newest] == "true"
       result = result.order(year: :desc)
     end
     render json: result
@@ -151,32 +150,60 @@ class CarsController < ApplicationController
     car = Car.find(params[:id])
     pdf = generate_pdf(car) # Метод для генерации PDF
 
-    send_data pdf.render, filename: "#{car.brand}_#{car.id}.pdf", type: 'application/pdf', disposition: 'attachment'
+    send_data pdf.render, filename: "#{car.brand}_#{car.id}.pdf", type: "application/pdf", disposition: "attachment"
   end
 
   def add_car
     render file: "#{Rails.root}/public/index.html", layout: false
   end
 
+  def special_offer
+    per_page = 18
+    filtered_cars = CarFilterService.new(filter_params, per_page).call.where(special_offer: true)
+    paginated_cars = filtered_cars.page(params[:page]).per(params[:per_page] || per_page)
+
+    if params[:price_asc] == "true"
+      paginated_cars = paginated_cars.order(price: :asc)
+    end
+    if params[:price_desc] == "true"
+      paginated_cars = paginated_cars.order(price: :desc)
+    end
+    if params[:mileage] == "true"
+      paginated_cars = paginated_cars.order("history_cars.last_mileage ASC")
+    end
+    if params[:newest] == "true"
+      paginated_cars = paginated_cars.order(year: :desc)
+    end
+
+    if request.format.html?
+      render file: "#{Rails.root}/public/index.html", layout: false
+    elsif params[:coll] == "all"
+      render json: filtered_cars, each_serializer: CarSerializer
+    else
+      render json: paginated_cars, each_serializer: CarSerializer
+    end
+  end
+
   private
-    def set_car
-      @car = Car.find_by(id: params[:id])
-      if @car.nil?
-        render file: "#{Rails.root}/public/404.html", status: :not_found, layout: false
-      end
-    end
 
-    def car_params
-      params.require(:car).permit(:model_id, :brand_id, :year, :price, :description,
-                                  :color_id, :body_type_id, :engine_name_type_id, :engine_power_type_id, :engine_capacity_type_id, :gearbox_type_id,
-                                  :drive_type_id, :generation_id, :online_view_available, :complectation_name)
+  def set_car
+    @car = Car.find_by(id: params[:id])
+    if @car.nil?
+      render file: "#{Rails.root}/public/404.html", status: :not_found, layout: false
     end
+  end
 
-    def filter_params
-      params.permit(:id, :brand_name, :model_name, :generation_name,
-                    :year_from, :max_price, :gearbox_type_name, :body_type_name,
-                    :drive_type_name, :owners_count, :engine_name_type_name, :unique_id)
-    end
+  def car_params
+    params.require(:car).permit(:model_id, :brand_id, :year, :price, :description,
+                                :color_id, :body_type_id, :engine_name_type_id, :engine_power_type_id, :engine_capacity_type_id, :gearbox_type_id,
+                                :drive_type_id, :generation_id, :online_view_available, :complectation_name)
+  end
+
+  def filter_params
+    params.permit(:id, :brand_name, :model_name, :generation_name,
+                  :year_from, :max_price, :gearbox_type_name, :body_type_name,
+                  :drive_type_name, :owners_count, :engine_name_type_name, :unique_id)
+  end
 
   def generate_pdf(car)
     # Логика для генерации PDF

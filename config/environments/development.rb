@@ -82,9 +82,11 @@ Rails.application.configure do
   #config.hosts << "youautoplus.ru"
   #config.hosts << "www.youautoplus.ru"
 
+  config.hosts << "localhost:3000"
+
   # Закомментированные домены оставляем для будущего использования
-  config.hosts << "usecar.ru"
-  config.hosts << "www.usecar.ru"
+  #config.hosts << "usecar.ru"
+  #config.hosts << "www.usecar.ru"
   # config.hosts << "usecarmax.ru"
   # config.hosts << "www.usecarmax.ru"
 
