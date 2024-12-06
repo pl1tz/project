@@ -17,7 +17,6 @@ class BannersController < ApplicationController
   def create
     @banner = Banner.new(banner_params)
     if @banner.save
-      Banner.where.not(id: @banner.id).update_all(status: false)
       render json: @banner, status: :ok
     else
       render json: @banner.errors, status: :unprocessable_entity
@@ -28,9 +27,6 @@ class BannersController < ApplicationController
   def update
     # Сначала обновляем текущий баннер
     if @banner.update(banner_params)
-      # Меняем статус всех остальных баннеров на false
-      Banner.where.not(id: @banner.id).update_all(status: false)
-  
       render json: @banner, status: :ok
     else
       render json: @banner.errors, status: :unprocessable_entity
@@ -40,7 +36,6 @@ class BannersController < ApplicationController
   # DELETE /banners/1 or /banners/1.json
   def destroy
     if @banner.destroy
-      Banner.where.not(id: @banner.id).update_all(status: false)
       head :ok
 
     else
