@@ -6,7 +6,7 @@ class CarsController < ApplicationController
     per_page = 18
     filtered_cars = CarFilterService.new(filter_params, per_page).call
     paginated_cars = filtered_cars.page(params[:page]).per(params[:per_page] || per_page)
-    
+
     if params[:price_asc] == 'true'
       paginated_cars = paginated_cars.order(price: :asc)
     end
@@ -78,7 +78,7 @@ class CarsController < ApplicationController
 
   def destroy
     if @car.destroy
-      if request.format.html? 
+      if request.format.html?
         render file: "#{Rails.root}/public/index.html", layout: false
       else
         head :ok
@@ -110,8 +110,8 @@ class CarsController < ApplicationController
   end
 
   def filters
-    filters = params.permit(:brand_name, :model_name, :generation_name, 
-                             :year_from, :max_price, :gearbox_type_name, :body_type_name, 
+    filters = params.permit(:brand_name, :model_name, :generation_name,
+                             :year_from, :max_price, :gearbox_type_name, :body_type_name,
                              :drive_type_name, :owners_count, :engine_name_type_name) # Добавлено
     result = CarFilterDataService.call(filters)
     if params[:price_asc] == 'true'
@@ -167,16 +167,16 @@ class CarsController < ApplicationController
     end
 
     def car_params
-      params.require(:car).permit(:model_id, :brand_id, :year, :price, :description, 
-                                  :color_id, :body_type_id, :engine_name_type_id, :engine_power_type_id, :engine_capacity_type_id, :gearbox_type_id, 
+      params.require(:car).permit(:model_id, :brand_id, :year, :price, :description,
+                                  :color_id, :body_type_id, :engine_name_type_id, :engine_power_type_id, :engine_capacity_type_id, :gearbox_type_id,
                                   :drive_type_id, :generation_id, :online_view_available, :complectation_name)
     end
 
     def filter_params
-      params.permit(:id, :brand_name, :model_name, :generation_name, 
-                    :year_from, :max_price, :gearbox_type_name, :body_type_name, 
+      params.permit(:id, :brand_name, :model_name, :generation_name,
+                    :year_from, :max_price, :gearbox_type_name, :body_type_name,
                     :drive_type_name, :owners_count, :engine_name_type_name, :unique_id)
-    end    
+    end
 
   def generate_pdf(car)
     # Логика для генерации PDF
@@ -186,4 +186,3 @@ class CarsController < ApplicationController
     end
   end
 end
-

@@ -71,6 +71,11 @@ group :development, :test do
   gem 'rubocop-rails', require: false
   gem "rubocop-rspec", require: false
   gem 'factory_bot_rails'
+
+  gem 'pry'
+  gem 'pry-rails'
+  gem 'pry-doc'
+  gem 'pry-byebug'
 end
 
 group :development do
@@ -98,4 +103,3 @@ gem 'rswag-api'
 gem 'typhoeus'
 gem 'savon'
 gem 'rest-client'
-

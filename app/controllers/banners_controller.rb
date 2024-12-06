@@ -4,7 +4,7 @@ class BannersController < ApplicationController
 
   # GET /banners or /banners.json
   def index
-    @banners = BannerService.fetch_active_banners
+    @banners = Banner.active
     render json: @banners
   end
 
@@ -15,7 +15,7 @@ class BannersController < ApplicationController
 
   # POST /banners or /banners.json
   def create
-    @banner = Banner .new(banner_params)
+    @banner = Banner.new(banner_params)
     if @banner.save
       render json: @banner, status: :ok
     else
@@ -43,7 +43,7 @@ class BannersController < ApplicationController
 
   def banner_all
   @banners =  BannerService.fetch_all_banners
-  render json: @banners 
+  render json: @banners
   end
 
   private
@@ -56,6 +56,6 @@ class BannersController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def banner_params
-      params.require(:banner).permit(:image, :status, :main_text, :second_text, :main_2_text, :second_2_text)
+      params.require(:banner).permit(:image, :status, :main_text, :second_text)
     end
 end
