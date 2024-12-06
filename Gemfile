@@ -103,3 +103,5 @@ gem 'rswag-api'
 gem 'typhoeus'
 gem 'savon'
 gem 'rest-client'
+
+gem 'lru_redux'

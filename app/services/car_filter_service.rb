@@ -5,7 +5,7 @@ class CarFilterService
   end
 
   def call
-    cars = Car.all.includes(:images, :history_cars)
+    cars = Car.all.includes(:images)
 
     cars = cars.by_brand_name(@params[:brand_name]) if @params[:brand_name].present?
     cars = cars.by_model_name(@params[:model_name]) if @params[:model_name].present?
