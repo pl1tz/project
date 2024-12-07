@@ -120,26 +120,26 @@ namespace :import do
       xml_unique_ids = doc.xpath('//car/unique_id').map(&:text)
 
       # Удаление автомобилей, которые отсутствуют в XML
-      existing_cars.each do |car|
-        puts "car: #{car.id}"
-        unless xml_unique_ids.include?(car.unique_id)
-          # Удаляем связанные записи перед удалением автомобиля
-          car.orders_credit.destroy_all
-          car.orders_buyout.destroy_all
-          car.orders_exchange.destroy_all
-          car.orders_installment.destroy_all
-          car.orders_call_request.destroy_all
-          car.credit.destroy_all
-          car.buyout.destroy_all
-          car.exchange.destroy_all
-          car.installment.destroy_all
-          car.history_cars.destroy_all
-          car.images.destroy_all
-          car.extras.destroy_all
-          car.destroy
-          puts "Car removed: #{car.id} (unique_id: #{car.unique_id})"
-        end
-      end
+      # existing_cars.each do |car|
+      #   puts "car: #{car.id}"
+      #   unless xml_unique_ids.include?(car.unique_id)
+      #     # Удаляем связанные записи перед удалением автомобиля
+      #     car.orders_credit.destroy_all
+      #     car.orders_buyout.destroy_all
+      #     car.orders_exchange.destroy_all
+      #     car.orders_installment.destroy_all
+      #     car.orders_call_request.destroy_all
+      #     car.credit.destroy_all
+      #     car.buyout.destroy_all
+      #     car.exchange.destroy_all
+      #     car.installment.destroy_all
+      #     car.history_cars.destroy_all
+      #     car.images.destroy_all
+      #     car.extras.destroy_all
+      #     car.destroy
+      #     puts "Car removed: #{car.id} (unique_id: #{car.unique_id})"
+      #   end
+      # end
     end
   end
   
