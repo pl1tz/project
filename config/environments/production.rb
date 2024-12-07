@@ -104,8 +104,8 @@ Rails.application.configure do
   #config.hosts << "www.youautoplus.ru"
 
   # Закомментированные домены оставляем для будущего использования
-  config.hosts << "usecar.ru"
-  config.hosts << "www.usecar.ru"
-  # config.hosts << "usecarmax.ru"
-  # config.hosts << "www.usecarmax.ru"
+  # config.hosts << "usecar.ru"
+  # config.hosts << "www.usecar.ru"
+  config.hosts << "usecarmax.ru"
+  config.hosts << "www.usecarmax.ru"
 end
