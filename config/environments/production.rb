@@ -100,12 +100,11 @@ Rails.application.configure do
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 
-  #config.hosts << "youautoplus.ru"
-  #config.hosts << "www.youautoplus.ru"
-
-  # Закомментированные домены оставляем для будущего использования
+  # домены оставляем для будущего использования
   # config.hosts << "usecar.ru"
   # config.hosts << "www.usecar.ru"
-  config.hosts << "usecarmax.ru"
-  config.hosts << "www.usecarmax.ru"
+  # config.hosts << "usecarmax.ru"
+  # config.hosts << "www.usecarmax.ru"
+  config.hosts << "youautoplus.ru"
+  config.hosts << "www.youautoplus.ru"
 end
