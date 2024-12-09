@@ -158,25 +158,55 @@ class CarsController < ApplicationController
     render file: "#{Rails.root}/public/index.html", layout: false
   end
 
+  def special_offers
+    per_page = 18
+    filtered_cars = CarFilterService.new(filter_params, per_page).call.where(special_offer: true)
+    paginated_cars = filtered_cars.page(params[:page]).per(params[:per_page] || per_page)
+
+    debugger
+
+    if params[:price_asc] == 'true'
+      paginated_cars = paginated_cars.order(price: :asc)
+    end
+    if params[:price_desc] == 'true'
+      paginated_cars = paginated_cars.order(price: :desc)
+    end
+    if params[:mileage] == 'true'
+      paginated_cars = paginated_cars.order('history_cars.last_mileage ASC')
+    end
+    if params[:newest] == 'true'
+      paginated_cars = paginated_cars.order(year: :desc)
+    end
+
+    if request.format.html?
+      render file: "#{Rails.root}/public/index.html", layout: false
+    elsif params[:coll] == 'all'
+      render json: filtered_cars, each_serializer: CarSerializer
+    else
+      render json: paginated_cars, each_serializer: CarSerializer
+    end
+  end
+
   private
-    def set_car
-      @car = Car.find_by(id: params[:id])
-      if @car.nil?
-        render file: "#{Rails.root}/public/404.html", status: :not_found, layout: false
-      end
-    end
 
-    def car_params
-      params.require(:car).permit(:model_id, :brand_id, :year, :price, :description,
-                                  :color_id, :body_type_id, :engine_name_type_id, :engine_power_type_id, :engine_capacity_type_id, :gearbox_type_id,
-                                  :drive_type_id, :generation_id, :online_view_available, :complectation_name)
+  def set_car
+    @car = Car.find_by(id: params[:id])
+    if @car.nil?
+      render file: "#{Rails.root}/public/404.html", status: :not_found, layout: false
     end
+  end
 
-    def filter_params
-      params.permit(:id, :brand_name, :model_name, :generation_name,
-                    :year_from, :max_price, :gearbox_type_name, :body_type_name,
-                    :drive_type_name, :owners_count, :engine_name_type_name, :unique_id)
-    end
+  def car_params
+    params.require(:car).permit(:model_id, :brand_id, :year, :price, :description,
+                                :color_id, :body_type_id, :engine_name_type_id, :engine_power_type_id, :engine_capacity_type_id, :gearbox_type_id,
+                                :drive_type_id, :generation_id, :online_view_available, :complectation_name)
+  end
+
+  def filter_params
+    params.permit(:id, :brand_name, :model_name, :generation_name,
+                  :year_from, :max_price, :gearbox_type_name, :body_type_name,
+                  :drive_type_name, :owners_count, :engine_name_type_name, :unique_id)
+  end
 
   def generate_pdf(car)
     # Логика для генерации PDF
