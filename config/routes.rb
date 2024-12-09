@@ -1,9 +1,9 @@
 Rails.application.routes.draw do
-  resources :banners do 
-    collection do 
+  resources :banners do
+    collection do
     get :banner_all
-    end 
-  end 
+    end
+  end
   resources :engine_capacity_types
   resources :engine_power_types
   resources :engine_name_types
@@ -15,7 +15,7 @@ Rails.application.routes.draw do
   resources :contacts
   resources :about_companies do
     collection do
-      patch :update_multiple 
+      patch :update_multiple
     end
   end
   resources :order_statuses
@@ -26,14 +26,14 @@ Rails.application.routes.draw do
       get :car_show
       get :all_extras
       post :update_multiple
-      patch :update_multiple 
+      patch :update_multiple
     end
   end
   resources :categories
   resources :images do
     collection do
       post :update_multiple
-      patch :update_multiple 
+      patch :update_multiple
     end
   end
   resources :drive_types
@@ -49,6 +49,7 @@ Rails.application.routes.draw do
   resources :cars do
     collection do
       get :total_pages
+      get :special_offers
     end
   end
   resources :banks
@@ -77,13 +78,13 @@ Rails.application.routes.draw do
 
 
   post 'exchange' => 'exchanges#create'#Создать обмен
-  
+
   get 'installment' => 'installments#index'#Рассрочка
   post 'installment' => 'installments#create'#Создать рассрочку
-  
+
   get 'buyout' => 'buyouts#index'#Выкуп
   post 'buyout' => 'buyouts#create'#Создать выкуп
-  
+
   get 'credit' => 'credits#top_programs'#Топ программ
   get 'credits' => 'credits#index '#Список программ
   post 'credit' => 'credits#create'#Создать программу
@@ -109,7 +110,7 @@ Rails.application.routes.draw do
   get 'admin/about' => 'about_companies#index'#О компании
   get 'admin/banners' => 'cars#add_car'#Добавить автомобиль
   get 'privacy' => 'cars#add_car'#Политика конфиденциальности
-  
+
 
 
   match "/404", to: "errors#not_found", via: :all
@@ -117,6 +118,5 @@ Rails.application.routes.draw do
 
   # Обработка всех остальных маршрутов
   match '*path', to: 'application#frontend', via: :all
-  
+
 end
-  
