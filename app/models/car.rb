@@ -10,15 +10,25 @@ class Car < ApplicationRecord
   belongs_to :engine_capacity_type
   belongs_to :gearbox_type
   belongs_to :drive_type
-  
-  has_many :call_requests
+
   has_many :images, dependent: :destroy
   has_many :history_cars, dependent: :destroy
-
   has_many :extras, dependent: :destroy
+
   has_many :categories, through: :extras
 
-  has_one :history_car
+  has_many :credits, dependent: :destroy
+  has_many :orders_credits, through: :credits, dependent: :destroy
+
+  has_many :exchanges, dependent: :destroy
+  has_many :orders_exchanges, through: :exchanges, dependent: :destroy
+
+  has_many :installments, dependent: :destroy
+  has_many :orders_installments, through: :installments, dependent: :destroy
+
+  has_many :call_requests, dependent: :destroy
+  has_many :orders_call_requests, through: :call_requests, dependent: :destroy
+
 
   scope :by_brand_name, -> (brand_name) { joins(model: :brand ).where(brands: { name: brand_name }) if brand_name.present? }
   scope :by_model_name, -> (model_name) { joins(:model).where(models: { name: model_name }) if model_name.present? }

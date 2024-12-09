@@ -5,7 +5,7 @@ class CarsController < ApplicationController
   def index
     per_page = 18
     filtered_cars = CarFilterService.new(filter_params, per_page).call
-    paginated_cars = filtered_cars.page(params[:page]).per(params[:per_page] || per_page)
+    paginated_cars = filtered_cars.joins(:history_car).page(params[:page]).per(params[:per_page] || per_page)
 
     if params[:price_asc] == 'true'
       paginated_cars = paginated_cars.order(price: :asc)

@@ -142,7 +142,87 @@ namespace :import do
       # end
     end
   end
-  
+
+  task delete_diff_cars: :environment do
+    require 'nokogiri'
+    require 'open-uri'
+
+    xml_data = URI.open('https://plex-crm.ru/xml/usecarmax/hpbz0dmc').read
+    doc = Nokogiri::XML(xml_data)
+
+    ActiveRecord::Base.transaction do
+      # Получаем все существующие автомобили из базы данных
+      existing_cars = Car.includes(:history_cars, :images, :extras).all
+      puts "existing_cars: #{existing_cars}"
+
+      # Получаем уникальные идентификаторы из XML
+      xml_unique_ids = doc.xpath('//car/unique_id').map(&:text)
+
+      # Удаление автомобилей, которые отсутствуют в XML
+      existing_cars.each do |car|
+        puts "car: #{car.id}"
+        unless xml_unique_ids.include?(car.unique_id)
+          puts "Car removed: #{car.id} (unique_id: #{car.unique_id})"
+          car.history_cars.destroy_all
+          car.images.destroy_all
+          car.extras.destroy_all
+          car.destroy
+        end
+      end
+    end
+  end
+
+  def remove_related_orders(car)
+    if car.credit
+      puts "Removing credit for car: #{car.id}"
+      car.credit.destroy
+    end
+    if car.orders_credit.any?
+      puts "Removing credit orders for car: #{car.id}"
+      car.orders_credit.destroy_all
+    end
+
+    if car.orders_buyout.any?
+      puts "Removing buyout orders for car: #{car.id}"
+      car.orders_buyout.destroy_all
+    end
+
+    if car.orders_exchange.any?
+      puts "Removing exchange orders for car: #{car.id}"
+      car.orders_exchange.destroy_all
+    end
+
+    if car.orders_installment.any?
+      puts "Removing installment orders for car: #{car.id}"
+      car.orders_installment.destroy_all
+    end
+
+    if car.orders_call_request.any?
+      puts "Removing call request orders for car: #{car.id}"
+      car.orders_call_request.destroy_all
+    end
+
+    if car.credit
+      puts "Removing credit for car: #{car.id}"
+      car.credit.destroy
+    end
+
+    if car.buyout
+      puts "Removing buyout for car: #{car.id}"
+      car.buyout.destroy
+    end
+
+    if car.exchange
+      puts "Removing exchange for car: #{car.id}"
+      car.exchange.destroy
+    end
+
+    if car.installment
+      puts "Removing installment for car: #{car.id}"
+      car.installment.destroy
+    end
+  end
+
   def update_car(car, node)
     # Обновляем атрибуты автомобиля
     car.assign_attributes(
@@ -314,7 +394,7 @@ namespace :import do
                         'Обзор'
                       when /диски|рейлинги/
                         'Элементы экстерьера'
-                      when /им��обилайзер|замок|сигнализация/
+                      when /иммобилайзер|замок|сигнализация/
                         'Защита от угона'
                       when /audi|usb|bluetooth|навигационная система|розетка/
                         'Мультимедиа'
