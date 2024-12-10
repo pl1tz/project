@@ -89,7 +89,7 @@ namespace :import do
       puts "existing_cars: #{existing_cars}"
 
       # Обновление или добавление автомобилей
-      doc.xpath('//car').each_slice(100) do |car_nodes|  # Обработка по 100 узлов за раз
+      doc.xpath('//car').each_slice(1000) do |car_nodes|  # Обработка по 100 узлов за раз
         car_nodes.each do |node|
           unique_id_xml = node.at_xpath('unique_id').text
           puts "unique_id xml: #{unique_id_xml}"
@@ -212,8 +212,7 @@ namespace :import do
       engine_power_type: EnginePowerType.find_or_create_by(power: node.at_xpath('engine_power').text.to_i),
       engine_capacity_type: find_or_create_engine_capacity_type(node),
       gearbox_type: find_or_create_gearbox_type(node),
-      drive_type: DriveType.find_or_create_by(name: node.at_xpath('drive')&.text || "Полный"),
-      online_view_available: true,
+      drive_type: DriveType.find_or_create_by(name: node.at_xpath('drive')&.text || "Полный"),  
       complectation_name: node.at_xpath('complectation_name').text
     )
 
