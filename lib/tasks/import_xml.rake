@@ -89,57 +89,34 @@ namespace :import do
       puts "existing_cars: #{existing_cars}"
 
       # Обновление или добавление автомобилей
-      doc.xpath('//car').each do |node|
-        unique_id_xml = node.at_xpath('unique_id').text
-        puts "unique_id xml: #{unique_id_xml}"
+      doc.xpath('//car').each_slice(100) do |car_nodes|  # Обработка по 100 узлов за раз
+        car_nodes.each do |node|
+          unique_id_xml = node.at_xpath('unique_id').text
+          puts "unique_id xml: #{unique_id_xml}"
 
-        # Поиск существующего автомобиля по unique_id
-        car = Car.find_by(unique_id: unique_id_xml    )
+          # Поиск существующего автомобиля по unique_id
+          car = Car.find_by(unique_id: unique_id_xml)
 
-        if car
-          # Если автомобиль существует, обновляем его
-          update_car(car, node)
-          # Обновляем историю автомобиля
-          update_history_for_car(car, node)
-          # Обновляем изображения
-          update_images_for_car(car, node)
-          # Обновляем комплектацию
-          update_extras_for_car(car, node)
-        else
-          # Если автомобиль не существует, создаем новый
-          car = create_car_from_node(node)
-          next unless car
-          create_history_for_car(car, node)
-          save_images_for_car(car, node)
-          save_extras_for_car(car, node)
-          puts "Car created: #{DateTime.now.strftime('%Y-%m-%d %H:%M:%S')}"
+          if car
+            # Если автомобиль существует, обновляем его
+            update_car(car, node)
+            # Обновляем историю автомобиля
+            update_history_for_car(car, node)
+            # Обновляем изображения
+            update_images_for_car(car, node)
+            # Обновляем комплектацию
+            update_extras_for_car(car, node)
+          else
+            # Если автомобиль не существует, создаем новый
+            car = create_car_from_node(node)
+            next unless car
+            create_history_for_car(car, node)
+            save_images_for_car(car, node)
+            save_extras_for_car(car, node)
+            puts "Car created: #{DateTime.now.strftime('%Y-%m-%d %H:%M:%S')}"
+          end
         end
       end
-
-      # Получаем уникальные идентификаторы из XML
-      xml_unique_ids = doc.xpath('//car/unique_id').map(&:text)
-
-      # Удаление автомобилей, которые отсутствуют в XML
-      # existing_cars.each do |car|
-      #   puts "car: #{car.id}"
-      #   unless xml_unique_ids.include?(car.unique_id)
-      #     # Удаляем связанные записи перед удалением автомобиля
-      #     car.orders_credit.destroy_all
-      #     car.orders_buyout.destroy_all
-      #     car.orders_exchange.destroy_all
-      #     car.orders_installment.destroy_all
-      #     car.orders_call_request.destroy_all
-      #     car.credit.destroy_all
-      #     car.buyout.destroy_all
-      #     car.exchange.destroy_all
-      #     car.installment.destroy_all
-      #     car.history_cars.destroy_all
-      #     car.images.destroy_all
-      #     car.extras.destroy_all
-      #     car.destroy
-      #     puts "Car removed: #{car.id} (unique_id: #{car.unique_id})"
-      #   end
-      # end
     end
   end
 
