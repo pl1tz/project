@@ -112,7 +112,19 @@ class CarsController < ApplicationController
   def filters
     filters = params.permit(:brand_name, :model_name, :generation_name,
                              :year_from, :max_price, :gearbox_type_name, :body_type_name,
-                             :drive_type_name, :owners_count, :engine_name_type_name) # Добавлено
+                             :drive_type_name, :owners_count, :engine_name_type_name)
+    if params[:price_asc] == 'true'
+      paginated_cars = paginated_cars.order(price: :asc)
+    end
+    if params[:price_desc] == 'true'
+      paginated_cars = paginated_cars.order(price: :desc)
+    end
+    if params[:mileage] == 'true'
+      paginated_cars = paginated_cars.joins(:history_cars).order('history_cars.last_mileage ASC')
+    end
+    if params[:newest] == 'true'
+      paginated_cars = paginated_cars.order(year: :desc)
+    end
     result = CarFilterDataService.call(filters)
     render json: result
   end
