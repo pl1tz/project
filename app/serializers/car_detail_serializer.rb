@@ -15,7 +15,7 @@ class CarDetailSerializer < ActiveModel::Serializer
     belongs_to :history_cars, serializer: HistoryCarDetailSerializer
   
     def images
-      object.images.order(id: :asc).limit(8) # Замените :size на нужное поле для сортировки
+      object.images.order(id: :asc).limit(4) # Замените :size на нужное поле для сортировки
     end
   end
   

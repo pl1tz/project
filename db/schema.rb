@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_12_05_143511) do
+ActiveRecord::Schema[7.2].define(version: 2024_12_10_192110) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -104,6 +104,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_05_143511) do
     t.index ["gearbox_type_id"], name: "index_cars_on_gearbox_type_id"
     t.index ["generation_id"], name: "index_cars_on_generation_id"
     t.index ["model_id"], name: "index_cars_on_model_id"
+    t.index ["unique_id"], name: "index_cars_on_unique_id", unique: true
   end
 
   create_table "categories", force: :cascade do |t|

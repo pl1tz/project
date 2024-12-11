@@ -3,7 +3,7 @@ class CarsController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   def index
-    per_page = 18
+    per_page = 12
     filtered_cars = CarFilterService.new(filter_params, per_page).call
     paginated_cars = filtered_cars.page(params[:page]).per(params[:per_page] || per_page)
 
@@ -14,7 +14,7 @@ class CarsController < ApplicationController
       paginated_cars = paginated_cars.order(price: :desc)
     end
     if params[:mileage] == 'true'
-      paginated_cars = paginated_cars.order('history_cars.last_mileage ASC')
+      paginated_cars = paginated_cars.joins(:history_cars).order('history_cars.last_mileage ASC')
     end
     if params[:newest] == 'true'
       paginated_cars = paginated_cars.order(year: :desc)
@@ -23,9 +23,9 @@ class CarsController < ApplicationController
     if request.format.html?
       render file: "#{Rails.root}/public/index.html", layout: false
     elsif params[:coll] == 'all'
-      render json: filtered_cars, each_serializer: CarSerializer
+      render json: filtered_cars, each_serializer: CarDetailSerializer
     else
-      render json: paginated_cars, each_serializer: CarSerializer
+      render json: paginated_cars, each_serializer: CarDetailSerializer
     end
 
   end
@@ -114,18 +114,6 @@ class CarsController < ApplicationController
                              :year_from, :max_price, :gearbox_type_name, :body_type_name,
                              :drive_type_name, :owners_count, :engine_name_type_name) # Добавлено
     result = CarFilterDataService.call(filters)
-    if params[:price_asc] == 'true'
-      result = result.order(price: :asc)
-    end
-    if params[:price_desc] == 'true'
-      result = result.order(price: :desc)
-    end
-    if params[:mileage] == 'true'
-      result = result.order('history_cars.last_mileage ASC')
-    end
-    if params[:newest] == 'true'
-      result = result.order(year: :desc)
-    end
     render json: result
   end
 

@@ -2,9 +2,7 @@ namespace :import do
   task create_cars: :environment do
     require 'nokogiri'
     require 'open-uri'
-
-    #file_path = Rails.root.join('app', 'assets', 'xml', 'hpbz0dmc.xml')
-    #xml_data = File.read(file_path)
+    
     xml_data = URI.open('https://plex-crm.ru/xml/usecarmax/hpbz0dmc').read
     doc = Nokogiri::XML(xml_data)
 
@@ -24,7 +22,6 @@ namespace :import do
 
   task drop_cars: :environment do
     ActiveRecord::Base.transaction do
-      # Удаление автомобилей
       existing_cars = Car.includes(
                                   :history_cars,
                                   :images,
@@ -84,38 +81,34 @@ namespace :import do
     doc = Nokogiri::XML(xml_data)
 
     ActiveRecord::Base.transaction do
-      # Получаем все существующие автомобили из базы данных
-      existing_cars = Car.includes(:history_cars, :images, :extras).all
-      puts "existing_cars: #{existing_cars}"
+      existing_cars = Car.includes(:history_cars, :images, :extras).all.index_by(&:unique_id)
 
-      # Обновление или добавление автомобилей
-      doc.xpath('//car').each_slice(1000) do |car_nodes|  # Обработка по 100 узлов за раз
-        car_nodes.each do |node|
-          unique_id_xml = node.at_xpath('unique_id').text
-          puts "unique_id xml: #{unique_id_xml}"
+      new_cars = []
+      updates = []
 
-          # Поиск существующего автомобиля по unique_id
-          car = Car.find_by(unique_id: unique_id_xml)
+      doc.xpath('//car').each do |node|
+        unique_id_xml = node.at_xpath('unique_id').text
+        puts "unique_id xml: #{unique_id_xml}"
 
-          if car
-            # Если автомобиль существует, обновляем его
-            update_car(car, node)
-            # Обновляем историю автомобиля
-            update_history_for_car(car, node)
-            # Обновляем изображения
-            update_images_for_car(car, node)
-            # Обновляем комплектацию
-            update_extras_for_car(car, node)
-          else
-            # Если автомобиль не существует, создаем новый
-            car = create_car_from_node(node)
-            next unless car
-            create_history_for_car(car, node)
-            save_images_for_car(car, node)
-            save_extras_for_car(car, node)
-            puts "Car created: #{DateTime.now.strftime('%Y-%m-%d %H:%M:%S')}"
-          end
+        if existing_cars[unique_id_xml]
+          car = existing_cars[unique_id_xml]
+          updates << update_car(car, node)
+          updates << update_history_for_car(car, node)
+          updates << update_images_for_car(car, node)
+          updates << update_extras_for_car(car, node)
+        else
+          new_cars << create_car_from_node(node)
         end
+      end
+
+      # Применяем обновления
+      updates.each(&:save) if updates.any?
+      new_cars.each do |car|
+        next unless car
+        create_history_for_car(car, node)
+        save_images_for_car(car, node)
+        save_extras_for_car(car, node)
+        puts "Car created: #{DateTime.now.strftime('%Y-%m-%d %H:%M:%S')}"
       end
     end
   end
