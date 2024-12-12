@@ -77,40 +77,90 @@ namespace :import do
     require 'nokogiri'
     require 'open-uri'
 
-    xml_data = URI.open('https://plex-crm.ru/xml/usecarmax/hpbz0dmc').read
-    doc = Nokogiri::XML(xml_data)
+    class CarUpdater
+      def initialize(xml_url)
+        @xml_data = URI.open(xml_url).read
+        @doc = Nokogiri::XML(@xml_data)
+        @existing_cars = Car.includes(:history_cars, :images, :extras).index_by(&:unique_id)
+        @updates = { cars: [], histories: [], images: [], extras: [] }
+      end
 
-    ActiveRecord::Base.transaction do
-      existing_cars = Car.includes(:history_cars, :images, :extras).all.index_by(&:unique_id)
-
-      new_cars = []
-      updates = []
-
-      doc.xpath('//car').each do |node|
-        unique_id_xml = node.at_xpath('unique_id').text
-        puts "unique_id xml: #{unique_id_xml}"
-
-        if existing_cars[unique_id_xml]
-          car = existing_cars[unique_id_xml]
-          updates << update_car(car, node)
-          updates << update_history_for_car(car, node)
-          updates << update_images_for_car(car, node)
-          updates << update_extras_for_car(car, node)
-        else
-          new_cars << create_car_from_node(node)
+      def process
+        ActiveRecord::Base.transaction do
+          process_cars
+          save_updates
         end
       end
 
-      # Применяем обновления
-      updates.each(&:save) if updates.any?
-      new_cars.each do |car|
-        next unless car
+      private
+
+      def process_cars
+        @doc.xpath('//car').each do |node|
+          unique_id = node.at_xpath('unique_id').text
+          puts "Обработка автомобиля с unique_id: #{unique_id}"
+
+          if @existing_cars[unique_id]
+            process_existing_car(@existing_cars[unique_id], node)
+          else
+            process_new_car(node)
+          end
+        end
+      end
+
+      def process_existing_car(car, node)
+        @updates[:cars] << update_car_attributes(car, node)
+        @updates[:histories] << update_history_attributes(car, node)
+        @updates[:images] << update_images_attributes(car, node)
+        @updates[:extras] << update_extras_attributes(car, node)
+      end
+
+      def process_new_car(node)
+        car = create_car_from_node(node)
+        return unless car
+
         create_history_for_car(car, node)
         save_images_for_car(car, node)
         save_extras_for_car(car, node)
-        puts "Car created: #{DateTime.now.strftime('%Y-%m-%d %H:%M:%S')}"
+        log_car_creation(car)
+      end
+
+      def save_updates
+        save_car_updates
+        save_history_updates
+        save_image_updates
+        save_extra_updates
+      end
+
+      def save_car_updates
+        @updates[:cars].each do |updates|
+          Car.find(updates[:id]).update!(updates)
+        end
+      end
+
+      def save_history_updates
+        HistoryCar.import @updates[:histories], validate: false
+      end
+
+      def save_image_updates
+        @updates[:images].flatten.each do |image_data|
+          Image.create!(image_data)
+        end
+      end
+
+      def save_extra_updates
+        @updates[:extras].flatten.each do |extra_data|
+          Extra.create!(extra_data)
+        end
+      end
+
+      def log_car_creation(car)
+        puts "Создан автомобиль: #{car.brand.name} #{car.model.name} (#{DateTime.now.strftime('%Y-%m-%d %H:%M:%S')})"
       end
     end
+
+    # Использование класса
+    updater = CarUpdater.new('https://plex-crm.ru/xml/usecarmax/hpbz0dmc')
+    updater.process
   end
 
   task delete_diff_cars: :environment do
@@ -120,26 +170,95 @@ namespace :import do
     xml_data = URI.open('https://plex-crm.ru/xml/usecarmax/hpbz0dmc').read
     doc = Nokogiri::XML(xml_data)
 
-    ActiveRecord::Base.transaction do
-      # Получаем все существующие автомобили из базы данных
-      existing_cars = Car.includes(:history_cars, :images, :extras).all
-      puts "existing_cars: #{existing_cars}"
+    xml_unique_ids = doc.xpath('//car/unique_id').map(&:text)
 
-      # Получаем уникальные идентификаторы из XML
-      xml_unique_ids = doc.xpath('//car/unique_id').map(&:text)
+    # Use a single SQL query to find cars to delete.
+    Car.where.not(unique_id: xml_unique_ids).destroy_all
 
-      # Удаление автомобилей, которые отсутствуют в XML
-      existing_cars.each do |car|
-        puts "car: #{car.id}"
-        unless xml_unique_ids.include?(car.unique_id)
-          puts "Car removed: #{car.id} (unique_id: #{car.unique_id})"
-          car.history_cars.destroy_all
-          car.images.destroy_all
-          car.extras.destroy_all
-          car.destroy
-        end
+    puts "Cars removed."  
+  end
+
+  def update_car_attributes(car, node)
+    {
+      id: car.id,
+      year: node.at_xpath('year').text.to_i,
+      price: node.at_xpath('price').text.to_d,
+      description: node.at_xpath('modification_id').text,
+      color_id: Color.find_or_create_by(name: node.at_xpath('color').text).id,
+      body_type_id: BodyType.find_or_create_by(name: node.at_xpath('body_type').text).id,
+      engine_name_type_id: EngineNameType.find_or_create_by(name: node.at_xpath('engine_type').text).id,
+      engine_power_type_id: EnginePowerType.find_or_create_by(power: node.at_xpath('engine_power').text.to_i).id,
+      engine_capacity_type_id: find_or_create_engine_capacity_type(node).id,
+      gearbox_type_id: find_or_create_gearbox_type(node).id,
+      drive_type_id: DriveType.find_or_create_by(name: node.at_xpath('drive')&.text || "Полный").id,
+      complectation_name: node.at_xpath('complectation_name').text
+    }
+  end
+
+  def update_history_attributes(car, node)
+    vin = node.at_xpath('vin').text
+
+    owners_number_text = node.at_xpath('owners_number').text.downcase.split.first
+    text_to_number = {
+      "ноль" => 0, "один" => 1, "два" => 2, "три" => 3, "четыре" => 4,
+      "пять" => 5, "шесть" => 6, "семь" => 7, "восемь" => 8, "девять" => 9, "десять" => 10
+    }
+    owners_number = text_to_number[owners_number_text] || owners_number_text.scan(/\d+/).first.to_i
+
+    run_value = node.at_xpath('run')&.text
+    params_last_mileage = (run_value && run_value.match?(/^\d+$/)) ? run_value.to_i : 10
+
+    {
+      car_id: car.id,
+      vin: vin.present? ? vin : nil,
+      last_mileage: params_last_mileage,
+      previous_owners: owners_number,
+      registration_number: "Отсутствует",
+      registration_restrictions: "Не найдены ограничения на регистрацию",
+      registration_restrictions_info: "Запрет регистрационных действий на машину накладывается, если у автовладельца есть неоплаченные штрафы и налоги, либо если имущество стало предметом спора.",
+      wanted_status: "Нет сведений о розыске",
+      wanted_status_info: "Покупка разыскиваемого автомобиля грозит тем, что его отберут в ГИБДД при регистрации, и пока будет идти следствие, а это может затянуться на долгий срок, автомобиль будет стоять на штрафплощадке.",
+      pledge_status: "Залог не найден",
+      pledge_status_info: "Мы проверили базы данных Федеральной нотариальной палаты (ФНП) и Национального бюро кредитных историй (НБКИ).",
+      accidents_found: "ДТП не найдены",
+      accidents_found_info: "В отчёт не попадут аварии, которые произошли раньше 2015 года или не оформлялись в ГИБДД.",
+      repair_estimates_found: "Не найдены расчёты стоимости ремонта",
+      repair_estimates_found_info: "Мы проверяем, во сколько эксперты страховых компаний оценили восстановление автомобиля после ДТП. Расчёт не означает, что машину ремонтировали.",
+      taxi_usage: "Не найдено разрешение на работу в такси",
+      taxi_usage_info: "Данные представлены из региональных баз по регистрации автомобиля в качестве такси.",
+      carsharing_usage: "Не найдены сведения об использовании в каршеринге",
+      carsharing_usage_info: "На каршеринговых авто ездят практически круглосуточно. Они много времени проводят в пробках  от этого двигатель и сцепление быстро изнашиваются. Салон тоже страдает от большого количества водителей и пассажиров.",
+      diagnostics_found: "Не найдены сведения о диагностике",
+      diagnostics_found_info: "В блоке представлены данные по оценке состояния автомобиля по результатам офлайн диагностики. В ходе диагностики специалисты проверяют состояние ЛКП, всех конструкций автомобиля, состояние салона, фактическую комплектацию и проводят небольшой тест-драйв.",
+      technical_inspection_found: "Не найдены сведения о техосмотрах",
+      technical_inspection_found_info: "В данном блоке отображаются данные о прохождении техосмотра на основании данных диагностических карт ТС. Срок прохождения технического осмотра для автомобилей категории «B»: — первые четыре года — не требуется; — возраст от 4 до 10 лет — каждые 2 года; — старше 10 лет — ежегодно.",
+      imported: "Нет сведений о ввозе из-за границы",
+      imported_info: "Данные из таможенной декларации, которую заполняет компания, осуществляющая ввоз транспортного средства на территорию РФ.",
+      insurance_found: "Нет полиса ОСАГО",
+      recall_campaigns_found: "Не найдены сведения об отзывных кампаниях",
+      recall_campaigns_found_info: "Для данного автомобиля не проводилось или нет действующих отзывных кампаний. Отзыв автомобиля представляет собой устранение выявленного брака. Практически все автомобильные производители периодически отзывают свои продукты для устранения дефектов."
+    }
+  end
+
+  def update_images_attributes(car, node)
+    node.xpath('images/image').map do |image_node|
+      image_url = image_node.text
+      { car_id: car.id, url: image_url } unless car.images.exists?(url: image_url)
+    end.compact
+  end
+
+  def update_extras_attributes(car, node)
+    extras_string = node.at_xpath('extras').text
+    extras_array = extras_string.split(',').map(&:strip)
+
+    extras_array.map do |extra|
+      extra_name_record = ExtraName.find_or_create_by(name: extra)
+      unless car.extras.exists?(extra_name: extra_name_record)
+        category_name = determine_category(extra)
+        category = Category.find_or_create_by(name: category_name)
+        { car_id: car.id, category_id: category.id, extra_name_id: extra_name_record.id }
       end
-    end
+    end.compact
   end
 
   def remove_related_orders(car)

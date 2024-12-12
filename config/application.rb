@@ -1,3 +1,5 @@
+require 'activerecord-import'
+
 require_relative "boot"
 
 require "rails/all"
