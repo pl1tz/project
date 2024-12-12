@@ -71,98 +71,7 @@ namespace :import do
       end
     end
   end
-
-
-  task update_cars: :environment do
-    require 'nokogiri'
-    require 'open-uri'
-
-    class CarUpdater
-      def initialize(xml_url)
-        @xml_data = URI.open(xml_url).read
-        @doc = Nokogiri::XML(@xml_data)
-        @existing_cars = Car.includes(:history_cars, :images, :extras).index_by(&:unique_id)
-        @updates = { cars: [], histories: [], images: [], extras: [] }
-      end
-
-      def process
-        ActiveRecord::Base.transaction do
-          process_cars
-          save_updates
-        end
-      end
-
-      private
-
-      def process_cars
-        @doc.xpath('//car').each do |node|
-          unique_id = node.at_xpath('unique_id').text
-          puts "Обработка автомобиля с unique_id: #{unique_id}"
-
-          if @existing_cars[unique_id]
-            process_existing_car(@existing_cars[unique_id], node)
-          else
-            process_new_car(node)
-          end
-        end
-      end
-
-      def process_existing_car(car, node)
-        @updates[:cars] << update_car_attributes(car, node)
-        @updates[:histories] << update_history_attributes(car, node)
-        @updates[:images] << update_images_attributes(car, node)
-        @updates[:extras] << update_extras_attributes(car, node)
-      end
-
-      def process_new_car(node)
-        car = create_car_from_node(node)
-        return unless car
-
-        create_history_for_car(car, node)
-        save_images_for_car(car, node)
-        save_extras_for_car(car, node)
-        log_car_creation(car)
-      end
-
-      def save_updates
-        save_car_updates
-        save_history_updates
-        save_image_updates
-        save_extra_updates
-      end
-
-      def save_car_updates
-        @updates[:cars].each do |updates|
-          Car.find(updates[:id]).update!(updates)
-        end
-      end
-
-      def save_history_updates
-        HistoryCar.import @updates[:histories], validate: false
-      end
-
-      def save_image_updates
-        @updates[:images].flatten.each do |image_data|
-          Image.create!(image_data)
-        end
-      end
-
-      def save_extra_updates
-        @updates[:extras].flatten.each do |extra_data|
-          Extra.create!(extra_data)
-        end
-      end
-
-      def log_car_creation(car)
-        puts "Создан автомобиль: #{car.brand.name} #{car.model.name} (#{DateTime.now.strftime('%Y-%m-%d %H:%M:%S')})"
-      end
-    end
-
-    # Использование класса
-    updater = CarUpdater.new('https://plex-crm.ru/xml/usecarmax/hpbz0dmc')
-    updater.process
-  end
-
+  
   task delete_diff_cars: :environment do
     require 'nokogiri'
     require 'open-uri'
@@ -176,6 +85,39 @@ namespace :import do
     Car.where.not(unique_id: xml_unique_ids).destroy_all
 
     puts "Cars removed."  
+  end
+
+
+  task update_cars: :environment do
+    require 'nokogiri'
+    require 'open-uri'
+
+    xml_data = URI.open('https://plex-crm.ru/xml/usecarmax/hpbz0dmc').read
+    doc = Nokogiri::XML(xml_data)
+
+    ActiveRecord::Base.transaction do
+      existing_cars = Car.includes(:history_cars, :images, :extras).all.index_by(&:unique_id)
+
+      doc.xpath('//car').each do |node|
+        unique_id_xml = node.at_xpath('unique_id').text
+        puts "unique_id xml: #{unique_id_xml}"
+
+        # Поиск существующего автомобиля по unique_id
+        car = Car.find_by(unique_id: unique_id_xml)
+
+        if car
+          puts "Car exists: #{unique_id_xml}"
+        else
+          # Если автомобиль не существует, создаем новый
+          car = create_car_from_node(node)
+          next unless car
+          create_history_for_car(car, node)
+          save_images_for_car(car, node)
+          save_extras_for_car(car, node)
+          puts "Car created: #{DateTime.now.strftime('%Y-%m-%d %H:%M:%S')}"
+        end
+      end
+    end
   end
 
   def update_car_attributes(car, node)
@@ -240,25 +182,83 @@ namespace :import do
     }
   end
 
-  def update_images_attributes(car, node)
-    node.xpath('images/image').map do |image_node|
-      image_url = image_node.text
-      { car_id: car.id, url: image_url } unless car.images.exists?(url: image_url)
-    end.compact
-  end
-
   def update_extras_attributes(car, node)
     extras_string = node.at_xpath('extras').text
     extras_array = extras_string.split(',').map(&:strip)
 
     extras_array.map do |extra|
       extra_name_record = ExtraName.find_or_create_by(name: extra)
+      category_name = determine_category(extra)
+      category = Category.find_or_create_by(name: category_name)
+      { car_id: car.id, category_id: category.id, extra_name_id: extra_name_record.id } #No need for exists? check in bulk import
+    end
+  end
+
+  def update_images_for_car(car, node)
+    existing_image_urls = car.images.pluck(:url)
+    node.xpath('images/image').each do |image_node|
+      image_url = image_node.text
+
+      unless existing_image_urls.include?(image_url)
+        Image.create(car: car, url: image_url)
+        puts "Image added for car: #{car.id} (URL: #{image_url})"
+      else
+        puts "Image already exists for car: #{car.id} (URL: #{image_url})"
+      end
+    end
+  end
+
+  def update_extras_for_car(car, node)
+    extras_string = node.at_xpath('extras').text
+    puts "Extras from XML: #{extras_string}" # Логируем полученные данные
+    extras_array = extras_string.split(',').map(&:strip)
+
+    # Удаляем старые комплектации, если они отсутствуют в новых данных
+    car.extras.each do |extra|
+      unless extras_array.include?(extra.extra_name.name)
+        extra.destroy
+        puts "Extra removed for car: #{car.id}"
+      end
+    end
+
+    # Добавляем новые комплектации
+    extras_array.each do |extra|
+      extra_name_record = ExtraName.find_or_create_by(name: extra)
       unless car.extras.exists?(extra_name: extra_name_record)
         category_name = determine_category(extra)
         category = Category.find_or_create_by(name: category_name)
-        { car_id: car.id, category_id: category.id, extra_name_id: extra_name_record.id }
+        new_extra = Extra.create(car: car, category: category, extra_name: extra_name_record)
+        if new_extra.persisted?
+          puts "Extra added for car: #{car.id} (Extra: #{extra})"
+        else
+          puts "Failed to add extra for car: #{car.id} (Extra: #{extra})"
+          puts new_extra.errors.full_messages.join(", ")
+        end
+      else
+        puts "Extra already exists for car: #{car.id} (Extra: #{extra})"
       end
-    end.compact
+    end
+  end
+
+  def determine_category(extra)
+    case extra
+    when /фары|датчик/
+      'Обзор'
+    when /диски|рейлинги/
+      'Элементы экстерьера'
+    when /иммобилайзер|замок|сигнализация/
+      'Защита от угона'
+    when /audi|usb|bluetooth|навигационная система|розетка/
+      'Мультимедиа'
+    when /салон|обогрев|подогрев|подголовник|регулировка|подлокотник/
+      'Салон'
+    when /камера|климат|компьютер|мультифункциональное|складывание|доступ|парктроник|круиз|усилитель|привод|стеклоподъемники|прикуриватель/
+      'Комфорт'
+    when /система|подушка/
+      'Безопасность'
+    else
+      'Прочее'
+    end
   end
 
   def remove_related_orders(car)
@@ -309,30 +309,6 @@ namespace :import do
     if car.installment
       puts "Removing installment for car: #{car.id}"
       car.installment.destroy
-    end
-  end
-
-  def update_car(car, node)
-    # Обновляем атрибуты автомобиля
-    car.assign_attributes(
-      year: node.at_xpath('year').text.to_i,
-      price: node.at_xpath('price').text.to_d,
-      description: node.at_xpath('modification_id').text,
-      color: Color.find_or_create_by(name: node.at_xpath('color').text),
-      body_type: BodyType.find_or_create_by(name: node.at_xpath('body_type').text),
-      engine_name_type: EngineNameType.find_or_create_by(name: node.at_xpath('engine_type').text),
-      engine_power_type: EnginePowerType.find_or_create_by(power: node.at_xpath('engine_power').text.to_i),
-      engine_capacity_type: find_or_create_engine_capacity_type(node),
-      gearbox_type: find_or_create_gearbox_type(node),
-      drive_type: DriveType.find_or_create_by(name: node.at_xpath('drive')&.text || "Полный"),  
-      complectation_name: node.at_xpath('complectation_name').text
-    )
-
-    if car.save
-      puts "Car updated: #{car.id}"
-    else
-      puts "Failed to update car: #{car.id}"
-      puts car.errors.full_messages.join(", ")
     end
   end
 
@@ -426,14 +402,14 @@ namespace :import do
     # Проверяем, является ли значение числом, и устанавливаем params_last_mileage
     params_last_mileage = (run_value && run_value.match?(/^\d+$/)) ? run_value.to_i : 10
   
-    history_car = HistoryCar.create(
+    history_car = HistoryCar.create!(
       car: car,
       vin: vin.present? ? vin : nil,
       last_mileage: params_last_mileage,
       previous_owners: owners_number,
       registration_number: "Отсутствует",
       registration_restrictions: "Не найдены ограничения на регистрацию",
-      registration_restrictions_info: "Запрет регистрационных действий на машину накладывается, если у автовладельца есть неоплаченные штрафы и налоги, либо если имущество стало предметом спора.",
+      registration_restrictions_info: "Запрет регистрационных действий на машину накладывается, если у автовладельца есть нео��лаченные штрафы и налоги, либо если имущество стало предметом спора.",
       wanted_status: "Нет сведений о розыске",
       wanted_status_info: "Покупка разыскиваемого автомобиля грозит тем, что его отберут в ГИБДД при регистрации, и пока будет идти следствие, а это может затянуться на долгий срок, автомобиль будет стоять на штрафплощадке.",
       pledge_status: "Залог не найден",
@@ -501,105 +477,5 @@ namespace :import do
       Extra.create(car: car, category: category, extra_name: extra_name)
     end
     puts "Extras saved for car: #{car.id}"
-  end
-
-  def update_history_for_car(car, node)
-    vin = node.at_xpath('vin').text
-    history_car = car.history_cars.find_or_initialize_by(vin: vin)
-  
-    owners_number_text = node.at_xpath('owners_number').text.downcase.split.first
-    text_to_number = {
-      "ноль" => 0, "один" => 1, "два" => 2, "три" => 3, "четыре" => 4,
-      "пять" => 5, "шесть" => 6, "семь" => 7, "восемь" => 8, "девять" => 9, "десять" => 10
-    }
-    owners_number = text_to_number[owners_number_text] || owners_number_text.scan(/\d+/).first.to_i
-  
-    # Получаем текстовое значение элемента 'run'
-    run_value = node.at_xpath('run')&.text
-
-    # Проверяем, является ли значение числом, и устанавливаем params_last_mileage
-    params_last_mileage = (run_value && run_value.match?(/^\d+$/)) ? run_value.to_i : 10
-  
-    # Обновляем атрибуты истории
-    history_car.assign_attributes(
-      last_mileage: params_last_mileage,
-      previous_owners: owners_number,
-      vin: node.at_xpath('vin').text.present? ? node.at_xpath('vin').text : nil
-      # Добавьте другие атрибуты, которые нужно обновить
-    )
-
-    if history_car.save
-      puts "History updated for car: #{car.id}"
-    else
-      puts "Failed to update history for car VIN: #{vin}"
-      puts history_car.errors.full_messages.join(", ")
-    end
-  end
-
-  def update_images_for_car(car, node)
-    existing_image_urls = car.images.pluck(:url)
-    node.xpath('images/image').each do |image_node|
-      image_url = image_node.text
-
-      unless existing_image_urls.include?(image_url)
-        Image.create(car: car, url: image_url)
-        puts "Image added for car: #{car.id} (URL: #{image_url})"
-      else
-        puts "Image already exists for car: #{car.id} (URL: #{image_url})"
-      end
-    end
-  end
-
-  def update_extras_for_car(car, node)
-    extras_string = node.at_xpath('extras').text
-    puts "Extras from XML: #{extras_string}" # Логируем полученные данные
-    extras_array = extras_string.split(',').map(&:strip)
-
-    # Удаляем старые комплектации, если они отсутствуют в новых данных
-    car.extras.each do |extra|
-      unless extras_array.include?(extra.extra_name.name)
-        extra.destroy
-        puts "Extra removed for car: #{car.id}"
-      end
-    end
-
-    # Добавляем новые комплектации
-    extras_array.each do |extra|
-      extra_name_record = ExtraName.find_or_create_by(name: extra)
-      unless car.extras.exists?(extra_name: extra_name_record)
-        category_name = determine_category(extra)
-        category = Category.find_or_create_by(name: category_name)
-        new_extra = Extra.create(car: car, category: category, extra_name: extra_name_record)
-        if new_extra.persisted?
-          puts "Extra added for car: #{car.id} (Extra: #{extra})"
-        else
-          puts "Failed to add extra for car: #{car.id} (Extra: #{extra})"
-          puts new_extra.errors.full_messages.join(", ")
-        end
-      else
-        puts "Extra already exists for car: #{car.id} (Extra: #{extra})"
-      end
-    end
-  end
-
-  def determine_category(extra)
-    case extra
-    when /фары|датчик/
-      'Обзор'
-    when /диски|рейлинги/
-      'Элементы экстерьера'
-    when /иммобилайзер|замок|сигнализация/
-      'Защита от угона'
-    when /audi|usb|bluetooth|навигационная система|розетка/
-      'Мультимедиа'
-    when /салон|обогрев|подогрев|подголовник|регулировка|подлокотник/
-      'Салон'
-    when /камера|климат|компьютер|мультифункциональное|складывание|доступ|парктроник|круиз|усилитель|привод|стеклоподъемники|прикуриватель/
-      'Комфорт'
-    when /система|подушка/
-      'Безопасность'
-    else
-      'Прочее'
-    end
   end
 end
