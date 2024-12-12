@@ -1,17 +1,16 @@
+require 'nokogiri'
+require 'open-uri'
+require 'httparty'
+
 namespace :import do
   task create_cars: :environment do
-    require 'nokogiri'
-    require 'open-uri'
-    
     xml_data = URI.open('https://plex-crm.ru/xml/usecarmax/hpbz0dmc').read
     doc = Nokogiri::XML(xml_data)
 
     ActiveRecord::Base.transaction do
-
       doc.xpath('//car').each do |node|
         car = create_car_from_node(node)
         next unless car
-
         create_history_for_car(car, node)
         save_images_for_car(car, node)
         save_extras_for_car(car, node)
@@ -73,38 +72,24 @@ namespace :import do
   end
   
   task delete_diff_cars: :environment do
-    require 'nokogiri'
-    require 'open-uri'
-
     xml_data = URI.open('https://plex-crm.ru/xml/usecarmax/hpbz0dmc').read
     doc = Nokogiri::XML(xml_data)
-
     xml_unique_ids = doc.xpath('//car/unique_id').map(&:text)
 
-    # Use a single SQL query to find cars to delete.
     Car.where.not(unique_id: xml_unique_ids).destroy_all
-
     puts "Cars removed."  
   end
 
-
   task update_cars: :environment do
-    require 'nokogiri'
-    require 'open-uri'
-
     xml_data = URI.open('https://plex-crm.ru/xml/usecarmax/hpbz0dmc').read
     doc = Nokogiri::XML(xml_data)
 
     ActiveRecord::Base.transaction do
       existing_cars = Car.includes(:history_cars, :images, :extras).all.index_by(&:unique_id)
-
       doc.xpath('//car').each do |node|
         unique_id_xml = node.at_xpath('unique_id').text
-        puts "unique_id xml: #{unique_id_xml}"
-
         # Поиск существующего автомобиля по unique_id
         car = Car.find_by(unique_id: unique_id_xml)
-
         if car
           puts "Car exists: #{unique_id_xml}"
         else
@@ -115,6 +100,35 @@ namespace :import do
           save_images_for_car(car, node)
           save_extras_for_car(car, node)
           puts "Car created: #{DateTime.now.strftime('%Y-%m-%d %H:%M:%S')}"
+        end
+      end
+    end
+  end
+
+  task update_all_cars: :environment do
+    xml_data = URI.open('https://plex-crm.ru/xml/usecarmax/hpbz0dmc').read
+    doc = Nokogiri::XML(xml_data)
+
+    ActiveRecord::Base.transaction do
+      existing_cars = Car.includes(:history_cars, :images, :extras).all.index_by(&:unique_id)
+      doc.xpath('//car').each_slice(1000) do |car_nodes|  # Обработка по 100 узлов за раз
+        car_nodes.each do |node|
+          unique_id_xml = node.at_xpath('unique_id').text
+          # Поиск существующего автомобиля по unique_id
+          car = Car.find_by(unique_id: unique_id_xml)
+          if car
+            # Если автомобиль существует, обновляем его
+            update_car_attributes(car, node)
+            # Обновляем историю автомобиля
+            update_history_attributes(car, node)
+            # Обновляем изображения
+            update_images_for_car(car, node)
+            # Обновляем комплектацию
+            update_extras_for_car(car, node)
+            puts "Car update unique_id xml: #{unique_id_xml}"
+          else
+            puts "Car noexist: #{unique_id_xml}"
+          end
         end
       end
     end
@@ -182,17 +196,6 @@ namespace :import do
     }
   end
 
-  def update_extras_attributes(car, node)
-    extras_string = node.at_xpath('extras').text
-    extras_array = extras_string.split(',').map(&:strip)
-
-    extras_array.map do |extra|
-      extra_name_record = ExtraName.find_or_create_by(name: extra)
-      category_name = determine_category(extra)
-      category = Category.find_or_create_by(name: category_name)
-      { car_id: car.id, category_id: category.id, extra_name_id: extra_name_record.id } #No need for exists? check in bulk import
-    end
-  end
 
   def update_images_for_car(car, node)
     existing_image_urls = car.images.pluck(:url)
