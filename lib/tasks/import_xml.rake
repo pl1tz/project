@@ -266,16 +266,13 @@ namespace :import do
 
 
   def update_images_for_car(car, node)
-    existing_image_urls = car.images.pluck(:url)
-    node.xpath('images/image').each do |image_node|
-      image_url = image_node.text
+    # Удаляем все существующие изображения
+    car.images.destroy_all
 
-      unless existing_image_urls.include?(image_url)
-        Image.create(car: car, url: image_url)
-        puts "Image added for car: #{car.id} (URL: #{image_url})"
-      else
-        puts "Image already exists for car: #{car.id} (URL: #{image_url})"
-      end
+    # Создаем новые изображения
+    node.xpath('images/image').each do |image_node|
+      car.images.create(url: image_node.text)
+      puts "Images update"
     end
   end
 
