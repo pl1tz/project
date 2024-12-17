@@ -1,0 +1,11 @@
+<% content_for :title, "New car color" %>
+
+<h1>New car color</h1>
+
+<%= render "form", car_color: @car_color %>
+
+<br>
+
+<div>
+  <%= link_to "Back to car colors", car_colors_path %>
+</div>

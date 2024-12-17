@@ -1,4 +1,10 @@
 Rails.application.routes.draw do
+  resources :car_colors
+  resources :car_catalogs do
+    collection do
+      get 'all_catalog'
+    end
+  end
   resources :banners do 
     collection do 
     get :banner_all

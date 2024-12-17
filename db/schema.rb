@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_12_10_192110) do
+ActiveRecord::Schema[7.2].define(version: 2024_12_16_153421) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -73,6 +73,27 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_10_192110) do
     t.string "preferred_time"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "car_catalogs", force: :cascade do |t|
+    t.string "brand"
+    t.string "model"
+    t.integer "power"
+    t.float "acceleration"
+    t.float "consumption"
+    t.integer "max_speed"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "car_colors", force: :cascade do |t|
+    t.bigint "car_catalog_id", null: false
+    t.string "background"
+    t.string "name"
+    t.string "image"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["car_catalog_id"], name: "index_car_colors_on_car_catalog_id"
   end
 
   create_table "cars", force: :cascade do |t|
@@ -342,6 +363,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_10_192110) do
   end
 
   add_foreign_key "call_requests", "cars"
+  add_foreign_key "car_colors", "car_catalogs"
   add_foreign_key "cars", "body_types"
   add_foreign_key "cars", "brands"
   add_foreign_key "cars", "colors"

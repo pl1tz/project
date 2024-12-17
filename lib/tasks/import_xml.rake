@@ -134,6 +134,73 @@ namespace :import do
     end
   end
 
+  task careate_car_catalog: :environment do
+    base_url = 'https://center-auto.ru'
+    catalog_url = "#{base_url}/katalog"
+
+    # Получаем HTML-код страницы каталога
+    catalog_response = HTTParty.get(catalog_url)
+    catalog_document = Nokogiri::HTML(catalog_response.body)
+
+    # Извлекаем ссылки на все машины
+    car_links = catalog_document.css('.catalog .item ul li a').map { |link| link['href'] }
+
+    car_links.each do |car_link|
+      car_url = car_link.start_with?('http') ? car_link : "#{base_url}#{car_link}"
+      response = HTTParty.get(car_url)
+      document = Nokogiri::HTML(response.body)
+
+      ActiveRecord::Base.transaction do
+        data_name = document.at_css('h1').text.strip
+        first_word, *remaining_words = data_name.split
+        remaining_text = remaining_words.join(' ')
+        brand = first_word
+        model = remaining_text
+
+        power_match = document.at_css('div:contains("Мощность двиг.")')&.text&.match(/(\d+) л.с./)
+        power = power_match ? power_match[1].to_i : nil
+
+        acceleration_match = document.at_css('div:contains("Разгон до 100км/ч")')&.text&.match(/(\d+\.\d+) с/)
+        acceleration = acceleration_match ? acceleration_match[1].to_f : nil
+
+        max_speed_match = document.at_css('div:contains("Макс. скорость")')&.text&.match(/(\d+) км\/ч/)
+        max_speed = max_speed_match ? max_speed_match[1].to_i : nil
+
+        car_catalog = CarCatalog.create!(
+          brand: brand,
+          model: model,
+          power: power,
+          acceleration: acceleration,
+          max_speed: max_speed
+        )
+
+        document.css('.top__car-color .thumbnail').each do |color_node|
+          background_match = color_node['style']&.match(/background: (#[0-9a-fA-F]{6})/)
+          background = background_match ? background_match[1] : nil
+          name = color_node['data-title']&.strip
+          image_path = color_node['data-image']
+          image = "#{base_url}#{image_path}"
+
+          CarColor.create!(
+            car_catalog_id: car_catalog.id,
+            background: background,
+            name: name,
+            image: image
+          )
+        end
+
+        puts "Car data imported successfully for #{brand} #{model}."
+      end
+    end
+  end
+
+  task destrroy_car_catalog: :environment do
+    ActiveRecord::Base.transaction do
+      CarCatalog.destroy_all
+      puts "Car data destroy successfully."
+    end
+  end
+
   def update_car_attributes(car, node)
     {
       id: car.id,
@@ -413,7 +480,7 @@ namespace :import do
       previous_owners: owners_number,
       registration_number: "Отсутствует",
       registration_restrictions: "Не найдены ограничения на регистрацию",
-      registration_restrictions_info: "Запрет регистрационных действий на машину накладывается, если у автовладельца есть нео��лаченные штрафы и налоги, либо если имущество стало предметом спора.",
+      registration_restrictions_info: "Запрет регистрационных действий на машину накладывается, если у автовладельца есть неоплаченные штрафы и налоги, либо если имущество стало предметом спора.",
       wanted_status: "Нет сведений о розыске",
       wanted_status_info: "Покупка разыскиваемого автомобиля грозит тем, что его отберут в ГИБДД при регистрации, и пока будет идти следствие, а это может затянуться на долгий срок, автомобиль будет стоять на штрафплощадке.",
       pledge_status: "Залог не найден",
