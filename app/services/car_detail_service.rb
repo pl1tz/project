@@ -11,6 +11,7 @@ class CarDetailService
        .includes(:images)
        .where('brands.name = ? AND models.name = ? AND generations.name = ?', brand_name, model_name, generation_name)
        .select(select_fields)
+       .distinct
   end
 
   def self.select_fields
