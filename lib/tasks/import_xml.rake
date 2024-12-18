@@ -120,7 +120,7 @@ namespace :import do
             # Если автомобиль существует, обновляем его
             update_car_attributes(car, node)
             # Обновляем историю автомобиля
-            update_history_attributes(car, node)
+            2368(car, node)
             # Обновляем изображения
             update_images_for_car(car, node)
             # Обновляем комплектацию

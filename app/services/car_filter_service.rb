@@ -5,7 +5,7 @@ class CarFilterService
   end
 
   def call
-    cars = Car.all.includes(:images)
+    cars = Car.all.includes(:images).distinct
 
     cars = cars.by_brand_name(@params[:brand_name]) if @params[:brand_name].present?
     cars = cars.by_model_name(@params[:model_name]) if @params[:model_name].present?
@@ -20,7 +20,6 @@ class CarFilterService
 
     cars = cars.by_owners_count(@params[:owners_count]) if @params[:owners_count].present?
     cars = cars.by_engine_name_type(@params[:engine_name_type_name]) if @params[:engine_name_type_name].present?
-
 
     cars
   end
@@ -37,5 +36,4 @@ class CarFilterService
   def all_cars
     call.to_a
   end
- 
 end
