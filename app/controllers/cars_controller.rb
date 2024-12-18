@@ -14,10 +14,9 @@ class CarsController < ApplicationController
       paginated_cars = paginated_cars.order(price: :desc)
     end
     if params[:mileage] == 'true'
-      subquery = HistoryCar.select('MIN(last_mileage) as min_mileage, car_id')
-                           .group(:car_id)
-      paginated_cars = paginated_cars.joins("INNER JOIN (#{subquery.to_sql}) AS min_mileage ON min_mileage.car_id = cars.id")
-                                     .order('min_mileage.min_mileage ASC')
+      paginated_cars = paginated_cars.joins(:history_cars)
+                                     .select('cars.id, cars.*, history_cars.last_mileage')
+                                     .order('cars.id, history_cars.last_mileage ASC')
     end
     if params[:newest] == 'true'
       paginated_cars = paginated_cars.order(year: :desc)
