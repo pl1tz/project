@@ -14,7 +14,7 @@ class CarsController < ApplicationController
       paginated_cars = paginated_cars.order(price: :desc)
     end
     if params[:mileage] == 'true'
-      paginated_cars = paginated_cars.joins(:history_cars).order('history_cars.last_mileage ASC')
+      paginated_cars = paginated_cars.joins(:history_cars).select('DISTINCT ON (cars.id) cars.*, history_cars.last_mileage').order('cars.id, history_cars.last_mileage ASC')
     end
     if params[:newest] == 'true'
       paginated_cars = paginated_cars.order(year: :desc)
