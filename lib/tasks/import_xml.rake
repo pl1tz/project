@@ -120,7 +120,7 @@ namespace :import do
             # Если автомобиль существует, обновляем его
             update_car_attributes(car, node)
             # Обновляем историю автомобиля
-            2368(car, node)
+            update_history_attributes(car, node)
             # Обновляем изображения
             update_images_for_car(car, node)
             # Обновляем комплектацию
@@ -219,6 +219,9 @@ namespace :import do
   end
 
   def update_history_attributes(car, node)
+    # Удаляем все существующие истории для автомобиля
+    car.history_cars.destroy_all
+
     vin = node.at_xpath('vin').text
 
     owners_number_text = node.at_xpath('owners_number').text.downcase.split.first
@@ -231,7 +234,7 @@ namespace :import do
     run_value = node.at_xpath('run')&.text
     params_last_mileage = (run_value && run_value.match?(/^\d+$/)) ? run_value.to_i : 10
 
-    {
+    history_car = HistoryCar.create!(
       car_id: car.id,
       vin: vin.present? ? vin : nil,
       last_mileage: params_last_mileage,
@@ -260,8 +263,14 @@ namespace :import do
       insurance_found: "Нет полиса ОСАГО",
       recall_campaigns_found: "Не найдены сведения об отзывных кампаниях",
       recall_campaigns_found_info: "Для данного автомобиля не проводилось или нет действующих отзывных кампаний. Отзыв автомобиля представляет собой устранение выявленного брака. Практически все автомобильные производители периодически отзывают свои продукты для устранения дефектов."
-    }
-    puts "History update car: #{vin}"
+    )
+
+    if history_car.save
+      puts "History updated for car: #{vin}"
+    else
+      puts "History not created for car VIN: #{vin}"
+      puts "Errors: #{history_car.errors.full_messages.join(", ")}"
+    end
   end
 
 

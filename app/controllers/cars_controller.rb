@@ -95,7 +95,7 @@ class CarsController < ApplicationController
   end
 
   def total_pages
-    per_page = 18
+    per_page = 12
     total_pages = CarFilterService.new(filter_params, per_page).total_pages
     cars_count = CarFilterService.new(filter_params, per_page).cars_count
     render json: { total_pages: total_pages, cars_count: cars_count }
