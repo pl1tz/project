@@ -1,0 +1,27 @@
+<%= form_with(model: car_catalog_image) do |form| %>
+  <% if car_catalog_image.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(car_catalog_image.errors.count, "error") %> prohibited this car_catalog_image from being saved:</h2>
+
+      <ul>
+        <% car_catalog_image.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :car_catalog_id, style: "display: block" %>
+    <%= form.text_field :car_catalog_id %>
+  </div>
+
+  <div>
+    <%= form.label :url, style: "display: block" %>
+    <%= form.text_field :url %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

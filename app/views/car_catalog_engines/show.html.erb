@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @car_catalog_engine %>
+
+<div>
+  <%= link_to "Edit this car catalog engine", edit_car_catalog_engine_path(@car_catalog_engine) %> |
+  <%= link_to "Back to car catalog engines", car_catalog_engines_path %>
+
+  <%= button_to "Destroy this car catalog engine", @car_catalog_engine, method: :delete %>
+</div>

@@ -1,0 +1,12 @@
+<% content_for :title, "Editing car catalog image" %>
+
+<h1>Editing car catalog image</h1>
+
+<%= render "form", car_catalog_image: @car_catalog_image %>
+
+<br>
+
+<div>
+  <%= link_to "Show this car catalog image", @car_catalog_image %> |
+  <%= link_to "Back to car catalog images", car_catalog_images_path %>
+</div>

@@ -1,0 +1,2 @@
+module CarCatalogImagesHelper
+end

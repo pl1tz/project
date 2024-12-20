@@ -2,4 +2,8 @@ class CarCatalogSerializer < ActiveModel::Serializer
   attributes :id, :brand, :model, :power, :acceleration, :consumption, :max_speed
 
   has_many :car_colors
+  has_many :car_catalog_contents
+  has_many :car_catalog_texnos
+  has_many :car_catalog_engines
+  has_many :car_catalog_images
 end

@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @car_catalog_texno %>
+
+<div>
+  <%= link_to "Edit this car catalog texno", edit_car_catalog_texno_path(@car_catalog_texno) %> |
+  <%= link_to "Back to car catalog texnos", car_catalog_texnos_path %>
+
+  <%= button_to "Destroy this car catalog texno", @car_catalog_texno, method: :delete %>
+</div>

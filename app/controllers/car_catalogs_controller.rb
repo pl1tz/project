@@ -77,6 +77,11 @@ class CarCatalogsController < ApplicationController
     render json: result
   end
 
+  def cars_by_brand
+    brand_name = params[:brand_name]
+    result = CarCatalogService.cars_by_brand(brand_name)
+    render json: result
+  end
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_car_catalog

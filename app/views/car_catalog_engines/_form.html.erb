@@ -1,0 +1,52 @@
+<%= form_with(model: car_catalog_engine) do |form| %>
+  <% if car_catalog_engine.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(car_catalog_engine.errors.count, "error") %> prohibited this car_catalog_engine from being saved:</h2>
+
+      <ul>
+        <% car_catalog_engine.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :car_catalog_id, style: "display: block" %>
+    <%= form.text_field :car_catalog_id %>
+  </div>
+
+  <div>
+    <%= form.label :torque, style: "display: block" %>
+    <%= form.number_field :torque %>
+  </div>
+
+  <div>
+    <%= form.label :power, style: "display: block" %>
+    <%= form.number_field :power %>
+  </div>
+
+  <div>
+    <%= form.label :cylinders, style: "display: block" %>
+    <%= form.number_field :cylinders %>
+  </div>
+
+  <div>
+    <%= form.label :engine_volume, style: "display: block" %>
+    <%= form.text_field :engine_volume %>
+  </div>
+
+  <div>
+    <%= form.label :fuel_type, style: "display: block" %>
+    <%= form.text_field :fuel_type %>
+  </div>
+
+  <div>
+    <%= form.label :engine_type, style: "display: block" %>
+    <%= form.text_field :engine_type %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

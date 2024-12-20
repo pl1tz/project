@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_12_16_153421) do
+ActiveRecord::Schema[7.2].define(version: 2024_12_19_165748) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -73,6 +73,47 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_16_153421) do
     t.string "preferred_time"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "car_catalog_contents", force: :cascade do |t|
+    t.bigint "car_catalog_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["car_catalog_id"], name: "index_car_catalog_contents_on_car_catalog_id"
+  end
+
+  create_table "car_catalog_engines", force: :cascade do |t|
+    t.bigint "car_catalog_id", null: false
+    t.string "name_engines"
+    t.integer "torque"
+    t.integer "power"
+    t.integer "cylinders"
+    t.float "engine_volume"
+    t.string "fuel_type"
+    t.string "engine_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["car_catalog_id"], name: "index_car_catalog_engines_on_car_catalog_id"
+  end
+
+  create_table "car_catalog_images", force: :cascade do |t|
+    t.bigint "car_catalog_id", null: false
+    t.string "url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["car_catalog_id"], name: "index_car_catalog_images_on_car_catalog_id"
+  end
+
+  create_table "car_catalog_texnos", force: :cascade do |t|
+    t.bigint "car_catalog_id", null: false
+    t.string "image"
+    t.integer "width"
+    t.integer "height"
+    t.integer "length"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["car_catalog_id"], name: "index_car_catalog_texnos_on_car_catalog_id"
   end
 
   create_table "car_catalogs", force: :cascade do |t|
@@ -363,6 +404,10 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_16_153421) do
   end
 
   add_foreign_key "call_requests", "cars"
+  add_foreign_key "car_catalog_contents", "car_catalogs"
+  add_foreign_key "car_catalog_engines", "car_catalogs"
+  add_foreign_key "car_catalog_images", "car_catalogs"
+  add_foreign_key "car_catalog_texnos", "car_catalogs"
   add_foreign_key "car_colors", "car_catalogs"
   add_foreign_key "cars", "body_types"
   add_foreign_key "cars", "brands"

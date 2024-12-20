@@ -1103,7 +1103,115 @@
     <h2 onclick="toggleSection(this)">CarCatalog</h2>
     <div class="toggle-content" style="display: none;">
         <p><code>GET /car_catalogs/all_catalog</code> Список всех машин по бренду</p>
+        <pre>
+            {
+                "brand": "Aito",
+                "models_count": 2,
+                "models": [
+                    {
+                        "id": 265,
+                        "model": "M5"
+                    },
+                    {
+                        "id": 266,
+                        "model": "M7"
+                    }
+                ]
+            },
+            </pre>
+        <p><code>GET /car_catalogs/cars_by_brand?brand_name=Baic</code> Список машин конкретного бренда</p>
+        <pre>
+            {
+                "id": 2,
+                "brand": "Baic",
+                "model": "Beijing",
+                "power": 180,
+                "acceleration": 10.5,
+                "consumption": null,
+                "car_color": {
+                    "id": 12,
+                    "image": "https://center-auto.ru/img/cars/8b712b08f384088b90b54e70d7f796c3.png"
+                }
+            },
+            </pre>
         <p><code>GET /car_catalogs/:id</code> Список конкретной машины</p>
+        <pre>
+            "id": 1,
+            "brand": "Arcfox",
+            "model": "Alpha",
+            "power": 218,
+            "acceleration": 4.6,
+            "consumption": null,
+            "max_speed": 180,
+            "car_colors": [
+                {
+                    "id": 1,
+                    "background": "#b0b8c2",
+                    "name": "",
+                    "image": "https://center-auto.ru/img/cars/e80267484768ab46f695f58cf9ff3355.png"
+                },
+                {
+                    "id": 2,
+                    "background": "#3b4149",
+                    "name": "",
+                    "image": "https://center-auto.ru/img/cars/ebe72a9622c316c8ead1b7feddcfe0d5.png"
+                },
+                {
+                    "id": 3,
+                    "background": "#3d444b",
+                    "name": "",
+                    "image": "https://center-auto.ru/img/cars/48281a68662f6c7ee47712647008a999.png"
+                },
+                {
+                    "id": 4,
+                    "background": "#cd3430",
+                    "name": "",
+                    "image": "https://center-auto.ru/img/cars/2a6a1898f85cb7557e44561c61a7849c.png"
+                },
+                {
+                    "id": 5,
+                    "background": "#008cb8",
+                    "name": "",
+                    "image": "https://center-auto.ru/img/cars/4ba9d642b2c4e7fe8ee36aefce317c8e.png"
+                },
+                {
+                    "id": 6,
+                    "background": "#888982",
+                    "name": "",
+                    "image": "https://center-auto.ru/img/cars/b94ead799574582dc25fef41ad2a2864.png"
+                },
+                {
+                    "id": 7,
+                    "background": "#e5e5e6",
+                    "name": "",
+                    "image": "https://center-auto.ru/img/cars/9c98561c10e5bba501b2aaddbb0aa0a7.png"
+                },
+                {
+                    "id": 8,
+                    "background": "#b5bcc6",
+                    "name": "",
+                    "image": "https://center-auto.ru/img/cars/2007660fbdffa0ef8d4eea0d30613be0.png"
+                },
+                {
+                    "id": 9,
+                    "background": "#cb342f",
+                    "name": "",
+                    "image": "https://center-auto.ru/img/cars/71d1f506e921a8b41f81b10a5c835eb4.png"
+                },
+                {
+                    "id": 10,
+                    "background": "#008ab5",
+                    "name": "",
+                    "image": "https://center-auto.ru/img/cars/152fc71b0bd347d6b01b995226f050ec.png"
+                },
+                {
+                    "id": 11,
+                    "background": "#848680",
+                    "name": "",
+                    "image": "https://center-auto.ru/img/cars/9d6774e213004beca180324a6ff5a715.png"
+                }
+            ]
+        </pre>
     </div>
 
 

@@ -134,7 +134,17 @@ namespace :import do
     end
   end
 
+  task destrroy_car_catalog: :environment do
+    ActiveRecord::Base.transaction do
+      CarCatalog.destroy_all
+      puts "Car data destroy successfully."
+    end
+  end
+
   task careate_car_catalog: :environment do
+    require 'nokogiri'
+    require 'open-uri'
+    require 'httparty'
     base_url = 'https://center-auto.ru'
     catalog_url = "#{base_url}/katalog"
 
@@ -174,6 +184,24 @@ namespace :import do
           max_speed: max_speed
         )
 
+        # Парсим содержимое car__content-text
+        content_nodes = document.css('.car__content-text p')
+        content_nodes.each do |content_node|
+          content_text = content_node.text.strip
+
+          CarCatalogContent.create!(
+            car_catalog: car_catalog,
+            content: content_text
+          )
+        end
+
+        # Сохранение технических данных
+        save_techno_data_for_car(car_catalog.id, document)
+
+        import_engine_data(car_catalog.id, document)
+
+        parse_car_images(car_catalog.id, document)
+
         document.css('.top__car-color .thumbnail').each do |color_node|
           background_match = color_node['style']&.match(/background: (#[0-9a-fA-F]{6})/)
           background = background_match ? background_match[1] : nil
@@ -194,15 +222,92 @@ namespace :import do
     end
   end
 
-  task destrroy_car_catalog: :environment do
-    ActiveRecord::Base.transaction do
-      CarCatalog.destroy_all
-      puts "Car data destroy successfully."
+  def save_techno_data_for_car(car_catalog_id, document)
+    techno_image_node = document.at_css('.techno-image')
+    return unless techno_image_node
+
+    image_url = techno_image_node.at_css('img')['src']
+    width = techno_image_node.at_css('.techno-width')&.text&.to_i
+    height = techno_image_node.at_css('.techno-height')&.text&.to_i
+    length = techno_image_node.at_css('.techno-length')&.text&.to_i
+    base_url = 'https://center-auto.ru'
+    image = "#{base_url}#{image_url}"
+
+    CarCatalogTexno.create!(
+      car_catalog_id: car_catalog_id,
+      image: image,
+      width: width,
+      height: height,
+      length: length
+    )
+
+    puts "Techno data saved for car catalog: #{car_catalog_id}"
+  end
+
+  def import_engine_data(car_catalog_id, document)
+    # Находим таблицу с данными двигателей
+    engine_table = document.at_css('.engines table')
+    return unless engine_table
+  
+    # Извлекаем строки таблицы
+    rows = engine_table.css('tr')
+  
+    # Заголовки двигателей (названия двигателей)
+    engine_names = rows[0].css('th').map(&:text).reject(&:empty?)
+  
+    # Извлекаем данные из строк таблицы
+    torque_row = rows.find { |row| row.at_css('td')&.text&.include?('Крутящий момент') }
+    power_row = rows.find { |row| row.at_css('td')&.text&.include?('Мощность двигателя') }
+    cylinders_row = rows.find { |row| row.at_css('td')&.text&.include?('Количество цилиндров') }
+    volume_row = rows.find { |row| row.at_css('td')&.text&.include?('Объем двигателя') }
+    fuel_row = rows.find { |row| row.at_css('td')&.text&.include?('Рекомендуемое топливо') }
+    type_row = rows.find { |row| row.at_css('td')&.text&.include?('Тип двигателя') }
+  
+    # Проходим по каждому двигателю и сохраняем данные
+    engine_names.each_with_index do |engine_name, index|
+      CarCatalogEngine.create!(
+        car_catalog_id: car_catalog_id,
+        name_engines: engine_name.strip,
+        torque: torque_row&.css('td')[index + 1]&.text&.to_i,
+        power: power_row&.css('td')[index + 1]&.text&.to_i,
+        cylinders: cylinders_row&.css('td')[index + 1]&.text&.to_i,
+        engine_volume: volume_row&.css('td')[index + 1]&.text&.gsub(',', '.').to_f,
+        fuel_type: fuel_row&.css('td')[index + 1]&.text&.strip,
+        engine_type: type_row&.css('td')[index + 1]&.text&.strip
+      )
     end
+  
+    puts "Engine data saved for car catalog: #{car_catalog_id}"
+  end 
+
+  def parse_car_images(car_catalog_id, document)
+    base_url = 'https://center-auto.ru'
+    
+    # Извлекаем изображения экстерьера
+    exterior_images = document.css('.photos .exterior .image img').map { |img| img['src'] }
+    exterior_images.each do |image_url|
+      all_catalog_url = "#{base_url}#{image_url}"
+      CarCatalogImage.create!(
+        car_catalog_id: car_catalog_id,
+        url: all_catalog_url
+      )
+    end
+  
+    # Извлекаем изображения интерьера
+    interior_images = document.css('.photos .interior .image img').map { |img| img['src'] }
+    interior_images.each do |image_url|
+      all_catalog_url = "#{base_url}#{image_url}"
+      CarCatalogImage.create!(
+        car_catalog_id: car_catalog_id,
+        url: all_catalog_url
+      )
+    end
+    
+    puts "Images saved for car catalog: #{car_catalog_id}"
   end
 
   def update_car_attributes(car, node)
-    {
+    attributes = {
       id: car.id,
       year: node.at_xpath('year').text.to_i,
       price: node.at_xpath('price').text.to_d,
@@ -216,6 +321,8 @@ namespace :import do
       drive_type_id: DriveType.find_or_create_by(name: node.at_xpath('drive')&.text || "Полный").id,
       complectation_name: node.at_xpath('complectation_name').text
     }
+
+    car.update(attributes)
   end
 
   def update_history_attributes(car, node)
@@ -273,7 +380,6 @@ namespace :import do
     end
   end
 
-
   def update_images_for_car(car, node)
     # Удаляем все существующие изображения
     car.images.destroy_all
@@ -290,29 +396,22 @@ namespace :import do
     puts "Extras from XML: #{extras_string}" # Логируем полученные данные
     extras_array = extras_string.split(',').map(&:strip)
 
-    # Удаляем старые комплектации, если они отсутствуют в новых данных
-    car.extras.each do |extra|
-      unless extras_array.include?(extra.extra_name.name)
-        extra.destroy
-        puts "Extra removed for car: #{car.id}"
-      end
-    end
+    # Удаляем все старые комплектации
+    car.extras.destroy_all
+    puts "All extras removed for car: #{car.id}"
 
     # Добавляем новые комплектации
     extras_array.each do |extra|
       extra_name_record = ExtraName.find_or_create_by(name: extra)
-      unless car.extras.exists?(extra_name: extra_name_record)
-        category_name = determine_category(extra)
-        category = Category.find_or_create_by(name: category_name)
-        new_extra = Extra.create(car: car, category: category, extra_name: extra_name_record)
-        if new_extra.persisted?
-          puts "Extra added for car: #{car.id} (Extra: #{extra})"
-        else
-          puts "Failed to add extra for car: #{car.id} (Extra: #{extra})"
-          puts new_extra.errors.full_messages.join(", ")
-        end
+      category_name = determine_category(extra)
+      category = Category.find_or_create_by(name: category_name)
+      new_extra = Extra.create(car: car, category: category, extra_name: extra_name_record)
+
+      if new_extra.persisted?
+        puts "Extra added for car: #{car.id} (Extra: #{extra})"
       else
-        puts "Extra already exists for car: #{car.id} (Extra: #{extra})"
+        puts "Failed to add extra for car: #{car.id} (Extra: #{extra})"
+        puts new_extra.errors.full_messages.join(", ")
       end
     end
   end
@@ -555,4 +654,6 @@ namespace :import do
     end
     puts "Extras saved for car: #{car.id}"
   end
+
+  
 end

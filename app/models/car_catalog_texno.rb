@@ -1,0 +1,2 @@
+class CarCatalogTexno < ApplicationRecord
+end

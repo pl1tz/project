@@ -1,8 +1,13 @@
 Rails.application.routes.draw do
+  resources :car_catalog_images
+  resources :car_catalog_engines
+  resources :car_catalog_texnos
+  resources :car_catalog_contents
   resources :car_colors
   resources :car_catalogs do
     collection do
       get 'all_catalog'
+      get 'cars_by_brand'
     end
   end
   resources :banners do 
