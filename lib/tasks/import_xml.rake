@@ -202,6 +202,8 @@ namespace :import do
 
         parse_car_images(car_catalog.id, document)
 
+        create_car_catalog_configurations_from_node(car_catalog.id, document)
+
         document.css('.top__car-color .thumbnail').each do |color_node|
           background_match = color_node['style']&.match(/background: (#[0-9a-fA-F]{6})/)
           background = background_match ? background_match[1] : nil
@@ -306,6 +308,52 @@ namespace :import do
     puts "Images saved for car catalog: #{car_catalog_id}"
   end
 
+
+  def create_car_catalog_configurations_from_node(car_catalog_id, document)
+    configurations = document.css('.prices tr.compl-height.compl-wrap')
+    package_groups = document.css('.prices tr.group-name').map { |group| group.at_css('td')&.text&.strip }
+
+    # Извлечение скидок из checkbox-elem
+    credit_discount = document.at_css('label.checkbox-elem:nth-of-type(1) .check-title span')&.text&.then { |text| text&.gsub(' ₽', '')&.gsub(' ', '')&.to_i } || 0
+    trade_in_discount = document.at_css('label.checkbox-elem:nth-of-type(2) .check-title span')&.text&.then { |text| text&.gsub(' ₽', '')&.gsub(' ', '')&.to_i } || 0
+    recycling_discount = document.at_css('label.checkbox-elem:nth-of-type(3) .check-title span')&.text&.then { |text| text&.gsub(' ₽', '')&.gsub(' ', '')&.to_i } || 0
+
+    current_package_group = nil
+    configurations.each_with_index do |config, index|
+        # Проверяем, есть ли группа пакетов для текущей конфигурации
+        if index < package_groups.size
+            current_package_group = package_groups[index]
+        end
+
+        title = config.at_css('.compl-title-main')&.text&.strip
+        volume = config.at_css('td:nth-child(2)')&.text&.strip&.to_f
+        gearbox = config.at_css('td:nth-child(3)')&.text&.strip
+        power = config.at_css('td:nth-child(4)')&.text&.strip&.then { |text| text&.gsub(' л.с.', '').to_i }
+        price = config.at_css('td:nth-child(5)')&.text&.strip&.then { |text| text&.gsub(' ₽', '')&.gsub(' ', '').to_i }
+        discount_price = config.at_css('td:nth-child(6) .compl-price')&.text&.strip&.then { |text| text&.gsub(' ₽', '')&.gsub(' ', '').to_i }
+
+        # Расчет специальной цены
+        special_price = price - credit_discount + trade_in_discount + recycling_discount
+
+        puts "Saving configuration: #{title}, Volume: #{volume}, Gearbox: #{gearbox}, Power: #{power}, Price: #{price}, Discount Price: #{discount_price}, Special Price: #{special_price}, Package Group: #{current_package_group}, Credit Discount: #{credit_discount}, Trade-in Discount: #{trade_in_discount}, Recycling Discount: #{recycling_discount}"
+
+        CarCatalogConfiguration.create!(
+            car_catalog_id: car_catalog_id,
+            package_group: current_package_group,
+            package_name: title,
+            volume: volume,
+            transmission: gearbox,
+            power: power,
+            price: price,
+            credit_discount: credit_discount,
+            trade_in_discount: trade_in_discount,
+            recycling_discount: recycling_discount,
+            special_price: special_price
+        )
+    end
+  end
+  
+  
   def update_car_attributes(car, node)
     attributes = {
       id: car.id,
@@ -572,7 +620,7 @@ namespace :import do
     }
     owners_number = text_to_number[owners_number_text] || owners_number_text.scan(/\d+/).first.to_i
   
-    # Получаем текстовое значение элемента 'run'
+    # Полчаем текстовое значение элемента 'run'
     run_value = node.at_xpath('run')&.text
 
     # Проверяем, является ли значение числом, и устанавливаем params_last_mileage
@@ -591,7 +639,7 @@ namespace :import do
       pledge_status: "Залог не найден",
       pledge_status_info: "Мы проверили базы данных Федеральной нотариальной палаты (ФНП) и Национального бюро кредитных историй (НБКИ).",
       accidents_found: "ДТП не найдены",
-      accidents_found_info: "В отчёт не попадут аварии, которые произошли раньше 2015 года или не оформлялись в ГИБДД.",
+      accidents_found_info: "В отчёт не попадут аварии, которые произошли раньше 2015 года или не оформлял��сь в ГИБДД.",
       repair_estimates_found: "Не найдены расчёты стоимости ремонта",
       repair_estimates_found_info: "Мы проверяем, во сколько эксперты страховых компаний оценили восстановление автомобиля после ДТП. Расчёт не означает, что машину ремонтировали.",
       taxi_usage: "Не найдено разрешение на работу в такси",
@@ -655,5 +703,5 @@ namespace :import do
     puts "Extras saved for car: #{car.id}"
   end
 
-  
+
 end

@@ -6,4 +6,5 @@ class CarCatalogSerializer < ActiveModel::Serializer
   has_many :car_catalog_texnos
   has_many :car_catalog_engines
   has_many :car_catalog_images
+  has_many :car_catalog_configurations
 end

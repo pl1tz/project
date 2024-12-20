@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_12_19_165748) do
+ActiveRecord::Schema[7.2].define(version: 2024_12_20_120502) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -73,6 +73,23 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_19_165748) do
     t.string "preferred_time"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "car_catalog_configurations", force: :cascade do |t|
+    t.bigint "car_catalog_id", null: false
+    t.string "package_group"
+    t.string "package_name"
+    t.float "volume"
+    t.string "transmission"
+    t.integer "power"
+    t.integer "price"
+    t.integer "credit_discount"
+    t.integer "trade_in_discount"
+    t.integer "recycling_discount"
+    t.integer "special_price"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["car_catalog_id"], name: "index_car_catalog_configurations_on_car_catalog_id"
   end
 
   create_table "car_catalog_contents", force: :cascade do |t|
@@ -404,6 +421,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_19_165748) do
   end
 
   add_foreign_key "call_requests", "cars"
+  add_foreign_key "car_catalog_configurations", "car_catalogs"
   add_foreign_key "car_catalog_contents", "car_catalogs"
   add_foreign_key "car_catalog_engines", "car_catalogs"
   add_foreign_key "car_catalog_images", "car_catalogs"

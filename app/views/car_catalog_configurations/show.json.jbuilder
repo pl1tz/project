@@ -1,0 +1,1 @@
+json.partial! "car_catalog_configurations/car_catalog_configuration", car_catalog_configuration: @car_catalog_configuration

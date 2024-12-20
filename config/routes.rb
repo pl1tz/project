@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :car_catalog_configurations
   resources :car_catalog_images
   resources :car_catalog_engines
   resources :car_catalog_texnos
