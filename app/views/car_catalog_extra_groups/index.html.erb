@@ -1,0 +1,16 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Car catalog extra groups" %>
+
+<h1>Car catalog extra groups</h1>
+
+<div id="car_catalog_extra_groups">
+  <% @car_catalog_extra_groups.each do |car_catalog_extra_group| %>
+    <%= render car_catalog_extra_group %>
+    <p>
+      <%= link_to "Show this car catalog extra group", car_catalog_extra_group %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New car catalog extra group", new_car_catalog_extra_group_path %>

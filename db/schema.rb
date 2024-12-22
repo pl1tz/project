@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_12_20_120502) do
+ActiveRecord::Schema[7.2].define(version: 2024_12_22_153242) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -112,6 +112,29 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_20_120502) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["car_catalog_id"], name: "index_car_catalog_engines_on_car_catalog_id"
+  end
+
+  create_table "car_catalog_extra_groups", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "car_catalog_extra_names", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "car_catalog_extras", force: :cascade do |t|
+    t.bigint "car_catalog_configuration_id", null: false
+    t.bigint "car_catalog_extra_group_id", null: false
+    t.bigint "car_catalog_extra_name_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["car_catalog_configuration_id"], name: "index_car_catalog_extras_on_car_catalog_configuration_id"
+    t.index ["car_catalog_extra_group_id"], name: "index_car_catalog_extras_on_car_catalog_extra_group_id"
+    t.index ["car_catalog_extra_name_id"], name: "index_car_catalog_extras_on_car_catalog_extra_name_id"
   end
 
   create_table "car_catalog_images", force: :cascade do |t|
@@ -424,6 +447,9 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_20_120502) do
   add_foreign_key "car_catalog_configurations", "car_catalogs"
   add_foreign_key "car_catalog_contents", "car_catalogs"
   add_foreign_key "car_catalog_engines", "car_catalogs"
+  add_foreign_key "car_catalog_extras", "car_catalog_configurations"
+  add_foreign_key "car_catalog_extras", "car_catalog_extra_groups"
+  add_foreign_key "car_catalog_extras", "car_catalog_extra_names"
   add_foreign_key "car_catalog_images", "car_catalogs"
   add_foreign_key "car_catalog_texnos", "car_catalogs"
   add_foreign_key "car_colors", "car_catalogs"

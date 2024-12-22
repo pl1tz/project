@@ -1,0 +1,2 @@
+class CarCatalogExtraGroup < ApplicationRecord
+end

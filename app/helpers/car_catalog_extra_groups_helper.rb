@@ -1,0 +1,2 @@
+module CarCatalogExtraGroupsHelper
+end

@@ -10,7 +10,8 @@ class CarCatalogsController < ApplicationController
 
   # GET /car_catalogs/1 or /car_catalogs/1.json
   def show
-    if @car_catalog.nil?
+    result = CarCatalogService.find_car_by_id(params[:id])
+    if result.nil?
       render file: "#{Rails.root}/public/404.html", status: :not_found, layout: false
       return
     end
@@ -18,7 +19,7 @@ class CarCatalogsController < ApplicationController
     if request.format.html?
       render file: "#{Rails.root}/public/index.html", layout: false
     else
-      render json: @car_catalog
+      render json: result
     end
   end
 

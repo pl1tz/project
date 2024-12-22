@@ -1,0 +1,2 @@
+module CarCatalogExtraNamesHelper
+end

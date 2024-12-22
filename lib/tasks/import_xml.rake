@@ -3,6 +3,71 @@ require 'open-uri'
 require 'httparty'
 
 namespace :import do
+
+
+  # task create_cars_test: :environment do
+  #   url = 'https://plex-crm.ru/api/v3/contact/form'
+  #   token = 'ezo4ysJQm1r1ZiFsFxBtp7zOV5rYAgYY9o3RWkz325009358'
+    
+  #   # Подготовка данных для POST-запроса
+  #   request_body = {
+  #     dealerId: '34124', # Замените на ваш dealerId
+  #     websiteHost: 'https://usecarmax.ru' # Замените на ваш websiteHost
+  #   }
+
+  #   puts "Request body: #{request_body.to_json}"
+
+  #   response = HTTParty.post(url, {
+  #     headers: {
+  #       'Authorization' => "Bearer #{token}",
+  #       'Accept' => 'application/json',
+  #       'Content-Type' => 'application/json'
+  #     },
+  #     body: request_body.to_json
+  #   })
+
+  #   if response.success?
+  #     cars_data = response.parsed_response # Предполагаем, что ответ в формате JSON
+  #     ActiveRecord::Base.transaction do
+  #       cars_data.each do |car_data|
+  #         car = create_car_from_data(car_data) # Создайте метод для обработки данных
+  #         next unless car
+
+  #         create_history_for_car(car, car_data)
+  #         save_images_for_car(car, car_data)
+  #         save_extras_for_car(car, car_data)
+  #         puts "Car created: #{DateTime.now.strftime('%Y-%m-%d %H:%M:%S')}"
+  #       end
+  #     end
+  #   else
+  #     puts "Failed to fetch cars from API: #{response.body}"
+  #   end
+  # end
+
+  # def create_car_from_data(car_data)
+  #   # Здесь вы должны создать объект Car на основе car_data
+  #   # Пример:
+  #   brand = Brand.find_or_create_by(name: car_data['brand'])
+  #   model = Model.find_or_create_by(name: car_data['model'], brand: brand)
+  #   # Добавьте остальные поля, которые вам нужны
+  #   car = Car.new(
+  #     model: model,
+  #     brand: brand,
+  #     year: car_data['year'],
+  #     price: car_data['price'],
+  #     description: car_data['description'],
+  #     # Добавьте остальные необходимые поля
+  #   )
+
+  #   if car.save
+  #     puts "Car created for: #{car.brand.name} #{car.model.name}"
+  #     car
+  #   else
+  #     puts "Failed to create car: #{car.errors.full_messages.join(", ")}"
+  #     nil
+  #   end
+  # end
+
   task create_cars: :environment do
     xml_data = URI.open('https://plex-crm.ru/xml/usecarmax/hpbz0dmc').read
     doc = Nokogiri::XML(xml_data)
@@ -134,14 +199,22 @@ namespace :import do
     end
   end
 
-  task destrroy_car_catalog: :environment do
+  task delete_car_catalog: :environment do
     ActiveRecord::Base.transaction do
+      CarCatalogExtra.destroy_all
+      puts "delete Extra"
+      CarCatalogExtraGroup.destroy_all
+      puts "delete Group"
+      CarCatalogExtraName.destroy_all
+      puts "delete Name"
+      CarCatalogConfiguration.destroy_all
+      puts "delete Configuration"
       CarCatalog.destroy_all
       puts "Car data destroy successfully."
     end
   end
 
-  task careate_car_catalog: :environment do
+  task create_car_catalog: :environment do
     require 'nokogiri'
     require 'open-uri'
     require 'httparty'
@@ -202,7 +275,7 @@ namespace :import do
 
         parse_car_images(car_catalog.id, document)
 
-        create_car_catalog_configurations_from_node(car_catalog.id, document)
+        parse_car_configuration_and_extra(car_catalog.id, document)
 
         document.css('.top__car-color .thumbnail').each do |color_node|
           background_match = color_node['style']&.match(/background: (#[0-9a-fA-F]{6})/)
@@ -309,48 +382,94 @@ namespace :import do
   end
 
 
-  def create_car_catalog_configurations_from_node(car_catalog_id, document)
-    configurations = document.css('.prices tr.compl-height.compl-wrap')
-    package_groups = document.css('.prices tr.group-name').map { |group| group.at_css('td')&.text&.strip }
+  def parse_car_configuration_and_extra(car_catalog_id, document)
+    prices_table = document.at_css('.prices table')
+    return unless prices_table 
 
     # Извлечение скидок из checkbox-elem
     credit_discount = document.at_css('label.checkbox-elem:nth-of-type(1) .check-title span')&.text&.then { |text| text&.gsub(' ₽', '')&.gsub(' ', '')&.to_i } || 0
     trade_in_discount = document.at_css('label.checkbox-elem:nth-of-type(2) .check-title span')&.text&.then { |text| text&.gsub(' ₽', '')&.gsub(' ', '')&.to_i } || 0
     recycling_discount = document.at_css('label.checkbox-elem:nth-of-type(3) .check-title span')&.text&.then { |text| text&.gsub(' ₽', '')&.gsub(' ', '')&.to_i } || 0
 
+    configurations = prices_table.css('tr.compl-height.compl-wrap')
+    package_groups = prices_table.css('tr.group-name').map { |group| group.at_css('td')&.text&.strip }
+
     current_package_group = nil
     configurations.each_with_index do |config, index|
-        # Проверяем, есть ли группа пакетов для текущей конфигурации
-        if index < package_groups.size
-            current_package_group = package_groups[index]
+      # Проверяем, есть ли группа пакетов для текущей конфигурации
+      if index < package_groups.size
+        current_package_group = package_groups[index]
+      end
+
+      title = config.at_css('.compl-title-main')&.text&.strip
+      volume = config.at_css('td:nth-child(2)')&.text&.strip&.to_f
+      gearbox = config.at_css('td:nth-child(3)')&.text&.strip
+      power = config.at_css('td:nth-child(4)')&.text&.strip&.then { |text| text&.gsub(' л.с.', '').to_i }
+      price = config.at_css('td:nth-child(5)')&.text&.strip&.then { |text| text&.gsub(' ₽', '')&.gsub(' ', '').to_i }
+      discount_price = config.at_css('td:nth-child(6) .compl-price')&.text&.strip&.then { |text| text&.gsub(' ₽', '')&.gsub(' ', '').to_i }
+
+      # Расчет специальной цены
+      special_price = price - (credit_discount + trade_in_discount + recycling_discount)
+      car_catalog_configuration = CarCatalogConfiguration.create!(
+        car_catalog_id: car_catalog_id,
+        package_group: current_package_group,
+        package_name: title,
+        volume: volume,
+        transmission: gearbox,
+        power: power,
+        price: price,
+        credit_discount: credit_discount,
+        trade_in_discount: trade_in_discount,
+        recycling_discount: recycling_discount,
+        special_price: special_price
+      )
+
+      # ��оздание CarCatalogExtra
+      parse_car_extras(car_catalog_configuration.id, document)
+    end 
+    puts "Techno data saved for car configuration and extra: #{car_catalog_id}"
+  end
+
+  def parse_car_extras(car_catalog_configuration_id, document)
+    extra_table = document.css('.prices tr.compl-content ul li')
+    
+    current_group_id = get_or_create_extra_group("буффер")
+
+    extra_table.each do |item|
+      if item.attributes['class'] && item.attributes['class'].value.include?('compl-title')
+        current_group_name = item.text.strip
+        current_group_id = get_or_create_extra_group(current_group_name)
+      else
+        extra_name = item.text.strip
+        extra_name_record = get_or_create_extra_name(extra_name)
+
+        if current_group_id
+          unless CarCatalogExtra.exists?(
+            car_catalog_configuration_id: car_catalog_configuration_id,
+            car_catalog_extra_group_id: current_group_id.id,
+            car_catalog_extra_name_id: extra_name_record.id
+          )
+            CarCatalogExtra.create!(
+              car_catalog_configuration_id: car_catalog_configuration_id,
+              car_catalog_extra_group_id: current_group_id.id,
+              car_catalog_extra_name_id: extra_name_record.id
+            )
+          else
+            puts "+++Duplicate extra found"
+          end
+        else
+          puts "---Warning: No current group ID found for extra: #{extra_name}"
         end
-
-        title = config.at_css('.compl-title-main')&.text&.strip
-        volume = config.at_css('td:nth-child(2)')&.text&.strip&.to_f
-        gearbox = config.at_css('td:nth-child(3)')&.text&.strip
-        power = config.at_css('td:nth-child(4)')&.text&.strip&.then { |text| text&.gsub(' л.с.', '').to_i }
-        price = config.at_css('td:nth-child(5)')&.text&.strip&.then { |text| text&.gsub(' ₽', '')&.gsub(' ', '').to_i }
-        discount_price = config.at_css('td:nth-child(6) .compl-price')&.text&.strip&.then { |text| text&.gsub(' ₽', '')&.gsub(' ', '').to_i }
-
-        # Расчет специальной цены
-        special_price = price - credit_discount + trade_in_discount + recycling_discount
-
-        puts "Saving configuration: #{title}, Volume: #{volume}, Gearbox: #{gearbox}, Power: #{power}, Price: #{price}, Discount Price: #{discount_price}, Special Price: #{special_price}, Package Group: #{current_package_group}, Credit Discount: #{credit_discount}, Trade-in Discount: #{trade_in_discount}, Recycling Discount: #{recycling_discount}"
-
-        CarCatalogConfiguration.create!(
-            car_catalog_id: car_catalog_id,
-            package_group: current_package_group,
-            package_name: title,
-            volume: volume,
-            transmission: gearbox,
-            power: power,
-            price: price,
-            credit_discount: credit_discount,
-            trade_in_discount: trade_in_discount,
-            recycling_discount: recycling_discount,
-            special_price: special_price
-        )
+      end
     end
+  end
+  
+  def get_or_create_extra_group(name)
+    CarCatalogExtraGroup.find_or_create_by!(name: name)
+  end
+  
+  def get_or_create_extra_name(name)
+    CarCatalogExtraName.find_or_create_by!(name: name)
   end
   
   

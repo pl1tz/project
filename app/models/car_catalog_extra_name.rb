@@ -1,0 +1,2 @@
+class CarCatalogExtraName < ApplicationRecord
+end

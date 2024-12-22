@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @car_catalog_extra_group %>
+
+<div>
+  <%= link_to "Edit this car catalog extra group", edit_car_catalog_extra_group_path(@car_catalog_extra_group) %> |
+  <%= link_to "Back to car catalog extra groups", car_catalog_extra_groups_path %>
+
+  <%= button_to "Destroy this car catalog extra group", @car_catalog_extra_group, method: :delete %>
+</div>
