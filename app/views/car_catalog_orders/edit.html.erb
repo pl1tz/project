@@ -1,0 +1,12 @@
+<% content_for :title, "Editing car catalog order" %>
+
+<h1>Editing car catalog order</h1>
+
+<%= render "form", car_catalog_order: @car_catalog_order %>
+
+<br>
+
+<div>
+  <%= link_to "Show this car catalog order", @car_catalog_order %> |
+  <%= link_to "Back to car catalog orders", car_catalog_orders_path %>
+</div>

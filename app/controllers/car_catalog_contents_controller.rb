@@ -1,59 +1,64 @@
 class CarCatalogContentsController < ApplicationController
-  before_action :set_car_catalog_content, only: %i[ show edit update destroy ]
+  before_action :set_car_catalog_content, only: %i[ show update destroy ]
+  skip_before_action :verify_authenticity_token
 
   # GET /car_catalog_contents or /car_catalog_contents.json
   def index
     @car_catalog_contents = CarCatalogContent.all
+    render json: @car_catalog_contents
   end
 
   # GET /car_catalog_contents/1 or /car_catalog_contents/1.json
   def show
+    render json: @car_catalog_contents
   end
 
-  # GET /car_catalog_contents/new
-  def new
-    @car_catalog_content = CarCatalogContent.new
-  end
-
-  # GET /car_catalog_contents/1/edit
-  def edit
-  end
-
-  # POST /car_catalog_contents or /car_catalog_contents.json
   def create
     @car_catalog_content = CarCatalogContent.new(car_catalog_content_params)
-
-    respond_to do |format|
-      if @car_catalog_content.save
-        format.html { redirect_to @car_catalog_content, notice: "Car catalog content was successfully created." }
-        format.json { render :show, status: :created, location: @car_catalog_content }
+    if @car_catalog_content.save
+      if request.format.html?
+        render file: "#{Rails.root}/public/index.html", layout: false
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @car_catalog_content.errors, status: :unprocessable_entity }
+        render json: @car_catalog_content, status: :created
+      end
+    else
+      if request.format.html?
+        render file: "#{Rails.root}/public/index.html", layout: false
+      else
+        render json: @car_catalog_content.errors, status: :unprocessable_entity
       end
     end
   end
 
-  # PATCH/PUT /car_catalog_contents/1 or /car_catalog_contents/1.json
   def update
-    respond_to do |format|
-      if @car_catalog_content.update(car_catalog_content_params)
-        format.html { redirect_to @car_catalog_content, notice: "Car catalog content was successfully updated." }
-        format.json { render :show, status: :ok, location: @car_catalog_content }
+    if @car_catalog_content.update(car_catalog_content_params)
+      if request.format.html?
+        render file: "#{Rails.root}/public/index.html", layout: false
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @car_catalog_content.errors, status: :unprocessable_entity }
+        render json: @car_catalog_content, status: :ok
+      end
+    else
+      if request.format.html?
+        render file: "#{Rails.root}/public/index.html", layout: false
+      else
+        render json: @car_catalog_content.errors, status: :unprocessable_entity
       end
     end
   end
 
-  # DELETE /car_catalog_contents/1 or /car_catalog_contents/1.json
   def destroy
-    @car_catalog_content.destroy!
-
-    respond_to do |format|
-      format.html { redirect_to car_catalog_contents_path, status: :see_other, notice: "Car catalog content was successfully destroyed." }
-      format.json { head :no_content }
+    if @car_catalog_content.destroy
+      if request.format.html?
+        render file: "#{Rails.root}/public/index.html", layout: false
+      else
+        head :ok
+      end
+    else
+      if request.format.html?
+        render file: "#{Rails.root}/public/index.html", layout: false
+      else
+        render json: @car_catalog_content.errors, status: :internal_server_error
+      end
     end
   end
 

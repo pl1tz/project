@@ -1,59 +1,77 @@
 class CarCatalogImagesController < ApplicationController
-  before_action :set_car_catalog_image, only: %i[ show edit update destroy ]
+  before_action :set_car_catalog_image, only: %i[ show update destroy ]
+  skip_before_action :verify_authenticity_token
 
   # GET /car_catalog_images or /car_catalog_images.json
   def index
     @car_catalog_images = CarCatalogImage.all
+    render json: @car_catalog_images
   end
 
   # GET /car_catalog_images/1 or /car_catalog_images/1.json
   def show
+    render json: @car_catalog_images
   end
+  def show
+    result = CarCatalogImage.find(params[:id])
+    if result.nil?
+      render file: "#{Rails.root}/public/404.html", status: :not_found, layout: false
+      return
+    end
 
-  # GET /car_catalog_images/new
-  def new
-    @car_catalog_image = CarCatalogImage.new
+    if request.format.html?
+      render file: "#{Rails.root}/public/index.html", layout: false
+    else
+      render json: result
+    end
   end
-
-  # GET /car_catalog_images/1/edit
-  def edit
-  end
-
-  # POST /car_catalog_images or /car_catalog_images.json
   def create
     @car_catalog_image = CarCatalogImage.new(car_catalog_image_params)
-
-    respond_to do |format|
-      if @car_catalog_image.save
-        format.html { redirect_to @car_catalog_image, notice: "Car catalog image was successfully created." }
-        format.json { render :show, status: :created, location: @car_catalog_image }
+    if @car_catalog_image.save
+      if request.format.html?
+        render file: "#{Rails.root}/public/index.html", layout: false
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @car_catalog_image.errors, status: :unprocessable_entity }
+        render json: @car_catalog_image, status: :created
+      end
+    else
+      if request.format.html?
+        render file: "#{Rails.root}/public/index.html", layout: false
+      else
+        render json: @car_catalog_image.errors, status: :unprocessable_entity
       end
     end
   end
 
-  # PATCH/PUT /car_catalog_images/1 or /car_catalog_images/1.json
   def update
-    respond_to do |format|
-      if @car_catalog_image.update(car_catalog_image_params)
-        format.html { redirect_to @car_catalog_image, notice: "Car catalog image was successfully updated." }
-        format.json { render :show, status: :ok, location: @car_catalog_image }
+    if @car_catalog_image.update(car_catalog_image_params)
+      if request.format.html?
+        render file: "#{Rails.root}/public/index.html", layout: false
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @car_catalog_image.errors, status: :unprocessable_entity }
+        render json: @car_catalog_image, status: :ok
+      end
+    else
+      if request.format.html?
+        render file: "#{Rails.root}/public/index.html", layout: false
+      else
+        render json: @car_catalog_image.errors, status: :unprocessable_entity
       end
     end
   end
 
   # DELETE /car_catalog_images/1 or /car_catalog_images/1.json
   def destroy
-    @car_catalog_image.destroy!
-
-    respond_to do |format|
-      format.html { redirect_to car_catalog_images_path, status: :see_other, notice: "Car catalog image was successfully destroyed." }
-      format.json { head :no_content }
+    if @car_catalog_image.destroy
+      if request.format.html?
+        render file: "#{Rails.root}/public/index.html", layout: false
+      else
+        head :ok
+      end
+    else
+      if request.format.html?
+        render file: "#{Rails.root}/public/index.html", layout: false
+      else
+        render json: @car_catalog_image.errors, status: :internal_server_error
+      end
     end
   end
 

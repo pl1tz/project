@@ -1134,6 +1134,7 @@
                 }
             },
             </pre>
+        <p><code>GET /car_catalogs/:id</code> Список машин</p>
         <p><code>GET /car_catalogs/:id</code> Список конкретной машины</p>
         <pre>
             "id": 1,
@@ -1214,6 +1215,28 @@
         </pre>
     </div>
 
+    <h2 onclick="toggleSection(this)">CarCatalog</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /car_catalog_extra_groups</code> - Список всех категорий комплектации</p>
+        <p><code>GET /car_catalog_extra_groups/:id</code> - Показать информацию о конкретной категории комплектации</p>
+        <p><code>POST /car_catalog_extra_groups</code> - Создать новую категорию комплектации</p>
+        <pre>
+        {
+            "car_catalog_extra_group": {
+                "name": "test_add"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /car_catalog_extra_groups/:id</code> - Обновить информацию о категорий комплектации</p>
+        <pre>
+        {
+            "car_catalog_extra_group": {
+                "name": "test_add_new"
+            }
+        }
+        </pre>
+        <p><code>DELETE /car_catalog_extra_groups/:id</code> - Удалить категорию комплектации (возвращает 200)</p>
+    </div>
 
     <script>
         function toggleSection(header) {

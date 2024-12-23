@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :car_catalog_orders
   resources :car_catalog_extras
   resources :car_catalog_extra_names
   resources :car_catalog_extra_groups
