@@ -1,59 +1,72 @@
 class CarCatalogOrdersController < ApplicationController
-  before_action :set_car_catalog_order, only: %i[ show edit update destroy ]
+  before_action :set_car_catalog_order, only: %i[ show update destroy ]
+  skip_before_action :verify_authenticity_token
 
   # GET /car_catalog_orders or /car_catalog_orders.json
   def index
-    @car_catalog_orders = CarCatalogOrder.all
+    @car_catalog_orders = CarCatalogOrderService.all_orders_with_car_details
+    render json: @car_catalog_orders
   end
 
   # GET /car_catalog_orders/1 or /car_catalog_orders/1.json
   def show
-  end
-
-  # GET /car_catalog_orders/new
-  def new
-    @car_catalog_order = CarCatalogOrder.new
-  end
-
-  # GET /car_catalog_orders/1/edit
-  def edit
+    car_catalog_order = CarCatalogOrderService.order_with_car_details(params[:id])
+    if car_catalog_order
+      render json: car_catalog_order
+    else
+      render json: { error: 'Order not found' }, status: :not_found
+    end
   end
 
   # POST /car_catalog_orders or /car_catalog_orders.json
   def create
     @car_catalog_order = CarCatalogOrder.new(car_catalog_order_params)
-
-    respond_to do |format|
-      if @car_catalog_order.save
-        format.html { redirect_to @car_catalog_order, notice: "Car catalog order was successfully created." }
-        format.json { render :show, status: :created, location: @car_catalog_order }
+    if @car_catalog_order.save
+      if request.format.html?
+        render file: "#{Rails.root}/public/index.html", layout: false
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @car_catalog_order.errors, status: :unprocessable_entity }
+        render json: @car_catalog_order, status: :created
+      end
+    else
+      if request.format.html?
+        render file: "#{Rails.root}/public/index.html", layout: false
+      else
+        render json: @car_catalog_order.errors, status: :unprocessable_entity
       end
     end
   end
 
   # PATCH/PUT /car_catalog_orders/1 or /car_catalog_orders/1.json
   def update
-    respond_to do |format|
-      if @car_catalog_order.update(car_catalog_order_params)
-        format.html { redirect_to @car_catalog_order, notice: "Car catalog order was successfully updated." }
-        format.json { render :show, status: :ok, location: @car_catalog_order }
+    if @car_catalog_order.update(car_catalog_order_params)
+      if request.format.html?
+        render file: "#{Rails.root}/public/index.html", layout: false
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @car_catalog_order.errors, status: :unprocessable_entity }
+        render json: @car_catalog_order, status: :ok
+      end
+    else
+      if request.format.html?
+        render file: "#{Rails.root}/public/index.html", layout: false
+      else
+        render json: @car_catalog_order.errors, status: :unprocessable_entity
       end
     end
   end
 
   # DELETE /car_catalog_orders/1 or /car_catalog_orders/1.json
   def destroy
-    @car_catalog_order.destroy!
-
-    respond_to do |format|
-      format.html { redirect_to car_catalog_orders_path, status: :see_other, notice: "Car catalog order was successfully destroyed." }
-      format.json { head :no_content }
+    if @car_catalog_order.destroy
+      if request.format.html?
+        render file: "#{Rails.root}/public/index.html", layout: false
+      else
+        head :ok
+      end
+    else
+      if request.format.html?
+        render file: "#{Rails.root}/public/index.html", layout: false
+      else
+        render json: @car_catalog_order.errors, status: :internal_server_error
+      end
     end
   end
 
@@ -65,6 +78,6 @@ class CarCatalogOrdersController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def car_catalog_order_params
-      params.require(:car_catalog_order).permit(:car_catalog_id, :name, :phone)
+      params.require(:car_catalog_order).permit(:order_status_id, :car_catalog, :name, :phone)
     end
 end

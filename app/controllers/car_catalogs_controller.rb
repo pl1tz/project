@@ -24,7 +24,7 @@ class CarCatalogsController < ApplicationController
   end
 
   def create
-    @car_catalog = CarCatalog.new(car_params)
+    @car_catalog = CarCatalog.new(car_catalog_params)
     if @car_catalog.save
       if request.format.html?
         render file: "#{Rails.root}/public/index.html", layout: false
@@ -42,7 +42,7 @@ class CarCatalogsController < ApplicationController
 
   # PATCH/PUT /car_catalogs/1 or /car_catalogs/1.json
   def update
-    if @car_catalog.update(car_params)
+    if @car_catalog.update(car_catalog_params)
       if request.format.html?
         render file: "#{Rails.root}/public/index.html", layout: false
       else
@@ -58,6 +58,7 @@ class CarCatalogsController < ApplicationController
   end
 
   def destroy
+    # Delete the related orders (crucially, using the delete_all or destroy method)
     if @car_catalog.destroy
       if request.format.html?
         render file: "#{Rails.root}/public/index.html", layout: false

@@ -14,8 +14,9 @@ class CarCatalogOrdersTest < ApplicationSystemTestCase
     visit car_catalog_orders_url
     click_on "New car catalog order"
 
-    fill_in "Car catalog", with: @car_catalog_order.car_catalog_id
+    fill_in "Car catalog", with: @car_catalog_order.car_catalog
     fill_in "Name", with: @car_catalog_order.name
+    fill_in "Order status", with: @car_catalog_order.order_status_id
     fill_in "Phone", with: @car_catalog_order.phone
     click_on "Create Car catalog order"
 
@@ -27,8 +28,9 @@ class CarCatalogOrdersTest < ApplicationSystemTestCase
     visit car_catalog_order_url(@car_catalog_order)
     click_on "Edit this car catalog order", match: :first
 
-    fill_in "Car catalog", with: @car_catalog_order.car_catalog_id
+    fill_in "Car catalog", with: @car_catalog_order.car_catalog
     fill_in "Name", with: @car_catalog_order.name
+    fill_in "Order status", with: @car_catalog_order.order_status_id
     fill_in "Phone", with: @car_catalog_order.phone
     click_on "Update Car catalog order"
 

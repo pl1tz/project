@@ -1134,7 +1134,6 @@
                 }
             },
             </pre>
-        <p><code>GET /car_catalogs/:id</code> Список машин</p>
         <p><code>GET /car_catalogs/:id</code> Список конкретной машины</p>
         <pre>
             "id": 1,
@@ -1213,9 +1212,39 @@
                 }
             ]
         </pre>
+        <p><code>GET /car_catalog_extra_groups</code> - Список всех категорий комплектации</p>
+        <p><code>POST /car_catalog_extra_groups</code> - Создать новую категорию комплектации</p>
+        <pre>
+        {
+            "car_catalog" : 
+            {
+                "brand": "aqb",
+                "model": "[qe",
+                "power": 1,
+                "acceleration": 1.1,
+                "consumption": 1,
+                "max_speed": 1
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /car_catalog_extra_groups/:id</code> - Обновить информацию о категорий комплектации</p>
+        <pre>
+            {
+                "car_catalog" : 
+                {
+                    "brand": "qqqqqq",
+                    "model": "qqqqqq",
+                    "power": 1,
+                    "acceleration": 1.1,
+                    "consumption": 1,
+                    "max_speed": 1
+                }
+            }
+        </pre>
+        <p><code>DELETE /car_catalog_extra_groups/:id</code> - Удалить категорию комплектации (возвращает 200)</p>
     </div>
 
-    <h2 onclick="toggleSection(this)">CarCatalog</h2>
+    <h2 onclick="toggleSection(this)">CarCatalogExtra</h2>
     <div class="toggle-content" style="display: none;">
         <p><code>GET /car_catalog_extra_groups</code> - Список всех категорий комплектации</p>
         <p><code>GET /car_catalog_extra_groups/:id</code> - Показать информацию о конкретной категории комплектации</p>
@@ -1236,6 +1265,304 @@
         }
         </pre>
         <p><code>DELETE /car_catalog_extra_groups/:id</code> - Удалить категорию комплектации (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">CarCatalogExtraName</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /car_catalog_extra_names</code> - Список всех названий для комплектации </p>
+        <p><code>GET /car_catalog_extra_names/:id</code> Показать 1 запись</p>
+        <p><code>POST /car_catalog_extra_names</code> Создать </p>
+        <pre>
+        {
+            "car_catalog_extra_name": {
+                "name": "test_add"
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /car_catalog_extra_names/:id</code> - Обновить </p>
+        <pre>
+        {
+            "car_catalog_extra_name": {
+                "name": "test_add_new"
+            }
+        }
+        </pre>
+        <p><code>DELETE /car_catalog_extra_names/:id</code> - Удалить (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">CarCatalogExtra</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /car_catalog_extras</code> - Список всех комплектаций</p>
+        <p><code>GET /car_catalog_extras/:id</code> </p>
+        <p><code>POST /car_catalog_extras</code> - Создать новую</p>
+        <pre>
+        {
+            "car_catalog_extra": {
+                "car_catalog_configuration_id": 1 ,
+                "car_catalog_extra_group_id": 1 ,
+                "car_catalog_extra_name_id": 57 
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /car_catalog_extras/:id</code> - Обновить информацию </p>
+        <pre>
+        {
+            "car_catalog_extra": {
+                "car_catalog_configuration_id": 1 ,
+                "car_catalog_extra_group_id": 1 ,
+                "car_catalog_extra_name_id": 57 
+            }
+        }
+        </pre>
+        <p><code>DELETE /car_catalog_extras/:id</code> - Удалить (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">CarCatalogImage</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /car_catalog_images</code> - Список всех изображений</p>
+        <p><code>GET /car_catalog_images/:id</code> </p>
+        <p><code>POST /car_catalog_images</code> - Создать новую</p>
+        <pre>
+        {
+            "car_catalog_image":{
+                "car_catalog_id": 10,
+                "url": "ссылка на изображение"
+                }
+        }
+        </pre>
+        <p><code>PATCH/PUT /car_catalog_images/:id</code> - Обновить </p>
+        <pre>
+        {
+            "car_catalog_image":{
+                "car_catalog_id": 10,
+                "url": "ссылка на изображение"
+                }
+        }
+        </pre>
+        <p><code>DELETE /car_catalog_images/:id</code> - Удалить (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">CarCatalogConfiguration</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /car_catalog_configurations</code> - Список всех</p>
+        <p><code>GET /car_catalog_configurations/:id</code></p>
+        <p><code>POST /car_catalog_configurations</code> - Создать новую </p>
+        <pre>
+        {
+            "car_catalog_configuration" : {
+                "package_group": "67.3 kWh (218 л.с.) FWD",
+                "package_name": "Long Range",
+                "volume": 67.3,
+                "transmission": "0 kWh",
+                "power": 218,
+                "price": 4000000,
+                "credit_discount": 500000,
+                "trade_in_discount": 50000,
+                "recycling_discount": 50000,
+                "special_price": 3400000,
+                "car_catalog_id": 1
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /car_catalog_configurations/:id</code> - Обновить информацию</p>
+        <pre>
+        {
+            "car_catalog_configuration" : {
+                "package_group": "666.3 kWh (218 л.с.) FWD",
+                "package_name": "Long Range",
+                "volume": 666.3,
+                "transmission": "0 kWh",
+                "power": 218,
+                "price": 4000000,
+                "credit_discount": 500000,
+                "trade_in_discount": 50000,
+                "recycling_discount": 50000,
+                "special_price": 3400000,
+                "car_catalog_id": 2
+            }
+        }
+        </pre>
+        <p><code>DELETE /car_catalog_configurations/:id</code> - Удалить (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">CarCatalogEngine</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /car_catalog_engines</code> - Список всех </p>
+        <p><code>GET /car_catalog_engines/:id</code></p>
+        <p><code>POST /car_catalog_engines</code> - Создать новую </p>
+        <pre>
+        {
+            "car_catalog_engine" : {
+                "name_engines": "67.3 kWh / 218 л.с.",
+                "torque": 360,
+                "power": 218,
+                "cylinders": 0,
+                "engine_volume": 0.0,
+                "fuel_type": "Электричество",
+                "engine_type": "Электро",
+                "car_catalog_id": 1
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /car_catalog_engines/:id</code> - Обновить информацию </p>
+        <pre>
+            {
+                "car_catalog_engine" : {
+                    "name_engines": "666.3 kWh / 218 л.с.",
+                    "torque": 360,
+                    "power": 218,
+                    "cylinders": 0,
+                    "engine_volume": 0.0,
+                    "fuel_type": "Электричество",
+                    "engine_type": "Электро",
+                    "car_catalog_id": 1
+                }
+            }
+        </pre>
+        <p><code>DELETE /car_catalog_engines/:id</code> - Удалить (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">CarCatalogContent</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /car_catalog_contents</code> - Список всех </p>
+        <p><code>GET /car_catalog_contents/:id</code></p>
+        <p><code>POST /car_catalog_contents</code> - Создать </p>
+        <pre>
+        {
+            "car_catalog_content" : {
+            "content": "[eeappvhawoenadvvjnnapwwubdhbawefue",
+            "car_catalog_id": 1
+            }
+        }
+        </pre>  
+        <p><code>PATCH/PUT /car_catalog_contents/:id</code> - Обновить информацию </p>
+        <pre>
+        {
+            "car_catalog_content" : {
+            "content": "test",
+            "car_catalog_id": 1
+            }
+        }
+        </pre>
+        <p><code>DELETE /car_catalog_configurations/:id</code> - Удалить (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">CarCatalogTexno</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /car_catalog_texnos</code> - Список всех </p>
+        <p><code>GET /car_catalog_texnos/:id</code></p>
+        <p><code>POST /car_catalog_texnos</code> - Создать </p>
+        <pre>
+        {
+                "car_catalog_texno" : {
+                "image": "test",
+                "width": 2915,
+                "height": 1683,
+                "length": 4788,
+                "car_catalog_id": 12
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /car_catalog_texnos/:id</code> - Обновить информацию </p>
+        <pre>
+        {
+                "car_catalog_texno" : {
+                "image": "test_new",
+                "width": 5555,
+                "height": 5555,
+                "length": 5555,
+                "car_catalog_id": 13
+            }
+        }
+        </pre>
+        <p><code>DELETE /car_catalog_texnos/:id</code> - Удалить (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">CarCatalorOrder</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /car_catalog_orders</code> - Список всех </p>
+        <p><code>GET /car_catalog_orders/:id</code></p>
+        <p><code>POST /car_catalog_orders</code> - Создать </p>
+        <pre>
+        {
+                "car_catalog_order" : {
+                "phone": "12121212",
+                "name": "Сергей",
+                "order_status_id": 1,
+                "car_catalog": null
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /car_catalog_orders/:id</code> - Обновить информацию </p>
+        <pre>
+        {
+                "car_catalog_order" : {
+                "phone": "12121212",
+                "name": "Сергей",
+                "order_status_id": 1,
+                "car_catalog": null
+            }
+        }
+        </pre>
+        <p><code>DELETE /car_catalog_orders/:id</code> - Удалить (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">CarColor</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /car_colors</code> - Список всех </p>
+        <p><code>GET /car_colors/:id</code></p>
+        <p><code>POST /car_colors</code> - Создать </p>
+        <pre>
+        {
+                "car_color" : {
+            "background": "#3d444b",
+            "name": "[qe",
+            "image": "[eq",
+            "car_catalog_id": 1
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /car_colors/:id</code> - Обновить информацию </p>
+        <pre>
+            {
+                "car_color" : {
+            "background": "#3d4412",
+            "name": "новый",
+            "image": "новый",
+            "car_catalog_id": 1
+            }
+        }
+        </pre>
+        <p><code>DELETE /car_colors/:id</code> - Удалить (возвращает 200)</p>
+    </div>
+
+    <h2 onclick="toggleSection(this)">CarCatalog</h2>
+    <div class="toggle-content" style="display: none;">
+        <p><code>GET /car_colors</code> - Список всех </p>
+        <p><code>GET /car_colors/:id</code></p>
+        <p><code>POST /car_colors</code> - Создать </p>
+        <pre>
+        {
+                "car_color" : {
+            "background": "#3d444b",
+            "name": "[qe",
+            "image": "[eq",
+            "car_catalog_id": 1
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /car_colors/:id</code> - Обновить информацию </p>
+        <pre>
+        {
+                "car_color" : {
+            "background": "#3d4412",
+            "name": "новый",
+            "image": "новый",
+            "car_catalog_id": 1
+            }
+        }
+        </pre>
+        <p><code>DELETE /car_colors/:id</code> - Удалить (возвращает 200)</p>
     </div>
 
     <script>

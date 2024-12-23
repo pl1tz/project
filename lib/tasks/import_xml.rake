@@ -432,8 +432,8 @@ namespace :import do
 
   def parse_car_extras(car_catalog_configuration_id, document)
     extra_table = document.css('.prices tr.compl-content ul li')
-    
-    current_group_id = get_or_create_extra_group("буффер")
+
+    current_group_id = get_or_create_extra_group(" ")
 
     extra_table.each do |item|
       if item.attributes['class'] && item.attributes['class'].value.include?('compl-title')

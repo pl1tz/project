@@ -17,7 +17,7 @@ class CarCatalogOrdersControllerTest < ActionDispatch::IntegrationTest
 
   test "should create car_catalog_order" do
     assert_difference("CarCatalogOrder.count") do
-      post car_catalog_orders_url, params: { car_catalog_order: { car_catalog_id: @car_catalog_order.car_catalog_id, name: @car_catalog_order.name, phone: @car_catalog_order.phone } }
+      post car_catalog_orders_url, params: { car_catalog_order: { car_catalog: @car_catalog_order.car_catalog, name: @car_catalog_order.name, order_status_id: @car_catalog_order.order_status_id, phone: @car_catalog_order.phone } }
     end
 
     assert_redirected_to car_catalog_order_url(CarCatalogOrder.last)
@@ -34,7 +34,7 @@ class CarCatalogOrdersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update car_catalog_order" do
-    patch car_catalog_order_url(@car_catalog_order), params: { car_catalog_order: { car_catalog_id: @car_catalog_order.car_catalog_id, name: @car_catalog_order.name, phone: @car_catalog_order.phone } }
+    patch car_catalog_order_url(@car_catalog_order), params: { car_catalog_order: { car_catalog: @car_catalog_order.car_catalog, name: @car_catalog_order.name, order_status_id: @car_catalog_order.order_status_id, phone: @car_catalog_order.phone } }
     assert_redirected_to car_catalog_order_url(@car_catalog_order)
   end
 

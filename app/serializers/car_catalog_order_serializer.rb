@@ -1,4 +1,4 @@
 class CarCatalogOrderSerializer < ActiveModel::Serializer
-  attributes :id, :name, :phone
-  has_one :car_catalog
+  attributes :id, :car_catalog, :name, :phone
+  has_one :order_status
 end

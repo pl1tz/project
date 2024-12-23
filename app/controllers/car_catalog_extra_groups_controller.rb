@@ -2,13 +2,11 @@ class CarCatalogExtraGroupsController < ApplicationController
   before_action :set_car_catalog_extra_group, only: %i[ show update destroy ]
   skip_before_action :verify_authenticity_token
 
-  # GET /car_catalog_extra_groups or /car_catalog_extra_groups.json
   def index
     @car_catalog_extra_groups = CarCatalogExtraGroup.all
-    render json: @car_catalog_extra_groups
+    render json: @car_catalog_extra_groups, adapter: :json
   end
 
-  # GET /car_catalog_extra_groups/1 or /car_catalog_extra_groups/1.json
   def show
     render json: @car_catalog_extra_group
   end
@@ -58,12 +56,10 @@ class CarCatalogExtraGroupsController < ApplicationController
     end
   end
   private
-    # Use callbacks to share common setup or constraints between actions.
     def set_car_catalog_extra_group
       @car_catalog_extra_group = CarCatalogExtraGroup.find(params[:id])
     end
 
-    # Only allow a list of trusted parameters through.
     def car_catalog_extra_group_params
       params.require(:car_catalog_extra_group).permit(:name)
     end

@@ -3,13 +3,14 @@ class CarCatalogExtrasController < ApplicationController
   skip_before_action :verify_authenticity_token
   # GET /car_catalog_extras or /car_catalog_extras.json
   def index
-    @car_catalog_extras = CarCatalogExtra.all
-    render json: @car_catalog_extras
+    per_page = 18
+    @car_catalog_extras = CarCatalogExtra.page(params[:page]).per(per_page)
+    render json: @car_catalog_extras, adapter: :json
   end
 
   # GET /car_catalog_extras/1 or /car_catalog_extras/1.json
   def show
-    render json: @car_catalog_extras
+    render json: @car_catalog_extra
   end
 
   def create

@@ -2,15 +2,13 @@ class CarCatalogEnginesController < ApplicationController
   before_action :set_car_catalog_engine, only: %i[ show update destroy ]
   skip_before_action :verify_authenticity_token
 
-  # GET /car_catalog_engines or /car_catalog_engines.json
   def index
     @car_catalog_engines = CarCatalogEngine.all
     render json: @car_catalog_engines
   end
 
-  # GET /car_catalog_engines/1 or /car_catalog_engines/1.json
   def show
-    render json: @car_catalog_engines
+    render json: @car_catalog_engine
   end
 
   def create

@@ -9,7 +9,7 @@ class CarCatalogConfigurationsController < ApplicationController
 
   # GET /car_catalog_configurations/1 or /car_catalog_configurations/1.json
   def show
-    render json: @car_catalog_configurations
+    render json: @car_catalog_configuration
   end
 
   def create

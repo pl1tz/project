@@ -1,4 +1,4 @@
 class CarColorSerializer < ActiveModel::Serializer
   attributes :id, :background, :name, :image
-  has_one :carcatalog
+  has_one :car_catalog
 end

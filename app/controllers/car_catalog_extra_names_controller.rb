@@ -1,15 +1,14 @@
 class CarCatalogExtraNamesController < ApplicationController
   before_action :set_car_catalog_extra_name, only: %i[ show update destroy ]
   skip_before_action :verify_authenticity_token
-  # GET /car_catalog_extra_names or /car_catalog_extra_names.json
+
   def index
     @car_catalog_extra_names = CarCatalogExtraName.all
-    render json: @car_catalog_extras
+    render json: @car_catalog_extra_names, adapter: :json
   end
 
-  # GET /car_catalog_extra_names/1 or /car_catalog_extra_names/1.json
   def show
-    render json: @car_catalog_extras
+    render json: @car_catalog_extra_name
   end
 
   def create
@@ -46,28 +45,22 @@ class CarCatalogExtraNamesController < ApplicationController
   end
 
   def destroy
-    if @car_catalog_extra_name.destroy
-      if request.format.html?
-        render file: "#{Rails.root}/public/index.html", layout: false
-      else
-        head :ok
-      end
+    if CarCatalogExtra.exists?(car_catalog_extra_name_id: @car_catalog_extra_name.id)
+        render json: { error: "Невозможно удалить название параметр комплектаци, так как он используется в таблицах комплектации." }, status: :unprocessable_entity
     else
-      if request.format.html?
-        render file: "#{Rails.root}/public/index.html", layout: false
-      else
-        render json: @car_catalog_extra_name.errors, status: :internal_server_error
-      end
+        if @car_catalog_extra_name.destroy
+            head :ok
+        else
+            render json: @car_catalog_extra_name.errors, status: :unprocessable_entity
+        end
     end
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
     def set_car_catalog_extra_name
       @car_catalog_extra_name = CarCatalogExtraName.find(params[:id])
     end
 
-    # Only allow a list of trusted parameters through.
     def car_catalog_extra_name_params
       params.require(:car_catalog_extra_name).permit(:name)
     end

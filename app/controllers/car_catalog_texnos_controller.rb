@@ -11,6 +11,7 @@ class CarCatalogTexnosController < ApplicationController
   # GET /car_catalog_texnos/1 or /car_catalog_texnos/1.json
   def show
     render json: @car_catalog_texno
+  end
 
   def create
     @car_catalog_texno = CarCatalogTexno.new(car_catalog_texno_params)
@@ -69,6 +70,6 @@ class CarCatalogTexnosController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def car_catalog_texno_params
-      params.require(:car_catalog_texno).permit(:image, :width, :height, :length)
+      params.require(:car_catalog_texno).permit(:car_catalog_id,:image, :width, :height, :length)
     end
 end

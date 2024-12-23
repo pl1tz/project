@@ -10,7 +10,7 @@ class CarCatalogImagesController < ApplicationController
 
   # GET /car_catalog_images/1 or /car_catalog_images/1.json
   def show
-    render json: @car_catalog_images
+    render json: @car_catalog_image
   end
   def show
     result = CarCatalogImage.find(params[:id])

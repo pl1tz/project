@@ -5,5 +5,6 @@ class CarCatalog < ApplicationRecord
     has_many :car_catalog_engines, dependent: :destroy
     has_many :car_catalog_images, dependent: :destroy
     has_many :car_catalog_configurations, dependent: :destroy
-
-end
+    has_many :car_catalog_orders, foreign_key: :car_catalog, dependent: :destroy
+  end
+  
