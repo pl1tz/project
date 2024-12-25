@@ -5,7 +5,7 @@ class CreateCarCatalogConfigurations < ActiveRecord::Migration[7.2]
       t.string :package_group
       t.string :package_name
       t.float :volume
-      t.string :transmission
+      t.float :transmission
       t.integer :power
       t.integer :price
       t.integer :credit_discount

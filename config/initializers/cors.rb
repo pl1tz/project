@@ -8,7 +8,7 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
     allow do
-      origins '*'# Укажите ваш фронтенд URL
+      origins 'http://localhost:3000'# Укажите ваш фронтенд URL
       resource '*',
         headers: :any,
         methods: [:get, :post, :put, :patch, :delete, :options, :head]

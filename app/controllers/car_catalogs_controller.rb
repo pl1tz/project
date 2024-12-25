@@ -84,6 +84,17 @@ class CarCatalogsController < ApplicationController
     result = CarCatalogService.cars_by_brand(brand_name)
     render json: result
   end
+
+  def compare
+    car_catalog_id = params[:id]
+
+    begin
+      comparison_result = CarCatalogService.find_configurations_by_id(car_catalog_id)
+      render json: comparison_result
+    rescue ActiveRecord::RecordNotFound
+      render json: { error: "Car catalog not found" }, status: :not_found
+    end
+  end
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_car_catalog

@@ -14,6 +14,9 @@ Rails.application.routes.draw do
       get 'all_catalog'
       get 'cars_by_brand'
     end
+    member do
+      get 'compare'
+    end
   end
   resources :banners do 
     collection do 
@@ -81,6 +84,8 @@ Rails.application.routes.draw do
   resources :admin, only: [:index]
   resources :reports, only: [:show]
   #Маршруты для клиентов
+
+  post 'verify-captcha' => 'captcha#verify'
 
   get 'cars' => 'cars#index'#Список автомобилей
   get 'last_cars' => 'cars#last_cars'#Последние 20 автомобилей

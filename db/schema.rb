@@ -80,7 +80,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_12_23_165101) do
     t.string "package_group"
     t.string "package_name"
     t.float "volume"
-    t.string "transmission"
+    t.float "transmission"
     t.integer "power"
     t.integer "price"
     t.integer "credit_discount"

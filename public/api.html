@@ -1102,6 +1102,37 @@
 
     <h2 onclick="toggleSection(this)">CarCatalog</h2>
     <div class="toggle-content" style="display: none;">
+        <p><code>GET /car_catalogs/:id</code> Список конкретной машины</p>
+        <p><code>GET /car_catalogs</code> - Список всех категорий комплектации</p>
+        <p><code>POST /car_catalogs</code> - Создать новую категорию комплектации</p>
+        <pre>
+        {
+            "car_catalog" :
+            {
+                "brand": "aqb",
+                "model": "[qe",
+                "power": 1,
+                "acceleration": 1.1,
+                "consumption": 1,
+                "max_speed": 1
+            }
+        }
+        </pre>
+        <p><code>PATCH/PUT /car_catalogs/:id</code> - Обновить информацию о категорий комплектации</p>
+        <pre>
+            {
+                "car_catalog" :
+                {
+                    "brand": "qqqqqq",
+                    "model": "qqqqqq",
+                    "power": 1,
+                    "acceleration": 1.1,
+                    "consumption": 1,
+                    "max_speed": 1
+                }
+            }
+        </pre>
+        <p><code>DELETE /car_catalogs/:id</code> - Удалить категорию комплектации (возвращает 200)</p>
         <p><code>GET /car_catalogs/all_catalog</code> Список всех машин по бренду</p>
         <pre>
             {
@@ -1133,118 +1164,43 @@
                     "image": "https://center-auto.ru/img/cars/8b712b08f384088b90b54e70d7f796c3.png"
                 }
             },
-            </pre>
-        <p><code>GET /car_catalogs/:id</code> Список конкретной машины</p>
-        <pre>
-            "id": 1,
-            "brand": "Arcfox",
-            "model": "Alpha",
-            "power": 218,
-            "acceleration": 4.6,
-            "consumption": null,
-            "max_speed": 180,
-            "car_colors": [
-                {
-                    "id": 1,
-                    "background": "#b0b8c2",
-                    "name": "",
-                    "image": "https://center-auto.ru/img/cars/e80267484768ab46f695f58cf9ff3355.png"
-                },
-                {
-                    "id": 2,
-                    "background": "#3b4149",
-                    "name": "",
-                    "image": "https://center-auto.ru/img/cars/ebe72a9622c316c8ead1b7feddcfe0d5.png"
-                },
-                {
-                    "id": 3,
-                    "background": "#3d444b",
-                    "name": "",
-                    "image": "https://center-auto.ru/img/cars/48281a68662f6c7ee47712647008a999.png"
-                },
-                {
-                    "id": 4,
-                    "background": "#cd3430",
-                    "name": "",
-                    "image": "https://center-auto.ru/img/cars/2a6a1898f85cb7557e44561c61a7849c.png"
-                },
-                {
-                    "id": 5,
-                    "background": "#008cb8",
-                    "name": "",
-                    "image": "https://center-auto.ru/img/cars/4ba9d642b2c4e7fe8ee36aefce317c8e.png"
-                },
-                {
-                    "id": 6,
-                    "background": "#888982",
-                    "name": "",
-                    "image": "https://center-auto.ru/img/cars/b94ead799574582dc25fef41ad2a2864.png"
-                },
-                {
-                    "id": 7,
-                    "background": "#e5e5e6",
-                    "name": "",
-                    "image": "https://center-auto.ru/img/cars/9c98561c10e5bba501b2aaddbb0aa0a7.png"
-                },
-                {
-                    "id": 8,
-                    "background": "#b5bcc6",
-                    "name": "",
-                    "image": "https://center-auto.ru/img/cars/2007660fbdffa0ef8d4eea0d30613be0.png"
-                },
-                {
-                    "id": 9,
-                    "background": "#cb342f",
-                    "name": "",
-                    "image": "https://center-auto.ru/img/cars/71d1f506e921a8b41f81b10a5c835eb4.png"
-                },
-                {
-                    "id": 10,
-                    "background": "#008ab5",
-                    "name": "",
-                    "image": "https://center-auto.ru/img/cars/152fc71b0bd347d6b01b995226f050ec.png"
-                },
-                {
-                    "id": 11,
-                    "background": "#848680",
-                    "name": "",
-                    "image": "https://center-auto.ru/img/cars/9d6774e213004beca180324a6ff5a715.png"
-                }
-            ]
         </pre>
-        <p><code>GET /car_catalog_extra_groups</code> - Список всех категорий комплектации</p>
-        <p><code>POST /car_catalog_extra_groups</code> - Создать новую категорию комплектации</p>
-        <pre>
+        <p><code>DELETE /car_catalogs/:id/compare</code> - Возвращает сравнение комплектаци</p>
+        <pre></pre>
+        "configurations": [
         {
-            "car_catalog" : 
-            {
-                "brand": "aqb",
-                "model": "[qe",
-                "power": 1,
-                "acceleration": 1.1,
-                "consumption": 1,
-                "max_speed": 1
-            }
+            "package_name": "Comfort",
+            "volume": 1.6,
+            "power": 114,
+            "special_price": 551699
         }
-        </pre>
-        <p><code>PATCH/PUT /car_catalog_extra_groups/:id</code> - Обновить информацию о категорий комплектации</p>
-        <pre>
+        ],
+        "groups": [
             {
-                "car_catalog" : 
-                {
-                    "brand": "qqqqqq",
-                    "model": "qqqqqq",
-                    "power": 1,
-                    "acceleration": 1.1,
-                    "consumption": 1,
-                    "max_speed": 1
-                }
+                "group_name": "Безопасность",
+                "features": [
+                    {
+                        "feature_name": "Буксировочные кольца",
+                        "values": [
+                            "+",
+                            "+",
+                            "+",
+                            "+",
+                            "+",
+                            "+",
+                            "+",
+                            "+",
+                            "+",
+                            "+"
+                        ]
+                    }
+                ]
             }
+        ]
         </pre>
-        <p><code>DELETE /car_catalog_extra_groups/:id</code> - Удалить категорию комплектации (возвращает 200)</p>
     </div>
 
-    <h2 onclick="toggleSection(this)">CarCatalogExtra</h2>
+    <h2 onclick="toggleSection(this)">CarCatalogExtraGroup</h2>
     <div class="toggle-content" style="display: none;">
         <p><code>GET /car_catalog_extra_groups</code> - Список всех категорий комплектации</p>
         <p><code>GET /car_catalog_extra_groups/:id</code> - Показать информацию о конкретной категории комплектации</p>
@@ -1500,7 +1456,7 @@
                 "phone": "12121212",
                 "name": "Сергей",
                 "order_status_id": 1,
-                "car_catalog": null
+                "car_catalog": 1
             }
         }
         </pre>
@@ -1514,36 +1470,7 @@
         <p><code>POST /car_colors</code> - Создать </p>
         <pre>
         {
-                "car_color" : {
-            "background": "#3d444b",
-            "name": "[qe",
-            "image": "[eq",
-            "car_catalog_id": 1
-            }
-        }
-        </pre>
-        <p><code>PATCH/PUT /car_colors/:id</code> - Обновить информацию </p>
-        <pre>
-            {
-                "car_color" : {
-            "background": "#3d4412",
-            "name": "новый",
-            "image": "новый",
-            "car_catalog_id": 1
-            }
-        }
-        </pre>
-        <p><code>DELETE /car_colors/:id</code> - Удалить (возвращает 200)</p>
-    </div>
-
-    <h2 onclick="toggleSection(this)">CarCatalog</h2>
-    <div class="toggle-content" style="display: none;">
-        <p><code>GET /car_colors</code> - Список всех </p>
-        <p><code>GET /car_colors/:id</code></p>
-        <p><code>POST /car_colors</code> - Создать </p>
-        <pre>
-        {
-                "car_color" : {
+            "car_color" : {
             "background": "#3d444b",
             "name": "[qe",
             "image": "[eq",
@@ -1554,7 +1481,7 @@
         <p><code>PATCH/PUT /car_colors/:id</code> - Обновить информацию </p>
         <pre>
         {
-                "car_color" : {
+            "car_color" : {
             "background": "#3d4412",
             "name": "новый",
             "image": "новый",
