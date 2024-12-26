@@ -101,10 +101,10 @@ Rails.application.configure do
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 
   # домены оставляем для будущего использования
-  # config.hosts << "usecar.ru"
-  # config.hosts << "www.usecar.ru"
-    config.hosts << "usecarmax.ru"
-    config.hosts << "www.usecarmax.ru"
+  config.hosts << "usecar.ru"
+  config.hosts << "www.usecar.ru"
+    # config.hosts << "usecarmax.ru"
+    # config.hosts << "www.usecarmax.ru"
   # config.hosts << "youautoplus.ru"
   # config.hosts << "www.youautoplus.ru"
 end
