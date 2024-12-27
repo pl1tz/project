@@ -21,6 +21,8 @@ gem "jbuilder"
 
 gem 'rack-cors', require: 'rack/cors'
 
+gem 'recaptcha'
+
 # Изображения
 gem 'image_processing', '~> 1.2'
 # Загрузка изображений альтернативно

@@ -84,8 +84,7 @@ Rails.application.routes.draw do
   resources :admin, only: [:index]
   resources :reports, only: [:show]
   #Маршруты для клиентов
-
-  post 'verify-captcha' => 'captcha#verify'
+  post 'verify_captcha', to: 'captcha#verify'
 
   get 'cars' => 'cars#index'#Список автомобилей
   get 'last_cars' => 'cars#last_cars'#Последние 20 автомобилей
@@ -104,7 +103,7 @@ Rails.application.routes.draw do
   
   get 'buyout' => 'buyouts#index'#Выкуп
   post 'buyout' => 'buyouts#create'#Создать выкуп
-  
+
   get 'credit' => 'credits#top_programs'#Топ программ
   get 'credits' => 'credits#index '#Список программ
   post 'credit' => 'credits#create'#Создать программу
