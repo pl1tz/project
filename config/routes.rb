@@ -104,7 +104,7 @@ Rails.application.routes.draw do
   
   get 'buyout' => 'buyouts#index'#Выкуп
   post 'buyout' => 'buyouts#create'#Создать выкуп
-  
+  get 'catalog' => 'cars#add_car'
   get 'credit' => 'credits#top_programs'#Топ программ
   get 'credits' => 'credits#index '#Список программ
   post 'credit' => 'credits#create'#Создать программу
