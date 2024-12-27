@@ -83,10 +83,11 @@ Rails.application.routes.draw do
   resources :call_requests
   resources :admin, only: [:index]
   resources :reports, only: [:show]
+
+  # Маршрут для гугл капчи
+  post 'verify_captcha', to: 'captcha#verify'
+
   #Маршруты для клиентов
-
-  post 'verify-captcha' => 'captcha#verify'
-
   get 'cars' => 'cars#index'#Список автомобилей
   get 'last_cars' => 'cars#last_cars'#Последние 20 автомобилей
   get 'cars_count' => 'cars#cars_count'#Количество автомобилей
