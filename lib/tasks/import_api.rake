@@ -1,36 +1,94 @@
 require 'open-uri'
 require 'httparty'
+require 'parallel'
 
 namespace :import_api do
   task create_cars: :environment do
     url = 'https://plex-crm.ru/api/v3/offers/website/628'
     token = 'ezo4ysJQm1r1ZiFsFxBtp7zOV5rYAgYY9o3RWkz325009358'
+    
+    total_successful_imports = 0
+    total_failed_imports = 0
+    failed_cars = []
+    current_page = 1
+    
+    start_time = Time.now
+    
+    loop do
+      response = HTTParty.get(url, {
+        headers: {
+          'Authorization' => "Bearer #{token}",
+          'Accept' => 'application/json'
+        },
+        query: {
+          page: current_page,
+          per_page: 50
+        }
+      })
 
-    response = HTTParty.get(url, {
-      headers: {
-        'Authorization' => "Bearer #{token}",
-        'Accept' => 'application/json'
-      }
-    })
+      break unless response.success?
 
-    if response.success?
       data = response.parsed_response
-      cars_data = data['items'] # Получаем массив машин из items
+      cars_data = data['items']
+      pagination = data['pagination']
       
+      break if cars_data.empty?
+
+      total_pages = pagination['totalPages']
+      total_items = pagination['totalItems']
+
+      if current_page == 1
+        puts "\nStarting import of #{total_items} cars (#{total_pages} pages)..."
+      end
+      
+      puts "\nProcessing page #{current_page}/#{total_pages}..."
+      
+      page_successful = 0
+      page_failed = 0
+
       ActiveRecord::Base.transaction do
         cars_data.each do |car_data|
           car = create_car_from_api_data(car_data)
-          next unless car
-
-          create_history_for_api_car(car, car_data)
-          save_images_for_api_car(car, car_data)
-          save_extras_for_api_car(car, car_data)
-          puts "Car created from API: #{DateTime.now.strftime('%Y-%m-%d %H:%M:%S')}"
+          
+          if car
+            create_history_for_api_car(car, car_data)
+            save_images_for_api_car(car, car_data)
+            save_extras_for_api_car(car, car_data)
+            page_successful += 1
+            total_successful_imports += 1
+            puts "Car created from API: #{car.brand.name} #{car.model.name} (#{total_successful_imports}/#{total_items})"
+          else
+            page_failed += 1
+            total_failed_imports += 1
+            failed_cars << "#{car_data.dig('mark', 'name')} #{car_data.dig('model', 'name')} (ID: #{car_data['uniqueId']})"
+          end
         end
       end
-    else
-      puts "Failed to fetch cars from API: #{response.body}"
+
+      puts "\nPage #{current_page} results:"
+      puts "Successfully imported: #{page_successful}"
+      puts "Failed to import: #{page_failed}"
+
+      break if current_page >= total_pages
+      current_page += 1
     end
+
+    # Итоговая статистика
+    puts "\n========== Final Import Summary =========="
+    puts "Total cars processed: #{total_successful_imports + total_failed_imports}"
+    puts "Successfully imported: #{total_successful_imports}"
+    puts "Failed to import: #{total_failed_imports}"
+    
+    if total_failed_imports > 0
+      puts "\nFailed cars:"
+      failed_cars.each { |car| puts "- #{car}" }
+    end
+    
+    puts "======================================"
+
+    end_time = Time.now
+    duration = (end_time - start_time) / 60
+    puts "Total import time: #{duration.round(2)} minutes"
   end
 
   private
@@ -67,10 +125,10 @@ namespace :import_api do
     )
 
     if car.save
-      puts "Car created for: #{car.brand.name} #{car.model.name}"
       car
     else
-      puts "Failed to create car: #{car.errors.full_messages.join(", ")}"
+      puts "\nFailed to create car: #{car_data.dig('mark', 'name')} #{car_data.dig('model', 'name')}"
+      puts "Errors: #{car.errors.full_messages.join(", ")}"
       nil
     end
   end
