@@ -21,6 +21,7 @@ gem "jbuilder"
 
 gem 'rack-cors', require: 'rack/cors'
 
+# For google captcha
 gem 'recaptcha'
 
 # Изображения
