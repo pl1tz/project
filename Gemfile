@@ -115,3 +115,5 @@ gem 'savon'
 gem 'rest-client'
 
 gem 'lru_redux'
+
+gem 'dotenv-rails'

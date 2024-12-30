@@ -126,6 +126,10 @@ GEM
       reline (>= 0.3.8)
     diff-lcs (1.5.1)
     domain_name (0.6.20240107)
+    dotenv (3.1.7)
+    dotenv-rails (3.1.7)
+      dotenv (= 3.1.7)
+      railties (>= 6.1)
     drb (2.2.1)
     error_highlight (0.7.0)
     erubi (1.13.0)
@@ -467,6 +471,7 @@ DEPENDENCIES
   capybara
   carrierwave (~> 2.0)
   debug
+  dotenv-rails
   error_highlight (>= 0.4.0)
   factory_bot_rails
   faker
