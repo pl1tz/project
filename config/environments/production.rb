@@ -106,4 +106,6 @@ Rails.application.configure do
   # config.hosts << "www.usecar.ru"
   # config.hosts << "usecarmax.ru"
   # config.hosts << "www.usecarmax.ru"
+  config.hosts << "youautoplus.ru"
+  config.hosts << "www.youautoplus.ru"
 end
