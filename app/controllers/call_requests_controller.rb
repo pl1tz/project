@@ -13,18 +13,34 @@ class CallRequestsController < ApplicationController
 
 
   def create
+    Rails.logger.info "Received params: #{params.inspect}"
     @call_request = CallRequest.new(call_request_params)
-    if @call_request.save
-      result = create_order_call_request(@call_request)
-      if result[:errors]
-        render json: { call_request: @call_request, errors: result[:errors] }, status: result[:status]
+
+    ActiveRecord::Base.transaction do
+      if @call_request.save
+        crm_service = PlexCrmService.new
+        crm_response = crm_service.send_call_request_application(@call_request)
+        
+        Rails.logger.info "CRM Response: #{crm_response.inspect}"
+        
+        unless crm_response[:success]
+          error_message = "Failed to send to CRM: #{crm_response[:message]}"
+          Rails.logger.error error_message
+          raise ActiveRecord::Rollback, error_message
+        end
+
+        Rails.logger.info "Successfully created call request and sent to CRM"
+        create_order_call_request(@call_request)
       else
-        render json: { call_request: @call_request, order_call_request: result[:order_call_request] }, status: result[:status]
+        Rails.logger.error "Failed to save call request: #{@call_request.errors.full_messages}"
+        render json: @call_request.errors, status: :unprocessable_entity
+        raise ActiveRecord::Rollback
       end
-    else
-      render json: @call_request.errors, status: :unprocessable_entity
-    end 
-  end 
+    end
+  rescue ActiveRecord::Rollback => e
+    render json: { error: e.message || "Failed to create call request" }, 
+           status: :unprocessable_entity
+  end
 
   def update
     if @call_request.update(call_request_params)

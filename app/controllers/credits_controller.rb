@@ -15,15 +15,59 @@ class CreditsController < ApplicationController
     render json: @credit  
   end
 
+  # Creates a new credit application and sends it to Plex CRM
+  #
+  # @param [Hash] params Credit application parameters from the request
+  #   @option params [Integer] :car_id ID of the selected car
+  #   @option params [String] :name Client's name
+  #   @option params [String] :phone Client's phone number
+  #   @option params [Integer] :credit_term Credit term in months
+  #   @option params [Decimal] :initial_contribution Initial payment amount
+  #   @option params [Integer] :banks_id Selected bank ID
+  #   @option params [Integer] :programs_id Selected credit program ID
+  #
+  # @return [JSON] Returns created credit application with order or error message
+  #
+  # @example POST /credits
+  #   {
+  #     "credit": {
+  #       "car_id": 1,
+  #       "name": "John Doe",
+  #       "phone": "+79001234567",
+  #       "credit_term": 36,
+  #       "initial_contribution": 300000,
+  #       "banks_id": 1,
+  #       "programs_id": 1
+  #     }
+  #   }
+  #
+  # @example_return
+  #   {
+  #     "credit": { ... },
+  #     "order_credit": { ... }
+  #   }
   def create
     Rails.logger.info "Received params: #{params.inspect}"
     @credit = Credit.new(credit_params)
 
-    if @credit.save 
-      create_order_credit(@credit)
-    else
-      render json: @credit.errors, status: :unprocessable_entity
+    ActiveRecord::Base.transaction do
+      if @credit.save 
+        crm_service = PlexCrmService.new
+        crm_response = crm_service.send_credit_application(@credit)
+        
+        unless crm_response[:success]
+          raise ActiveRecord::Rollback, "Failed to send to CRM: #{crm_response[:error]}"
+        end
+
+        create_order_credit(@credit)
+      else
+        render json: @credit.errors, status: :unprocessable_entity
+        raise ActiveRecord::Rollback
+      end
     end
+  rescue ActiveRecord::Rollback => e
+    render json: { error: e.message || "Failed to create credit application" }, 
+           status: :unprocessable_entity
   end
 
   def update

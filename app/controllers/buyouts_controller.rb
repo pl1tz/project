@@ -19,11 +19,30 @@ class BuyoutsController < ApplicationController
     Rails.logger.info "Received params: #{params.inspect}"
     @buyout = Buyout.new(buyout_params)
 
-    if @buyout.save
-      render json: create_order_buyout(@buyout), status: :created
-    else
-      render json: @buyout.errors, status: :unprocessable_entity
+    ActiveRecord::Base.transaction do
+      if @buyout.save
+        crm_service = PlexCrmService.new
+        crm_response = crm_service.send_buyout_application(@buyout)
+        
+        Rails.logger.info "CRM Response: #{crm_response.inspect}"
+        
+        unless crm_response[:success]
+          error_message = "Failed to send to CRM: #{crm_response[:message]}"
+          Rails.logger.error error_message
+          raise ActiveRecord::Rollback, error_message
+        end
+
+        Rails.logger.info "Successfully created buyout application and sent to CRM"
+        create_order_buyout(@buyout)
+      else
+        Rails.logger.error "Failed to save buyout: #{@buyout.errors.full_messages}"
+        render json: @buyout.errors, status: :unprocessable_entity
+        raise ActiveRecord::Rollback
+      end
     end
+  rescue ActiveRecord::Rollback => e
+    render json: { error: e.message || "Failed to create buyout application" }, 
+           status: :unprocessable_entity
   end
 
   def update

@@ -19,11 +19,30 @@ class InstallmentsController < ApplicationController
     Rails.logger.info "Received params: #{params.inspect}"
     @installment = Installment.new(installment_params)
 
-    if @installment.save  
-      create_order_installment(@installment)
-    else
-      render json: @installment.errors, status: :unprocessable_entity
+    ActiveRecord::Base.transaction do
+      if @installment.save
+        crm_service = PlexCrmService.new
+        crm_response = crm_service.send_installment_application(@installment)
+        
+        Rails.logger.info "CRM Response: #{crm_response.inspect}"
+        
+        unless crm_response[:success]
+          error_message = "Failed to send to CRM: #{crm_response[:message]}"
+          Rails.logger.error error_message
+          raise ActiveRecord::Rollback, error_message
+        end
+
+        Rails.logger.info "Successfully created installment application and sent to CRM"
+        create_order_installment(@installment)
+      else
+        Rails.logger.error "Failed to save installment: #{@installment.errors.full_messages}"
+        render json: @installment.errors, status: :unprocessable_entity
+        raise ActiveRecord::Rollback
+      end
     end
+  rescue ActiveRecord::Rollback => e
+    render json: { error: e.message || "Failed to create installment application" }, 
+           status: :unprocessable_entity
   end
 
   def update
