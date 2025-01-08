@@ -21,7 +21,7 @@ class ExchangesController < ApplicationController
 
     ActiveRecord::Base.transaction do
       if @exchange.save
-        crm_service = PlexCrmService.new
+        crm_service = PlexCrmService.new(request)
         crm_response = crm_service.send_exchange_application(@exchange)
         
         Rails.logger.info "CRM Response: #{crm_response.inspect}"

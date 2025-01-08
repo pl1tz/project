@@ -52,7 +52,7 @@ class CreditsController < ApplicationController
 
     ActiveRecord::Base.transaction do
       if @credit.save 
-        crm_service = PlexCrmService.new
+        crm_service = PlexCrmService.new(request)
         crm_response = crm_service.send_credit_application(@credit)
         
         unless crm_response[:success]

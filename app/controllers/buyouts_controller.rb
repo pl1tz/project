@@ -21,7 +21,7 @@ class BuyoutsController < ApplicationController
 
     ActiveRecord::Base.transaction do
       if @buyout.save
-        crm_service = PlexCrmService.new
+        crm_service = PlexCrmService.new(request)
         crm_response = crm_service.send_buyout_application(@buyout)
         
         Rails.logger.info "CRM Response: #{crm_response.inspect}"

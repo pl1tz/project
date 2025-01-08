@@ -18,7 +18,7 @@ class CallRequestsController < ApplicationController
 
     ActiveRecord::Base.transaction do
       if @call_request.save
-        crm_service = PlexCrmService.new
+        crm_service = PlexCrmService.new(request)
         crm_response = crm_service.send_call_request_application(@call_request)
         
         Rails.logger.info "CRM Response: #{crm_response.inspect}"

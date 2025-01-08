@@ -21,7 +21,7 @@ class InstallmentsController < ApplicationController
 
     ActiveRecord::Base.transaction do
       if @installment.save
-        crm_service = PlexCrmService.new
+        crm_service = PlexCrmService.new(request)
         crm_response = crm_service.send_installment_application(@installment)
         
         Rails.logger.info "CRM Response: #{crm_response.inspect}"
