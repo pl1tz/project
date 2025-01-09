@@ -11,9 +11,52 @@ require 'parallel'
 #
 # @example Run rake import_api:create_cars
 namespace :import_api do
+  task delete_diff_cars: :environment do
+    url = 'https://plex-crm.ru/api/v3/offers/website/628'
+    token = ENV['PLEX_CRM_TOKEN']
+    
+    puts "Fetching cars from API..."
+    api_unique_ids = []
+    current_page = 1
+    
+    loop do
+      response = HTTParty.get(url, {
+        headers: {
+          'Authorization' => "Bearer #{token}",
+          'Accept' => 'application/json'
+        },
+        query: {
+          page: current_page,
+          per_page: 50
+        }
+      })
+
+      break unless response.success?
+      
+      data = response.parsed_response
+      cars_data = data['items']
+      break if cars_data.empty?
+      
+      # Собираем unique_ids из API
+      api_unique_ids += cars_data.map { |car| car['uniqueId'] }
+      current_page += 1
+    end
+
+    # Удаляем машины, которых нет в API
+    cars_to_delete = Car.where.not(unique_id: api_unique_ids)
+    count = cars_to_delete.count
+    
+    if count > 0
+      cars_to_delete.destroy_all
+      puts "Removed #{count} cars that are not present in the API."
+    else
+      puts "No cars to remove."
+    end
+  end
+
   task create_cars: :environment do
     url = 'https://plex-crm.ru/api/v3/offers/website/628'
-    token = 'ezo4ysJQm1r1ZiFsFxBtp7zOV5rYAgYY9o3RWkz325009358'
+    token = ENV['PLEX_CRM_TOKEN']
     
     total_successful_imports = 0
     total_failed_imports = 0
@@ -56,19 +99,38 @@ namespace :import_api do
 
       ActiveRecord::Base.transaction do
         cars_data.each do |car_data|
-          car = create_car_from_api_data(car_data)
+          # Ищем существующую машину
+          existing_car = Car.find_by(unique_id: car_data['uniqueId'])
           
-          if car
-            create_history_for_api_car(car, car_data)
-            save_images_for_api_car(car, car_data)
-            save_extras_for_api_car(car, car_data)
-            page_successful += 1
-            total_successful_imports += 1
-            puts "Car created from API: #{car.brand.name} #{car.model.name} (#{total_successful_imports}/#{total_items})"
+          if existing_car
+            # Обновляем существующую машину
+            if update_existing_car(existing_car, car_data)
+              update_history_for_api_car(existing_car, car_data)
+              update_images_for_api_car(existing_car, car_data)
+              update_extras_for_api_car(existing_car, car_data)
+              page_successful += 1
+              total_successful_imports += 1
+              puts "Car updated: #{existing_car.brand.name} #{existing_car.model.name}"
+            else
+              page_failed += 1
+              total_failed_imports += 1
+              failed_cars << "#{car_data.dig('mark', 'name')} #{car_data.dig('model', 'name')} (ID: #{car_data['uniqueId']})"
+            end
           else
-            page_failed += 1
-            total_failed_imports += 1
-            failed_cars << "#{car_data.dig('mark', 'name')} #{car_data.dig('model', 'name')} (ID: #{car_data['uniqueId']})"
+            # Создаем новую машину
+            car = create_car_from_api_data(car_data)
+            if car
+              create_history_for_api_car(car, car_data)
+              save_images_for_api_car(car, car_data)
+              save_extras_for_api_car(car, car_data)
+              page_successful += 1
+              total_successful_imports += 1
+              puts "New car created: #{car.brand.name} #{car.model.name}"
+            else
+              page_failed += 1
+              total_failed_imports += 1
+              failed_cars << "#{car_data.dig('mark', 'name')} #{car_data.dig('model', 'name')} (ID: #{car_data['uniqueId']})"
+            end
           end
         end
       end
@@ -273,5 +335,45 @@ namespace :import_api do
     GearboxType.find_or_create_by(name: gearbox_name) do |gt|
       gt.abbreviation = abbreviations[gearbox_name]
     end
+  end
+
+  def update_existing_car(car, car_data)
+    # Обновляем атрибуты существующей машины
+    car.assign_attributes(
+      year: car_data['year'],
+      price: car_data['price'],
+      description: car_data['description'],
+      color: Color.find_or_create_by(name: car_data.dig('color', 'name')),
+      body_type: BodyType.find_or_create_by(name: car_data.dig('bodyType', 'name')),
+      engine_name_type: EngineNameType.find_or_create_by(name: car_data.dig('engineType', 'name')),
+      engine_power_type: EnginePowerType.find_or_create_by(power: car_data['enginePower']),
+      engine_capacity_type: EngineCapacityType.find_or_create_by(capacity: car_data['engineVolume']),
+      gearbox_type: find_or_create_gearbox_type_from_api(car_data.dig('gearbox', 'name')),
+      drive_type: DriveType.find_or_create_by(name: car_data.dig('driveType', 'name') || "Полный"),
+      complectation_name: car_data['complectation']
+    )
+
+    car.save
+  end
+
+  def update_history_for_api_car(car, car_data)
+    # Удаляем старую историю
+    car.history_cars.destroy_all
+    # Создаем новую историю
+    create_history_for_api_car(car, car_data)
+  end
+
+  def update_images_for_api_car(car, car_data)
+    # Удаляем старые изображения
+    car.images.destroy_all
+    # Создаем новые изображения
+    save_images_for_api_car(car, car_data)
+  end
+
+  def update_extras_for_api_car(car, car_data)
+    # Удаляем старые extras
+    car.extras.destroy_all
+    # Создаем новые extras
+    save_extras_for_api_car(car, car_data)
   end
 end
