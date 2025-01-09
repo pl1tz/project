@@ -12,7 +12,7 @@ require 'parallel'
 # @example Run rake import_api:create_cars
 namespace :import_api do
   task create_cars: :environment do
-    url = 'https://plex-crm.ru/api/v3/offers/website/628'
+    url = 'https://plex-crm.ru/api/v3/offers/website/627'
     token = 'ezo4ysJQm1r1ZiFsFxBtp7zOV5rYAgYY9o3RWkz325009358'
     
     total_successful_imports = 0
