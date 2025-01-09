@@ -234,7 +234,7 @@ namespace :import_api do
       car: car,
       vin: car_data['vin'],
       last_mileage: car_data['run'],
-      previous_owners: car_data.dig('owners', 'name')&.to_i || 1,
+      previous_owners: car_data.dig('owners', 'title')&.to_i || 1,
       registration_number: "Отсутствует",
       registration_restrictions: "Не найдены ограничения на регистрацию",
       registration_restrictions_info: "Запрет регистрационных действий на машину накладывается, если у автовладельца есть неоплаченные штрафы и налоги, либо если имущество стало предметом спора.",
@@ -274,10 +274,13 @@ namespace :import_api do
   #     'images' => [{ 'original' => 'http://example.com/image.jpg' }]
   #   })
   def save_images_for_api_car(car, car_data)
-    return unless car_data['photos']
-  
-    car_data['photos'].each do |photo_url|
-      car.images.find_or_create_by(url: photo_url)
+    return unless car_data['images'].is_a?(Array)
+
+    car_data['images'].each do |image_data|
+      Image.create(
+        car: car,
+        url: image_data['original']
+      )
     end
     puts "Images saved for car: #{car.id}"
   end
