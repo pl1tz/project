@@ -27,7 +27,7 @@ class PlexCrmService
   # @example
   #   PlexCrmService.new(request)
   def initialize(request = nil)
-    @token = 'ezo4ysJQm1r1ZiFsFxBtp7zOV5rYAgYY9o3RWkz325009358'
+    @token = ENV['PLEX_CRM_TOKEN']
     @headers = {
       'Authorization' => "Bearer #{@token}",
       'Accept' => 'application/json'
