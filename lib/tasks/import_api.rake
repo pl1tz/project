@@ -299,13 +299,47 @@ namespace :import_api do
   #     }
   #   })
   def save_extras_for_api_car(car, car_data)
-    return unless car_data['additionalOptions']
-  
-    car_data['additionalOptions'].each do |extra_name|
-      extra = Extra.find_or_create_by(name: extra_name)
-      car.extras << extra unless car.extras.include?(extra)
+    return unless car_data['equipment'].is_a?(Hash)
+
+    car_data['equipment'].each do |category_name, extra_data|
+      next unless extra_data.is_a?(Hash) # Проверяем, что это хэш
+
+      # Извлекаем значение из хэша
+      extra_value = extra_data['value']
+      next if extra_value.blank? # Пропускаем пустые значения
+
+      # Определяем категорию на основе названия extra
+      category_title = determine_category(extra_value)
+
+      # Находим или создаем категорию
+      category = Category.find_or_create_by(name: category_title)
+
+      # Создаем или находим имя extra
+      extra_name = ExtraName.find_or_create_by(name: extra_value)
+      Extra.create(car: car, category: category, extra_name: extra_name)
     end
     puts "Extras saved for car: #{car.id}"
+  end
+
+  def determine_category(extra)
+    case extra
+    when /фары|датчик/
+      'Обзор'
+    when /диски|рейлинги/
+      'Элементы экстерьера'
+    when /иммобилайзер|замок|сигнализация/
+      'Защита от угона'
+    when /audi|usb|bluetooth|навигационная система|розетка/
+      'Мультимедиа'
+    when /салон|обогрев|подогрев|подголовник|регулировка|подлокотник/
+      'Салон'
+    when /камера|климат|компьютер|мультифункциональное|складывание|доступ|парктроник|круиз|усилитель|привод|стеклоподъемники|прикуриватель/
+      'Комфорт'
+    when /система|подушка/
+      'Безопасность'
+    else
+      'Прочее'
+    end
   end
 
   # Finds or creates gearbox type based on API data
@@ -318,7 +352,18 @@ namespace :import_api do
   #
   # @example_return #<GearboxType id: 1, name: "Автоматическая", abbreviation: "АКПП">
   def find_or_create_gearbox_type_from_api(gearbox_name)
-    GearboxType.find_or_create_by(name: gearbox_name)
+    return nil unless gearbox_name
+
+    abbreviations = {
+      'Автомат' => 'АКПП',
+      'Механика' => 'МКПП',
+      'Вариатор' => 'CVT',
+      'Робот' => 'РКПП'
+    }
+
+    GearboxType.find_or_create_by(name: gearbox_name) do |gt|
+      gt.abbreviation = abbreviations[gearbox_name]
+    end
   end
 
   def update_existing_car(existing_car, car_data)
@@ -331,7 +376,7 @@ namespace :import_api do
       engine_name_type: EngineNameType.find_or_create_by(name: car_data.dig('engineType', 'title')),
       engine_power_type: EnginePowerType.find_or_create_by(power: car_data['enginePower']),
       engine_capacity_type: EngineCapacityType.find_or_create_by(capacity: car_data['engineVolume']),
-      gearbox_type: find_or_create_gearbox_type_from_api(car_data.dig('gearbox', 'title')),
+      gearbox_type: find_or_create_gearbox_type_from_api(car_data.dig('gearbox', 'title') || 'Неизвестно'),
       drive_type: DriveType.find_or_create_by(name: car_data.dig('driveType', 'title') || "Полный"),
       complectation_name: car_data['complectation']
     )
