@@ -195,7 +195,7 @@ namespace :import_api do
       unique_id: car_data['uniqueId'],
       year: car_data['year'],
       price: car_data['price'],
-      description: car_data['description'],
+      description: car_data['modification'],
       color: Color.find_or_create_by(name: car_data.dig('color', 'title')),
       body_type: BodyType.find_or_create_by(name: car_data.dig('bodyType', 'title')),
       engine_name_type: EngineNameType.find_or_create_by(name: car_data.dig('engineType', 'title')),
@@ -370,7 +370,7 @@ namespace :import_api do
     existing_car.update(  
       year: car_data['year'],
       price: car_data['price'],
-      description: car_data['description'],
+      description: car_data['modification'],
       color: Color.find_or_create_by(name: car_data.dig('color', 'title')),
       body_type: BodyType.find_or_create_by(name: car_data.dig('bodyType', 'title')),
       engine_name_type: EngineNameType.find_or_create_by(name: car_data.dig('engineType', 'title')),
