@@ -27,7 +27,7 @@ gem 'recaptcha'
 # Изображения
 gem 'image_processing', '~> 1.2'
 # Загрузка изображений альтернативно
-gem 'carrierwave', '~> 2.0'
+gem 'carrierwave', '~> 3.1'
 # Пагинация
 gem 'kaminari'
 # Поиск и фильтрация
