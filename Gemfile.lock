@@ -126,6 +126,10 @@ GEM
       reline (>= 0.3.8)
     diff-lcs (1.5.1)
     domain_name (0.6.20240107)
+    dotenv (3.1.7)
+    dotenv-rails (3.1.7)
+      dotenv (= 3.1.7)
+      railties (>= 6.1)
     drb (2.2.1)
     error_highlight (0.7.0)
     erubi (1.13.0)
@@ -144,9 +148,7 @@ GEM
       logger
     faraday-net_http (3.4.0)
       net-http (>= 0.5.0)
-    ffi (1.17.0-arm64-darwin)
-    ffi (1.17.0-x86_64-darwin)
-    ffi (1.17.0-x86_64-linux-gnu)
+    ffi (1.17.0)
     globalid (1.2.1)
       activesupport (>= 6.1)
     gyoku (1.4.0)
@@ -323,6 +325,7 @@ GEM
       i18n
     rdoc (6.8.1)
       psych (>= 4.0.0)
+    recaptcha (5.18.0)
     regexp_parser (2.9.3)
     reline (0.5.12)
       io-console (~> 0.5)
@@ -468,6 +471,7 @@ DEPENDENCIES
   capybara
   carrierwave (~> 2.0)
   debug
+  dotenv-rails
   error_highlight (>= 0.4.0)
   factory_bot_rails
   faker
@@ -491,6 +495,7 @@ DEPENDENCIES
   rails (~> 7.2.1, >= 7.2.1.1)
   rails-i18n
   ransack
+  recaptcha
   rest-client
   rspec-rails
   rswag-api

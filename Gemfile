@@ -21,6 +21,9 @@ gem "jbuilder"
 
 gem 'rack-cors', require: 'rack/cors'
 
+# For google captcha
+gem 'recaptcha'
+
 # Изображения
 gem 'image_processing', '~> 1.2'
 # Загрузка изображений альтернативно
@@ -113,3 +116,5 @@ gem 'savon'
 gem 'rest-client'
 
 gem 'lru_redux'
+
+gem 'dotenv-rails'
