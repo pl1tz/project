@@ -177,12 +177,12 @@ namespace :import_api do
   #     ...
   #   })
   def create_car_from_api_data(car_data)
-    brand = Brand.find_or_create_by(name: car_data.dig('mark', 'name'))
+    brand = Brand.find_or_create_by(name: car_data.dig('mark', 'title'))
     model = Model.find_or_create_by(
-      name: car_data.dig('model', 'name'),
+      name: car_data.dig('model', 'title'),
       brand: brand
     )
-    
+
     generation = Generation.find_or_create_by(
       name: car_data.dig('generation', 'title'),
       model: model
@@ -196,22 +196,22 @@ namespace :import_api do
       year: car_data['year'],
       price: car_data['price'],
       description: car_data['description'],
-      color: Color.find_or_create_by(name: car_data.dig('color', 'name')),
-      body_type: BodyType.find_or_create_by(name: car_data.dig('bodyType', 'name')),
-      engine_name_type: EngineNameType.find_or_create_by(name: car_data.dig('engineType', 'name')),
+      color: Color.find_or_create_by(name: car_data.dig('color', 'title')),
+      body_type: BodyType.find_or_create_by(name: car_data.dig('bodyType', 'title')),
+      engine_name_type: EngineNameType.find_or_create_by(name: car_data.dig('engineType', 'title')),
       engine_power_type: EnginePowerType.find_or_create_by(power: car_data['enginePower']),
       engine_capacity_type: EngineCapacityType.find_or_create_by(capacity: car_data['engineVolume']),
-      gearbox_type: find_or_create_gearbox_type_from_api(car_data.dig('gearbox', 'name')),
-      drive_type: DriveType.find_or_create_by(name: car_data.dig('driveType', 'name') || "Полный"),
+      gearbox_type: find_or_create_gearbox_type_from_api(car_data.dig('gearbox', 'title')),
+      drive_type: DriveType.find_or_create_by(name: car_data.dig('driveType', 'title') || "Полный"),
       online_view_available: true,
       complectation_name: car_data['complectation']
     )
-
+  
     if car.save
       car
     else
-      puts "\nFailed to create car: #{car_data.dig('mark', 'name')} #{car_data.dig('model', 'name')}"
-      puts "Errors: #{car.errors.full_messages.join(", ")}"
+      puts "\nFailed to create car: #{car_data.dig('mark', 'title')} #{car_data.dig('model', 'title')}"
+      puts "Errors: #{car.errors.full_messages.join(', ')}"
       nil
     end
   end
@@ -274,13 +274,10 @@ namespace :import_api do
   #     'images' => [{ 'original' => 'http://example.com/image.jpg' }]
   #   })
   def save_images_for_api_car(car, car_data)
-    return unless car_data['images'].is_a?(Array)
-    
-    car_data['images'].each do |image_data|
-      Image.create(
-        car: car,
-        url: image_data['original']
-      )
+    return unless car_data['photos']
+  
+    car_data['photos'].each do |photo_url|
+      car.images.find_or_create_by(url: photo_url)
     end
     puts "Images saved for car: #{car.id}"
   end
@@ -299,16 +296,11 @@ namespace :import_api do
   #     }
   #   })
   def save_extras_for_api_car(car, car_data)
-    return unless car_data['equipment'].is_a?(Hash)
-    
-    car_data['equipment'].each do |category_name, extras|
-      next unless extras.is_a?(Array)
-      
-      category = Category.find_or_create_by(name: category_name)
-      extras.each do |extra|
-        extra_name = ExtraName.find_or_create_by(name: extra)
-        Extra.create(car: car, category: category, extra_name: extra_name)
-      end
+    return unless car_data['additionalOptions']
+  
+    car_data['additionalOptions'].each do |extra_name|
+      extra = Extra.find_or_create_by(name: extra_name)
+      car.extras << extra unless car.extras.include?(extra)
     end
     puts "Extras saved for car: #{car.id}"
   end
@@ -323,37 +315,23 @@ namespace :import_api do
   #
   # @example_return #<GearboxType id: 1, name: "Автоматическая", abbreviation: "АКПП">
   def find_or_create_gearbox_type_from_api(gearbox_name)
-    return nil unless gearbox_name
-    
-    abbreviations = {
-      'Автоматическая' => 'АКПП',
-      'Механическая' => 'МКПП',
-      'Вариатор' => 'CVT',
-      'Робот' => 'РКПП'
-    }
-    
-    GearboxType.find_or_create_by(name: gearbox_name) do |gt|
-      gt.abbreviation = abbreviations[gearbox_name]
-    end
+    GearboxType.find_or_create_by(name: gearbox_name)
   end
 
-  def update_existing_car(car, car_data)
-    # Обновляем атрибуты существующей машины
-    car.assign_attributes(
+  def update_existing_car(existing_car, car_data)
+    existing_car.update(  
       year: car_data['year'],
       price: car_data['price'],
       description: car_data['description'],
-      color: Color.find_or_create_by(name: car_data.dig('color', 'name')),
-      body_type: BodyType.find_or_create_by(name: car_data.dig('bodyType', 'name')),
-      engine_name_type: EngineNameType.find_or_create_by(name: car_data.dig('engineType', 'name')),
+      color: Color.find_or_create_by(name: car_data.dig('color', 'title')),
+      body_type: BodyType.find_or_create_by(name: car_data.dig('bodyType', 'title')),
+      engine_name_type: EngineNameType.find_or_create_by(name: car_data.dig('engineType', 'title')),
       engine_power_type: EnginePowerType.find_or_create_by(power: car_data['enginePower']),
       engine_capacity_type: EngineCapacityType.find_or_create_by(capacity: car_data['engineVolume']),
-      gearbox_type: find_or_create_gearbox_type_from_api(car_data.dig('gearbox', 'name')),
-      drive_type: DriveType.find_or_create_by(name: car_data.dig('driveType', 'name') || "Полный"),
+      gearbox_type: find_or_create_gearbox_type_from_api(car_data.dig('gearbox', 'title')),
+      drive_type: DriveType.find_or_create_by(name: car_data.dig('driveType', 'title') || "Полный"),
       complectation_name: car_data['complectation']
     )
-
-    car.save
   end
 
   def update_history_for_api_car(car, car_data)
