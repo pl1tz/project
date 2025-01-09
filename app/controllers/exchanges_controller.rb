@@ -19,11 +19,30 @@ class ExchangesController < ApplicationController
     Rails.logger.info "Received params: #{params.inspect}"
     @exchange = Exchange.new(exchange_params)
 
-    if @exchange.save
-      create_order_exchange(@exchange)
-    else
-      render json: @exchange.errors, status: :unprocessable_entity
+    ActiveRecord::Base.transaction do
+      if @exchange.save
+        crm_service = PlexCrmService.new(request)
+        crm_response = crm_service.send_exchange_application(@exchange)
+        
+        Rails.logger.info "CRM Response: #{crm_response.inspect}"
+        
+        unless crm_response[:success]
+          error_message = "Failed to send to CRM: #{crm_response[:message]}"
+          Rails.logger.error error_message
+          raise ActiveRecord::Rollback, error_message
+        end
+
+        Rails.logger.info "Successfully created exchange application and sent to CRM"
+        create_order_exchange(@exchange)
+      else
+        Rails.logger.error "Failed to save exchange: #{@exchange.errors.full_messages}"
+        render json: @exchange.errors, status: :unprocessable_entity
+        raise ActiveRecord::Rollback
+      end
     end
+  rescue ActiveRecord::Rollback => e
+    render json: { error: e.message || "Failed to create exchange application" }, 
+           status: :unprocessable_entity
   end
 
   # PATCH/PUT /exchanges/1 or /exchanges/1.json
