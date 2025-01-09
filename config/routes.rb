@@ -105,13 +105,16 @@ Rails.application.routes.draw do
   
   get 'buyout' => 'buyouts#index'#Выкуп
   post 'buyout' => 'buyouts#create'#Создать выкуп
-  
+  get 'catalog' => 'cars#add_car'
   get 'credit' => 'credits#top_programs'#Топ программ
   get 'credits' => 'credits#index '#Список программ
   post 'credit' => 'credits#create'#Создать программу
   get 'credit/:id' => 'credits#show'#Показать программу
   get 'about' => 'about_companies#index'#О компании
-  get 'car/:brand/:id' => 'cars#show'#Показать автомобиль
+  get 'car/:brand/:id' => 'cars#add_car'#Показать автомобиль
+
+  get 'catalog/:brand/:model_id' => 'cars#add_car'#Показать автомобиль
+  get 'catalog/:brand_name' => 'cars#add_car'#Показать автомобиль
 
   get 'favorites', to: 'favorites#index'#Избранное
   #post 'admins/login' => 'admins#login'#Авторизация
@@ -130,6 +133,12 @@ Rails.application.routes.draw do
   get 'admin/contacts' => 'contacts#index'#Контакты
   get 'admin/about' => 'about_companies#index'#О компании
   get 'admin/banners' => 'cars#add_car'#Добавить автомобиль
+  get 'admin/catalog' => 'cars#add_car'#Добавить автомобиль
+  get 'admin/catalog/:id' => 'cars#add_car'#Добавить автомобиль
+  get 'admin/catalog/:id/color' => 'cars#add_car'#Добавить автомобиль
+  get 'admin/catalog/:id/complectation' => 'cars#add_car'#Добавить автомобиль
+  get 'admin/catalog/:id/texnos' => 'cars#add_car'#Добавить автомобиль
+  get 'admin/catalog/:id/gallery' => 'cars#add_car'#Добавить автомобиль
   get 'privacy' => 'cars#add_car'#Политика конфиденциальности
   
 
