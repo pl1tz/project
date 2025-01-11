@@ -6,6 +6,7 @@ class BannerService
       {
         id: banner.id,
         images: banner.image,
+        image2: banner.image2,
         status: banner.status,
         text: {
         main_text: banner.main_text,
