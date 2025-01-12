@@ -12,7 +12,8 @@ class CarCatalogService
             power: car.power,
             acceleration: car.acceleration,
             consumption: car.consumption,
-            car_color: car.car_colors.first ? { id: car.car_colors.first.id, image: car.car_colors.first.image } : nil
+            car_color: car.car_colors.first ? { id: car.car_colors.first.id, image: car.car_colors.first.image } : nil,
+            car_catalog_configuration_price: car.car_catalog_configurations.first&.special_price
           }
         end,
         models_count: cars.uniq { |car| car.model }.count,

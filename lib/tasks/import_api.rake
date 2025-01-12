@@ -55,7 +55,7 @@ namespace :import_api do
   end
 
   task create_cars: :environment do
-    url = 'https://plex-crm.ru/api/v3/offers/website/628'
+    url = 'https://plex-crm.ru/api/v3/offers/website/627'
     token = ENV['PLEX_CRM_TOKEN']
     
     total_successful_imports = 0
