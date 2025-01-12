@@ -12,7 +12,7 @@ require 'parallel'
 # @example Run rake import_api:create_cars
 namespace :import_api do
   task delete_diff_cars: :environment do
-    url = 'https://plex-crm.ru/api/v3/offers/website/627'
+    url = 'https://plex-crm.ru/api/v3/offers/website/628'
     token = ENV['PLEX_CRM_TOKEN']
     
     puts "Fetching cars from API..."
@@ -55,7 +55,7 @@ namespace :import_api do
   end
 
   task create_cars: :environment do
-    url = 'https://plex-crm.ru/api/v3/offers/website/627'
+    url = 'https://plex-crm.ru/api/v3/offers/website/628'
     token = ENV['PLEX_CRM_TOKEN']
     
     total_successful_imports = 0
