@@ -103,26 +103,12 @@ namespace :import_api do
           existing_car = Car.find_by(unique_id: car_data['uniqueId'])
           
           if existing_car
-            # Обновляем существующую машину
-            if update_existing_car(existing_car, car_data)
-              update_history_for_api_car(existing_car, car_data)
-              update_images_for_api_car(existing_car, car_data)
-              update_extras_for_api_car(existing_car, car_data)
-              page_successful += 1
-              total_successful_imports += 1
-              puts "Car updated: #{existing_car.brand.name} #{existing_car.model.name}"
-            else
-              page_failed += 1
-              total_failed_imports += 1
-              failed_cars << "#{car_data.dig('mark', 'name')} #{car_data.dig('model', 'name')} (ID: #{car_data['uniqueId']})"
-            end
+            # Пропускаем существующую машину
+            puts "Car already exists, skipping: #{existing_car.brand.name} #{existing_car.model.name}"
           else
             # Создаем новую машину
             car = create_car_from_api_data(car_data)
             if car
-              create_history_for_api_car(car, car_data)
-              save_images_for_api_car(car, car_data)
-              save_extras_for_api_car(car, car_data)
               page_successful += 1
               total_successful_imports += 1
               puts "New car created: #{car.brand.name} #{car.model.name}"
@@ -159,6 +145,95 @@ namespace :import_api do
     end_time = Time.now
     duration = (end_time - start_time) / 60
     puts "Total import time: #{duration.round(2)} minutes"
+  end
+
+  task update_cars: :environment do
+    url = 'https://plex-crm.ru/api/v3/offers/website/267'
+    token = ENV['PLEX_CRM_TOKEN']
+    
+    total_successful_updates = 0
+    total_failed_updates = 0
+    failed_cars = []
+    current_page = 1
+    
+    start_time = Time.now
+    
+    loop do
+      response = HTTParty.get(url, {
+        headers: {
+          'Authorization' => "Bearer #{token}",
+          'Accept' => 'application/json'
+        },
+        query: {
+          page: current_page,
+          per_page: 50
+        }
+      })
+
+      break unless response.success?
+
+      data = response.parsed_response
+      cars_data = data['items']
+      pagination = data['pagination']
+      
+      break if cars_data.empty?
+
+      total_pages = pagination['totalPages']
+
+      puts "\nProcessing page #{current_page}/#{total_pages}..."
+      
+      page_successful = 0
+      page_failed = 0
+
+      ActiveRecord::Base.transaction do
+        cars_data.each do |car_data|
+          # Ищем существующую машину
+          existing_car = Car.find_by(unique_id: car_data['uniqueId'])
+          
+          if existing_car
+            # Обновляем существующую машину
+            if update_existing_car(existing_car, car_data)
+              update_history_for_api_car(existing_car, car_data)
+              update_images_for_api_car(existing_car, car_data)
+              update_extras_for_api_car(existing_car, car_data)
+              page_successful += 1
+              total_successful_updates += 1
+              puts "Car updated: #{existing_car.brand.name} #{existing_car.model.name}"
+            else
+              page_failed += 1
+              total_failed_updates += 1
+              failed_cars << "#{car_data.dig('mark', 'name')} #{car_data.dig('model', 'name')} (ID: #{car_data['uniqueId']})"
+            end
+          else
+            puts "Car not found for update, skipping: #{car_data.dig('mark', 'name')} #{car_data.dig('model', 'name')}"
+          end
+        end
+      end
+
+      puts "\nPage #{current_page} results:"
+      puts "Successfully updated: #{page_successful}"
+      puts "Failed to update: #{page_failed}"
+
+      break if current_page >= total_pages
+      current_page += 1
+    end
+
+    # Итоговая статистика
+    puts "\n========== Final Update Summary =========="
+    puts "Total cars processed: #{total_successful_updates + total_failed_updates}"
+    puts "Successfully updated: #{total_successful_updates}"
+    puts "Failed to update: #{total_failed_updates}"
+    
+    if total_failed_updates > 0
+      puts "\nFailed cars:"
+      failed_cars.each { |car| puts "- #{car}" }
+    end
+    
+    puts "======================================"
+
+    end_time = Time.now
+    duration = (end_time - start_time) / 60
+    puts "Total update time: #{duration.round(2)} minutes"
   end
 
   private
