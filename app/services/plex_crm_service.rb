@@ -87,12 +87,12 @@ class PlexCrmService
   end
 
   # Returns source parameters for CRM identification
-  #
+  #267
   # @return [Hash] Dealer and website identifiers
   def source_params
     {
       dealerId: 77,
-      websiteId: 267
+      websiteId: 628
     }
   end
 
@@ -132,7 +132,7 @@ class PlexCrmService
       type: "credit",
       source: {
         dealerId: 77,
-        websiteId: 267
+        websiteId: 628
       },
       dateTime: Time.current.utc.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
       externalId: credit.id.to_s, # Внешний ID кредита
@@ -188,7 +188,7 @@ class PlexCrmService
       type: "installment",
       source: {
         dealerId: 77, # Замените на актуальный ID дилера
-        websiteId: 267, # Замените на актуальный ID сайта
+        websiteId: 628, # Замените на актуальный ID сайта
       },
       dateTime: Time.current.utc.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
       externalId: installment.id.to_s, # Внешний ID заявки
@@ -236,7 +236,7 @@ class PlexCrmService
       type: "buyout",
       source: {
         dealerId: 77,
-        websiteId: 267,
+        websiteId: 628,
       },
       dateTime: Time.current.utc.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
       externalId: buyout.id.to_s, # Внешний ID заявки
@@ -278,7 +278,7 @@ class PlexCrmService
       type: "exchange",
       source: {
         dealerId: 77,
-        websiteId: 267
+        websiteId: 628
       },
       dateTime: Time.current.utc.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
       externalId: exchange.id.to_s, # Внешний ID кредита
@@ -332,7 +332,7 @@ class PlexCrmService
       type: "call_request",
       source: {
         dealerId: 77,
-        websiteId: 267
+        websiteId: 628
       },
       dateTime: Time.current.utc.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
       externalId: call_request.id.to_s, # Внешний ID кредита
