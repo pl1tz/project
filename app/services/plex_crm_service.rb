@@ -137,12 +137,12 @@ class PlexCrmService
       dateTime: Time.current.utc.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
       externalId: credit.id.to_s, # Внешний ID кредита
       values: {
-        clientName: credit.name, # ФИО клиента
-        offerId: credit.banks_id, # ID банка
+        clientName: credit.name.to_s, # Имя клиента
+        offerId: car.unique_id, # ID банка
         offerExternalId: credit.id, # ID кредита
         comment: COMMENTS[:credit], # Комментарий
         paymentMethod: "credit", # Метод оплаты
-        bankTitle: credit.bank&.name, # Название банка
+        bankTitle: credit.bank&.name.to_s, # Название банка
         creditAmount: credit.initial_contribution.to_s, # Сумма кредита
         creditInitialFee: credit.initial_contribution.to_s, # Первоначальный взнос
         creditPeriod: credit.credit_term.to_s # Срок кредита
@@ -150,16 +150,16 @@ class PlexCrmService
       offer: {
         externalId: credit.id.to_s, # Внешний ID предложения
         title: "Кредит", # Название предложения (если есть)
-        mark: car.brand, # Марка автомобиля
-        model: car.model, # Модель автомобиля
-        generation: generation&.name || "Не указано", # Поколение автомобиля (если есть)
-        bodyType: car.body_type&.name || "Не указано", # Тип кузова
-        complectation: car.complectation_name, # Комплектация (если есть)
-        engineType: car.engine_name_type&.name || "Не указано", # Тип двигателя
+        mark: car.brand&.name.to_s, # Марка автомобиля
+        model: car.model&.name.to_s, # Модель автомобиля
+        generation: generation&.name.to_s || "Не указано", # Название генерации
+        bodyType: car.body_type&.name.to_s || "Не указано", # Тип кузова
+        complectation: car.complectation_name.to_s, # Комплектация (если есть)
+        engineType: car.engine_name_type&.name.to_s || "Не указано", # Тип двигателя
         enginePower: car.engine_power_type&.power || 0, # Мощность двигателя
         engineVolume: car.engine_capacity_type&.capacity || 0, # Объем двигателя
-        gearbox: car.gearbox_type&.name || "Не указано", # Тип коробки передач
-        wheelDrive: car.drive_type&.name || "Не указано", # Привод
+        gearbox: car.gearbox_type&.name.to_s || "Не указано", # Тип коробки передач
+        wheelDrive: car.drive_type&.name.to_s || "Не указано", # Привод
         price: car.price.to_s || 0, # Цена автомобиля
         year: car.year || 0, # Год автомобиля
         run: history_car.last_mileage || 0, # Пробег автомобиля
