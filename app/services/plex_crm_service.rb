@@ -45,15 +45,15 @@ class PlexCrmService
   #   send_application(:credit, credit_application)
   #   # => { success: true, data: {...}, status: 200, message: "Successfully sent to Plex CRM" }
   def send_application(type, application)
-    payload = build_request(type, application)
-    
+    payload = send("build_#{type}_values", application)
+  
     log_request(type, payload)
-    
+  
     response = self.class.post('/contact/form', {
       headers: @headers,
       body: payload
     })
-    
+  
     log_response(response)
     handle_response(response)
   end
@@ -67,56 +67,6 @@ class PlexCrmService
 
   private
 
-  # Builds the complete request payload for CRM API
-  #
-  # @param [Symbol] type Type of application
-  # @param [Object] application Application object
-  # @return [Hash] Formatted request payload
-  #
-  # @example
-  #   build_request(:credit, credit_application)
-  #   # => { type: 'credit', source: {...}, client: {...}, values: {...}, tracking: {...} }
-  def build_request(type, application)
-    {
-      type: APPLICATION_TYPES[type],
-      source: source_params,
-      dateTime: Time.current.utc.strftime('%Y-%m-%d %H:%M:%S'),
-      values: send("build_#{type}_values", application),
-      tracking: tracking_params
-    }
-  end
-
-  # Returns source parameters for CRM identification
-  #267
-  # @return [Hash] Dealer and website identifiers
-  def source_params
-    {
-      dealerId: 77,
-      websiteId: 628
-    }
-  end
-
-  # Extracts tracking parameters from request
-  #
-  # @return [Hash] UTM and other tracking parameters
-  def tracking_params
-    return {} unless @request
-
-    {
-      utm_source: @request.params[:utm_source],
-      utm_medium: @request.params[:utm_medium],
-      utm_campaign: @request.params[:utm_campaign],
-      utm_content: @request.params[:utm_content],
-      utm_term: @request.params[:utm_term],
-      gclid: @request.params[:gclid],
-      yclid: @request.params[:yclid],
-      fbclid: @request.params[:fbclid],
-      rb_clickid: @request.params[:rb_clickid],
-      ym_goal: @request.params[:ym_goal],
-      roistat_visit: @request.params[:roistat_visit]
-    }.compact
-  end
-
   # Builds values for credit application
   #
   # @param [Credit] credit Credit application object
@@ -126,9 +76,9 @@ class PlexCrmService
     history_car = HistoryCar.find_by(car_id: car.id) # Получаем данные о истории машины
     generation = car.model.generations.first # Получаем генерацию через модель
     first_image_url = car.images.first&.url || "Отсутствует изображение" # Замените "string" на значение по умолчанию, если изображение отсутствует
+    bank = credit.banks_id.present? ? Bank.find_by(id: credit.banks_id) : nil
 
     {
-      clientPhone: credit.phone, # Телефон клиента
       type: "credit",
       source: {
         dealerId: 77,
@@ -138,37 +88,28 @@ class PlexCrmService
       externalId: credit.id.to_s, # Внешний ID кредита
       values: {
         clientName: credit.name.to_s, # Имя клиента
-        offerId: car.unique_id, # ID банка
+        clientPhone: credit.phone, # Телефон клиента
+        offerId: car.unique_id,
         offerExternalId: credit.id, # ID кредита
         comment: COMMENTS[:credit], # Комментарий
         paymentMethod: "credit", # Метод оплаты
-        bankTitle: credit.bank&.name.to_s, # Название банка
+        bankTitle: bank&.name.to_s, # Название банка, если найден
         creditAmount: credit.initial_contribution.to_s, # Сумма кредита
         creditInitialFee: credit.initial_contribution.to_s, # Первоначальный взнос
         creditPeriod: credit.credit_term.to_s # Срок кредита
       },
-      offer: {
-        externalId: credit.id.to_s, # Внешний ID предложения
-        title: "Кредит", # Название предложения (если есть)
-        mark: car.brand&.name.to_s, # Марка автомобиля
-        model: car.model&.name.to_s, # Модель автомобиля
-        generation: generation&.name.to_s || "Не указано", # Название генерации
-        bodyType: car.body_type&.name.to_s || "Не указано", # Тип кузова
-        complectation: car.complectation_name.to_s, # Комплектация (если есть)
-        engineType: car.engine_name_type&.name.to_s || "Не указано", # Тип двигателя
-        enginePower: car.engine_power_type&.power || 0, # Мощность двигателя
-        engineVolume: car.engine_capacity_type&.capacity || 0, # Объем двигателя
-        gearbox: car.gearbox_type&.name.to_s || "Не указано", # Тип коробки передач
-        wheelDrive: car.drive_type&.name.to_s || "Не указано", # Привод
-        price: car.price.to_s || 0, # Цена автомобиля
-        year: car.year || 0, # Год автомобиля
-        run: history_car.last_mileage || 0, # Пробег автомобиля
-        vin: history_car.vin, # VIN (если есть)
-        color: car.color&.name || "Не указано", # Цвет автомобиля
-        owners: history_car&.previous_owners.to_s || "0", # Количество владельцев
-        imageUrls: [first_image_url], # URL изображений (если есть)
-        category: "cars", # Категория
-        offerType: "credit" # Тип предложения (если есть)
+      tracking: {
+        utm_source: @request&.params[:utm_source],
+        utm_medium: @request&.params[:utm_medium],
+        utm_campaign: @request&.params[:utm_campaign],
+        utm_content: @request&.params[:utm_content],
+        utm_term: @request&.params[:utm_term],
+        gclid: @request&.params[:gclid],
+        yclid: @request&.params[:yclid],
+        fbclid: @request&.params[:fbclid],
+        rb_clickid: @request&.params[:rb_clickid],
+        ym_goal: @request&.params[:ym_goal],
+        roistat_visit: @request&.params[:roistat_visit]
       }
     }
   end

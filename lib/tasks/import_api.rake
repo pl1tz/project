@@ -18,7 +18,7 @@ namespace :import_api do
     token = ENV['PLEX_CRM_TOKEN']
     
     puts "Fetching cars from API..."
-    api_unique_ids = []
+    api_ids = []
     current_page = 1
     
     loop do
@@ -40,12 +40,12 @@ namespace :import_api do
       break if cars_data.empty?
       
       # Собираем unique_ids из API
-      api_unique_ids += cars_data.map { |car| car['uniqueId'] }
+      api_ids += cars_data.map { |car| car['id'] }
       current_page += 1
     end
 
     # Удаляем машины, которых нет в API
-    cars_to_delete = Car.where.not(unique_id: api_unique_ids)
+    cars_to_delete = Car.where.not(unique_id: api_ids)
     count = cars_to_delete.count
     
     if count > 0
@@ -102,7 +102,7 @@ namespace :import_api do
       ActiveRecord::Base.transaction do
         cars_data.each do |car_data|
           # Ищем существующую машину
-          existing_car = Car.find_by(unique_id: car_data['uniqueId'])
+          existing_car = Car.find_by(unique_id: car_data['id'])
           
           if existing_car
             # Пропускаем существующую машину
@@ -117,7 +117,7 @@ namespace :import_api do
             else
               page_failed += 1
               total_failed_imports += 1
-              failed_cars << "#{car_data.dig('mark', 'name')} #{car_data.dig('model', 'name')} (ID: #{car_data['uniqueId']})"
+              failed_cars << "#{car_data.dig('mark', 'name')} #{car_data.dig('model', 'name')} (ID: #{car_data['id']})"
             end
           end
         end
@@ -190,7 +190,7 @@ namespace :import_api do
       ActiveRecord::Base.transaction do
         cars_data.each do |car_data|
           # Ищем существующую машину
-          existing_car = Car.find_by(unique_id: car_data['uniqueId'])
+          existing_car = Car.find_by(unique_id: car_data['id'])
           
           if existing_car
             # Обновляем существующую машину
@@ -204,7 +204,7 @@ namespace :import_api do
             else
               page_failed += 1
               total_failed_updates += 1
-              failed_cars << "#{car_data.dig('mark', 'name')} #{car_data.dig('model', 'name')} (ID: #{car_data['uniqueId']})"
+              failed_cars << "#{car_data.dig('mark', 'name')} #{car_data.dig('model', 'name')} (ID: #{car_data['id']})"
             end
           else
             puts "Car not found for update, skipping: #{car_data.dig('mark', 'name')} #{car_data.dig('model', 'name')}"
@@ -269,7 +269,7 @@ namespace :import_api do
       model: model,
       brand: brand,
       generation: generation,
-      unique_id: car_data['uniqueId'],
+      unique_id: car_data['id'],
       year: car_data['year'],
       price: car_data['price'],
       description: car_data['modification'],
