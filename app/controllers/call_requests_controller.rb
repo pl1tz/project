@@ -79,9 +79,9 @@ class CallRequestsController < ApplicationController
       )
       
       if order_call_request.save
-        { call_request: call_request, order_call_request: order_call_request, status: :created }
+        render json: { call_request: call_request, order_call_request: order_call_request}, status: :created
       else
-        { errors: order_call_request.errors, status: :unprocessable_entity }
+        render json: { errors: order_call_request.errors}, status: :unprocessable_entity
       end
     end
 end

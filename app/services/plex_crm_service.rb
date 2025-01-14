@@ -125,8 +125,7 @@ class PlexCrmService
     first_image_url = car.images.first&.url || "Отсутствует изображение"
 
     {
-      clientPhone: installment.phone,
-      type: "installment",
+      type: "hire-purchase",
       source: {
         dealerId: 77, # Замените на актуальный ID дилера
         websiteId: 628, # Замените на актуальный ID сайта
@@ -134,6 +133,7 @@ class PlexCrmService
       dateTime: Time.current.utc.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
       externalId: installment.id.to_s, # Внешний ID заявки
       values: {
+        clientPhone: installment.phone,
         clientName: installment.name, # Имя клиента
         offerExternalId: installment.id, # ID заявки
         comment: COMMENTS[:installment], # Комментарий
@@ -173,7 +173,6 @@ class PlexCrmService
   # @return [Hash] Formatted buyout application values
   def build_buyout_values(buyout)
     {
-      clientPhone: buyout.phone.gsub(/\D/, ''), # Удаляем все нецифровые символы
       type: "buyout",
       source: {
         dealerId: 77,
@@ -182,10 +181,10 @@ class PlexCrmService
       dateTime: Time.current.utc.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
       externalId: buyout.id.to_s, # Внешний ID заявки
       values: {
+        clientPhone: buyout.phone.gsub(/\D/, ''), # Удаляем все нецифровые символы
         clientName: buyout.name, # Имя клиента
         offerExternalId: buyout.id, # ID заявки
         comment: COMMENTS[:buyout], # Комментарий
-        paymentMethod: "buyout", # Метод оплаты
         clientVehicleMark: buyout.brand, # Марка автомобиля
         clientVehicleModel: buyout.model, # Модель автомобиля
         clientVehicleYear: buyout.year.to_s, # Год автомобиля
@@ -215,8 +214,7 @@ class PlexCrmService
     first_image_url = car.images.first&.url || "Отсутствует изображение" # Замените "string" на значение по умолчанию, если изображение отсутствует
 
     {
-      clientPhone: exchange.phone, # Телефон клиента
-      type: "exchange",
+      type: "trade-in",
       source: {
         dealerId: 77,
         websiteId: 628
@@ -224,10 +222,10 @@ class PlexCrmService
       dateTime: Time.current.utc.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
       externalId: exchange.id.to_s, # Внешний ID кредита
       values: {
+        clientPhone: exchange.phone, # Телефон клиента
         clientName: exchange.name, # ФИО клиента
         offerExternalId: exchange.id, # ID кредита
         comment: COMMENTS[:exchange], # Комментарий
-        paymentMethod: "exchange", # Метод оплаты
         clientVehicleMark: exchange.customer_car, # Марка автомобиля
         creditAmount: exchange.initial_contribution.to_s, # Сумма кредита
         creditPeriod: exchange.credit_term.to_s # Срок кредита
@@ -263,14 +261,13 @@ class PlexCrmService
   # @param [CallRequest] call_request Call request object
   # @return [Hash] Formatted call request values
   def build_call_request_values(call_request)
-    car = Car.find(call_request.car_id) # Получаем данные о машине по car_id
-    history_car = HistoryCar.find_by(car_id: car.id) # Получаем данные о истории машины
-    generation = car.model.generations.first # Получаем генерацию через модель
-    first_image_url = car.images.first&.url || "Отсутствует изображение" # Замените "string" на значение по умолчанию, если изображение отсутствует
+    car = Car.find_by(id: call_request.car_id) # Получаем данные о машине по car_id
+    history_car = HistoryCar.find_by(car_id: car&.id) # Получаем данные о истории машины
+    generation = car&.model&.generations&.first # Получаем генерацию через модель
+    first_image_url = car&.images&.first&.url || "Отсутствует изображение" # Замените "string" на значение по умолчанию, если изображение отсутствует
 
     {
-      clientPhone: call_request.phone, # Телефон клиента
-      type: "call_request",
+      type: "callback",
       source: {
         dealerId: 77,
         websiteId: 628
@@ -278,33 +275,10 @@ class PlexCrmService
       dateTime: Time.current.utc.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
       externalId: call_request.id.to_s, # Внешний ID кредита
       values: {
+        clientPhone: call_request.phone, # Телефон клиента
         clientName: call_request.name, # ФИО клиента
         offerExternalId: call_request.id, # ID кредита
-        comment: COMMENTS[:call_request].call(call_request),
-        paymentMethod: "call_request" # Метод оплаты
-      },
-      offer: {
-        externalId: call_request.id.to_s, # Внешний ID предложения
-        title: "Call request", # Название предложения (если есть)
-        mark: car.brand, # Марка автомобиля
-        model: car.model, # Модель автомобиля
-        generation: generation&.name || "Не указано", # Поколение автомобиля (если есть)
-        bodyType: car.body_type&.name || "Не указано", # Тип кузова
-        complectation: car.complectation_name, # Комплектация (если есть)
-        engineType: car.engine_name_type&.name || "Не указано", # Тип двигателя
-        enginePower: car.engine_power_type&.power || 0, # Мощность двигателя
-        engineVolume: car.engine_capacity_type&.capacity || 0, # Объем двигателя
-        gearbox: car.gearbox_type&.name || "Не указано", # Тип коробки передач
-        wheelDrive: car.drive_type&.name || "Не указано", # Привод
-        price: car.price.to_s || 0, # Цена автомобиля
-        year: car.year || 0, # Год автомобиля
-        run: history_car.last_mileage || 0, # Пробег автомобиля
-        vin: history_car.vin, # VIN (если есть)
-        color: car.color&.name || "Не указано", # Цвет автомобиля
-        owners: history_car&.previous_owners.to_s || "0", # Количество владельцев
-        imageUrls: [first_image_url], # URL изображений (если есть)
-        category: "cars", # Категория
-        offerType: "call_request" # Тип предложения (если есть)
+        comment: COMMENTS[:call_request].call(call_request)
       }
     }
   end

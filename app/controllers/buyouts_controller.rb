@@ -80,9 +80,9 @@ class BuyoutsController < ApplicationController
       )
       
       if order_buyout.save
-        { buyout: buyout, order_buyout: order_buyout, status: :created }
+        render json: { buyout: buyout, order_buyout: order_buyout}, status: :created
       else
-        { errors: order_buyout.errors, status: :unprocessable_entity }
+        render json: { errors: order_buyout.errors}, status: :unprocessable_entity
       end
     end
 end
