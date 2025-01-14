@@ -89,7 +89,7 @@ class PlexCrmService
       values: {
         clientName: credit.name.to_s, # Имя клиента
         clientPhone: credit.phone, # Телефон клиента
-        offerId: car.unique_id,
+        offerId: car.unique_id.to_i,
         offerExternalId: credit.id, # ID кредита
         comment: COMMENTS[:credit], # Комментарий
         paymentMethod: "credit", # Метод оплаты
