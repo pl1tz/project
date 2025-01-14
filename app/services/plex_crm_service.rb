@@ -84,13 +84,12 @@ class PlexCrmService
         dealerId: 77,
         websiteId: 628
       },
-      dateTime: Time.current.utc.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
+      dateTime: credit.created_at.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
       externalId: credit.id.to_s, # Внешний ID кредита
       values: {
         clientName: credit.name.to_s, # Имя клиента
         clientPhone: credit.phone, # Телефон клиента
         offerId: car.unique_id.to_i,
-        offerExternalId: credit.id, # ID кредита
         comment: COMMENTS[:credit], # Комментарий
         paymentMethod: "credit", # Метод оплаты
         bankTitle: bank&.name.to_s, # Название банка, если найден
