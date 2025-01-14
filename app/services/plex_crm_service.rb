@@ -73,9 +73,6 @@ class PlexCrmService
   # @return [Hash] Formatted credit application values
   def build_credit_values(credit)
     car = Car.find(credit.car_id) # Получаем данные о машине по car_id
-    history_car = HistoryCar.find_by(car_id: car.id) # Получаем данные о истории машины
-    generation = car.model.generations.first # Получаем генерацию через модель
-    first_image_url = car.images.first&.url || "Отсутствует изображение" # Замените "string" на значение по умолчанию, если изображение отсутствует
     bank = credit.banks_id.present? ? Bank.find_by(id: credit.banks_id) : nil
 
     {
@@ -119,9 +116,6 @@ class PlexCrmService
   # @return [Hash] Formatted installment application values
   def build_installment_values(installment)
     car = Car.find(installment.car_id) # Получаем данные о машине по car_id
-    history_car = HistoryCar.find_by(car_id: car.id) # Получаем данные о истории машины
-    generation = car.model.generations.first # Получаем генерацию через модель
-    first_image_url = car.images.first&.url || "Отсутствует изображение"
 
     {
       type: "hire-purchase",
@@ -129,39 +123,30 @@ class PlexCrmService
         dealerId: 77, # Замените на актуальный ID дилера
         websiteId: 628, # Замените на актуальный ID сайта
       },
-      dateTime: Time.current.utc.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
+      dateTime: installment.created_at.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
       externalId: installment.id.to_s, # Внешний ID заявки
       values: {
-        clientPhone: installment.phone,
-        clientName: installment.name, # Имя клиента
-        offerExternalId: installment.id, # ID заявки
+        clientName: installment.name.to_s, # Имя клиента
+        clientPhone: installment.phone, # Телефон клиента
+        offerId: car.unique_id.to_i,
         comment: COMMENTS[:installment], # Комментарий
         paymentMethod: "installment", # Метод оплаты
         creditAmount: installment.initial_contribution.to_s, # Сумма кредита
+        creditInitialFee: installment.initial_contribution.to_s, # Первоначальный взнос
         creditPeriod: installment.credit_term.to_s # Срок кредита
       },
-      offer: {
-        externalId: installment.id.to_s, # Внешний ID предложения
-        title: "Заявка на рассрочку", # Название предложения
-        mark: car.brand, # Марка автомобиля
-        model: car.model, # Модель автомобиля
-        generation: generation&.name || "Не указано", # Название генерации
-        bodyType: car.body_type&.name || "Не указано", # Тип кузова
-        complectation: car.complectation_name, # Комплектация (если есть)
-        engineType: car.engine_name_type&.name || "Не указано", # Тип двигателя
-        enginePower: car.engine_power_type&.power || 0, # Мощность двигателя
-        engineVolume: car.engine_capacity_type&.capacity || 0, # Объем двигателя
-        gearbox: car.gearbox_type&.name || "Не указано", # Тип коробки передач
-        wheelDrive: car.drive_type&.name || "Не указано", # Привод
-        price: car.price.to_s || 0, # Цена автомобиля
-        year: car.year || 0, # Год автомобиля
-        run: history_car.last_mileage || 0, # Пробег автомобиля
-        vin: history_car.vin, # VIN (если есть)
-        color: car.color&.name || "Не указано", # Цвет автомобиля
-        owners: history_car&.previous_owners.to_s || "0", # Количество владельцев
-        imageUrls: [first_image_url], # URL первой картинки автомобиля
-        category: "cars", # Категория
-        offerType: "installment" # Тип предложения
+      tracking: {
+        utm_source: @request&.params[:utm_source],
+        utm_medium: @request&.params[:utm_medium],
+        utm_campaign: @request&.params[:utm_campaign],
+        utm_content: @request&.params[:utm_content],
+        utm_term: @request&.params[:utm_term],
+        gclid: @request&.params[:gclid],
+        yclid: @request&.params[:yclid],
+        fbclid: @request&.params[:fbclid],
+        rb_clickid: @request&.params[:rb_clickid],
+        ym_goal: @request&.params[:ym_goal],
+        roistat_visit: @request&.params[:roistat_visit]
       }
     }
   end
@@ -177,27 +162,29 @@ class PlexCrmService
         dealerId: 77,
         websiteId: 628,
       },
-      dateTime: Time.current.utc.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
+      dateTime: buyout.created_at.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
       externalId: buyout.id.to_s, # Внешний ID заявки
       values: {
-        clientPhone: buyout.phone.gsub(/\D/, ''), # Удаляем все нецифровые символы
-        clientName: buyout.name, # Имя клиента
-        offerExternalId: buyout.id, # ID заявки
+        clientName: buyout.name.to_s, # Имя клиента
+        clientPhone: buyout.phone, # Телефон клиента
         comment: COMMENTS[:buyout], # Комментарий
         clientVehicleMark: buyout.brand, # Марка автомобиля
         clientVehicleModel: buyout.model, # Модель автомобиля
         clientVehicleYear: buyout.year.to_s, # Год автомобиля
         clientVehicleRun: buyout.mileage.to_s, # Пробег автомобиля
       },
-      offer: {
-        externalId: buyout.id.to_s, # Внешний ID предложения
-        title: "Заявка на выкуп", # Название предложения
-        mark: buyout.brand, # Марка автомобиля
-        model: buyout.model, # Модель автомобиля
-        year: buyout.year || 0, # Год автомобиля
-        run: buyout.mileage || 0, # Пробег автомобиля
-        category: "cars", # Категория
-        offerType: "buyout" # Тип предложения
+      tracking: {
+        utm_source: @request&.params[:utm_source],
+        utm_medium: @request&.params[:utm_medium],
+        utm_campaign: @request&.params[:utm_campaign],
+        utm_content: @request&.params[:utm_content],
+        utm_term: @request&.params[:utm_term],
+        gclid: @request&.params[:gclid],
+        yclid: @request&.params[:yclid],
+        fbclid: @request&.params[:fbclid],
+        rb_clickid: @request&.params[:rb_clickid],
+        ym_goal: @request&.params[:ym_goal],
+        roistat_visit: @request&.params[:roistat_visit]
       }
     }
   end
@@ -208,9 +195,6 @@ class PlexCrmService
   # @return [Hash] Formatted exchange application values
   def build_exchange_values(exchange)
     car = Car.find(exchange.car_id) # Получаем данные о машине по car_id
-    history_car = HistoryCar.find_by(car_id: car.id) # Получаем данные о истории машины
-    generation = car.model.generations.first # Получаем генерацию через модель
-    first_image_url = car.images.first&.url || "Отсутствует изображение" # Замените "string" на значение по умолчанию, если изображение отсутствует
 
     {
       type: "trade-in",
@@ -218,39 +202,30 @@ class PlexCrmService
         dealerId: 77,
         websiteId: 628
       },
-      dateTime: Time.current.utc.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
+      dateTime: exchange.created_at.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
       externalId: exchange.id.to_s, # Внешний ID кредита
       values: {
+        clientName: exchange.name.to_s, # Имя клиента
         clientPhone: exchange.phone, # Телефон клиента
-        clientName: exchange.name, # ФИО клиента
-        offerExternalId: exchange.id, # ID кредита
+        offerId: car.unique_id.to_i,
         comment: COMMENTS[:exchange], # Комментарий
         clientVehicleMark: exchange.customer_car, # Марка автомобиля
         creditAmount: exchange.initial_contribution.to_s, # Сумма кредита
+        creditInitialFee: exchange.initial_contribution.to_s, # Первоначальный взнос
         creditPeriod: exchange.credit_term.to_s # Срок кредита
       },
-      offer: {
-        externalId: exchange.id.to_s, # Внешний ID предложения
-        title: "Trade-in", # Название предложения (если есть)
-        mark: car.brand, # Марка автомобиля
-        model: car.model, # Модель автомобиля
-        generation: generation&.name || "Не указано", # Поколение автомобиля (если есть)
-        bodyType: car.body_type&.name || "Не указано", # Тип кузова
-        complectation: car.complectation_name, # Комплектация (если есть)
-        engineType: car.engine_name_type&.name || "Не указано", # Тип двигателя
-        enginePower: car.engine_power_type&.power || 0, # Мощность двигателя
-        engineVolume: car.engine_capacity_type&.capacity || 0, # Объем двигателя
-        gearbox: car.gearbox_type&.name || "Не указано", # Тип коробки передач
-        wheelDrive: car.drive_type&.name || "Не указано", # Привод
-        price: car.price.to_s || 0, # Цена автомобиля
-        year: car.year || 0, # Год автомобиля
-        run: history_car.last_mileage || 0, # Пробег автомобиля
-        vin: history_car.vin, # VIN (если есть)
-        color: car.color&.name || "Не указано", # Цвет автомобиля
-        owners: history_car&.previous_owners.to_s || "0", # Количество владельцев
-        imageUrls: [first_image_url], # URL изображений (если есть)
-        category: "cars", # Категория
-        offerType: "exchange" # Тип предложения (если есть)
+      tracking: {
+        utm_source: @request&.params[:utm_source],
+        utm_medium: @request&.params[:utm_medium],
+        utm_campaign: @request&.params[:utm_campaign],
+        utm_content: @request&.params[:utm_content],
+        utm_term: @request&.params[:utm_term],
+        gclid: @request&.params[:gclid],
+        yclid: @request&.params[:yclid],
+        fbclid: @request&.params[:fbclid],
+        rb_clickid: @request&.params[:rb_clickid],
+        ym_goal: @request&.params[:ym_goal],
+        roistat_visit: @request&.params[:roistat_visit]
       }
     }
   end
