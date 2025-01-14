@@ -285,6 +285,16 @@ namespace :import_api do
     )
   
     if car.save
+      # Добавляем историю автомобиля
+      create_history_for_api_car(car, car_data)
+  
+      # Сохраняем изображения
+      save_images_for_api_car(car, car_data)
+  
+      # Сохраняем дополнительные опции
+      save_extras_for_api_car(car, car_data)
+  
+      puts "New car created with full details: #{car.brand.name} #{car.model.name}"
       car
     else
       puts "\nFailed to create car: #{car_data.dig('mark', 'title')} #{car_data.dig('model', 'title')}"
