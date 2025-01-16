@@ -39,6 +39,7 @@ Rails.application.configure do
 
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
+  config.active_storage.variant_processor = :vips # Используем libvips вместо ImageMagick
 
   # Mount Action Cable outside main process or domain.
   # config.action_cable.mount_path = nil
@@ -108,4 +109,16 @@ Rails.application.configure do
   config.hosts << "www.usecarmax.ru"
   # config.hosts << "youautoplus.ru"
   # config.hosts << "www.youautoplus.ru"
+
+  config.public_file_server.headers = {
+    'Cache-Control' => 'public, max-age=31536000',
+    'X-Content-Type-Options' => 'nosniff',
+    'X-Frame-Options' => 'DENY',
+    'X-XSS-Protection' => '1; mode=block'
+  }
+
+  # Включаем сжатие ассетов
+  config.assets.compress = true
+  config.assets.js_compressor = :terser
+  config.assets.css_compressor = :sass
 end
