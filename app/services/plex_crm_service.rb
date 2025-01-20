@@ -236,9 +236,6 @@ class PlexCrmService
   # @return [Hash] Formatted call request values
   def build_call_request_values(call_request)
     car = Car.find_by(id: call_request.car_id) # Получаем данные о машине по car_id
-    history_car = HistoryCar.find_by(car_id: car&.id) # Получаем данные о истории машины
-    generation = car&.model&.generations&.first # Получаем генерацию через модель
-    first_image_url = car&.images&.first&.url || "Отсутствует изображение" # Замените "string" на значение по умолчанию, если изображение отсутствует
 
     {
       type: "callback",
@@ -246,13 +243,26 @@ class PlexCrmService
         dealerId: 77,
         websiteId: 267
       },
-      dateTime: Time.current.utc.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
+      dateTime: call_request.created_at.strftime('%Y-%m-%d %H:%M:%S'),
       externalId: call_request.id.to_s, # Внешний ID кредита
       values: {
+        clientName: call_request.name.to_s, # ФИО клиента
         clientPhone: call_request.phone, # Телефон клиента
-        clientName: call_request.name, # ФИО клиента
-        offerExternalId: call_request.id, # ID кредита
+        offerId: car&.unique_id.to_i,
         comment: COMMENTS[:call_request].call(call_request)
+      },
+      tracking: {
+        utm_source: @request&.params[:utm_source],
+        utm_medium: @request&.params[:utm_medium],
+        utm_campaign: @request&.params[:utm_campaign],
+        utm_content: @request&.params[:utm_content],
+        utm_term: @request&.params[:utm_term],
+        gclid: @request&.params[:gclid],
+        yclid: @request&.params[:yclid],
+        fbclid: @request&.params[:fbclid],
+        rb_clickid: @request&.params[:rb_clickid],
+        ym_goal: @request&.params[:ym_goal],
+        roistat_visit: @request&.params[:roistat_visit]
       }
     }
   end
