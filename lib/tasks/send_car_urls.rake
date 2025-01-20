@@ -17,7 +17,6 @@ namespace :plex_api do
       }
     end
 
-    byebug
     # Формируем тело запроса
     body = { items: items }
 
