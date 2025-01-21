@@ -6,8 +6,9 @@ namespace :plex_api do
     # Получаем все автомобили
     cars = Car.all
 
-    # Формируем массив items для отправки
     items = cars.map do |car|
+      next unless car.url.present?
+
       {
         id: car.id,
         siteId: 627,
@@ -15,25 +16,30 @@ namespace :plex_api do
         url: car.url,
         isActive: car.online_view_available
       }
+    end.compact
+
+    if items.empty?
+      puts "No valid URLs to send."
+      next
     end
 
-    # Формируем тело запроса
-    body = { items: items }
+    # Разбиваем массив на части по 1000 элементов
+    items.each_slice(1000) do |items_batch|
+      body = { items: items_batch }
 
-    # Отправляем запрос на Plex API
-    response = HTTParty.post('https://plex-crm.ru/api/v3/offers/urls', 
-      headers: {
-        'Authorization' => "Bearer #{ENV['PLEX_CRM_TOKEN']}",
-        'Content-Type' => 'application/json'
-      },
-      body: body.to_json
-    )
+      response = HTTParty.post('https://plex-crm.ru/api/v3/offers/urls', 
+        headers: {
+          'Authorization' => "Bearer #{ENV['PLEX_CRM_TOKEN']}",
+          'Content-Type' => 'application/json'
+        },
+        body: body.to_json
+      )
 
-    # Обрабатываем ответ
-    if response.success?
-      puts "Successfully sent URLs to Plex API."
-    else
-      puts "Failed to send URLs. Response: #{response.body}"
+      if response.success?
+        puts "Successfully sent #{items_batch.size} URLs to Plex API."
+      else
+        puts "Failed to send URLs. Response: #{response.body}"
+      end
     end
   end
 end
