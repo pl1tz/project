@@ -203,7 +203,6 @@ class PlexCrmService
         websiteId: 627
       },
       dateTime: exchange.created_at.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
-      externalId: exchange.id.to_s, # Внешний ID кредита
       values: {
         clientName: exchange.name.to_s, # Имя клиента
         clientPhone: exchange.phone, # Телефон клиента
