@@ -50,53 +50,86 @@ class CarCatalogService
         :car_catalog_texnos,
         :car_catalog_engines,
         :car_catalog_images,
-        :car_catalog_configurations
+        car_catalog_configurations: { car_catalog_extras: [:car_catalog_extra_group, :car_catalog_extra_name] }
       ).find_by(id: car_id)
 
       return nil unless car
 
-      [
-        {
-          id: car.id,
-          brand: car.brand,
-          model: car.model,
-          power: car.power,
-          acceleration: car.acceleration,
-          consumption: car.consumption,
-          max_speed: car.max_speed,
-          car_colors: car.car_colors.map { |color| { id: color.id, background: color.background, name: color.name, image: color.image } },
-          car_catalog_contents: car.car_catalog_contents,
-          car_catalog_texnos: car.car_catalog_texnos.map { |texno| { id: texno.id, image: texno.image, width: texno.width, height: texno.height, length: texno.length } },
-          car_catalog_engines: car.car_catalog_engines.map { |engine| { id: engine.id, name_engines: engine.name_engines, torque: engine.torque, power: engine.power, cylinders: engine.cylinders, engine_volume: engine.engine_volume, fuel_type: engine.fuel_type, engine_type: engine.engine_type } },
-          car_catalog_images: car.car_catalog_images.map { |image| { id: image.id, url: image.url } },
-          car_catalog_configurations: car.car_catalog_configurations.group_by(&:package_group).map do |group_name, configs|
-            {
-              package_group: group_name,
-              configurations: configs.map do |config|
-
-                {
-                  id: config.id,
-                  package_name: config.package_name,
-                  volume: config.volume,
-                  transmission: config.transmission,
-                  power: config.power,
-                  price: config.price,
-                  credit_discount: config.credit_discount,
-                  trade_in_discount: config.trade_in_discount,
-                  recycling_discount: config.recycling_discount,
-                  special_price: config.special_price,
-                  car_catalog_extras: config.car_catalog_extras.includes(:car_catalog_extra_group, :car_catalog_extra_name).group_by(&:car_catalog_extra_group).map do |extra_group_name, extras|
-                    {
-                      group_name: extra_group_name,
-                      extra_names: extras.map(&:car_catalog_extra_name).map(&:name)
-                    }
-                  end
-                }
-              end
-            }
-          end
-        }
-      ]
+      {
+        id: car.id,
+        brand: car.brand,
+        model: car.model,
+        power: car.power,
+        acceleration: car.acceleration,
+        consumption: car.consumption,
+        max_speed: car.max_speed,
+        car_colors: car.car_colors.map do |color|
+          {
+            id: color.id,
+            background: color.background,
+            name: color.name,
+            image: color.image
+          }
+        end,
+        car_catalog_contents: car.car_catalog_contents.map do |content|
+          {
+            id: content.id,
+            content: content.content
+          }
+        end,
+        car_catalog_texnos: car.car_catalog_texnos.map do |texno|
+          {
+            id: texno.id,
+            image: texno.image,
+            width: texno.width,
+            height: texno.height,
+            length: texno.length
+          }
+        end,
+        car_catalog_engines: car.car_catalog_engines.map do |engine|
+          {
+            id: engine.id,
+            name_engines: engine.name_engines,
+            torque: engine.torque,
+            power: engine.power,
+            cylinders: engine.cylinders,
+            engine_volume: engine.engine_volume,
+            fuel_type: engine.fuel_type,
+            engine_type: engine.engine_type
+          }
+        end,
+        car_catalog_images: car.car_catalog_images.map do |image|
+          {
+            id: image.id,
+            url: image.url
+          }
+        end,
+        car_catalog_configurations: car.car_catalog_configurations.group_by(&:package_group).map do |group_name, configs|
+          {
+            package_group: group_name,
+            configurations: configs.map do |config|
+              {
+                id: config.id,
+                package_name: config.package_name,
+                volume: config.volume,
+                transmission: config.transmission,
+                power: config.power,
+                price: config.price,
+                credit_discount: config.credit_discount,
+                trade_in_discount: config.trade_in_discount,
+                recycling_discount: config.recycling_discount,
+                special_price: config.special_price,
+                car_catalog_extras: config.car_catalog_extras.group_by(&:car_catalog_extra_group).map do |extra_group, extras|
+                  {
+                    group_name: extra_group.name,
+                    extra_names: extras.map { |extra| extra.car_catalog_extra_name.name }
+                  }
+                end
+              }
+            end
+          }
+        end
+      }
     end
 
     def self.find_configurations_by_id(car_catalog_id)
