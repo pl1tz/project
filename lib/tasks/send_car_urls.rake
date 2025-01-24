@@ -10,9 +10,9 @@ namespace :plex_api do
       next unless car.url.present?
 
       {
-        id: car.id,
+        id: car.unique_id.to_i,
         siteId: 627,
-        externalId: car.unique_id.to_i,
+        externalId: car.id,
         url: car.url,
         isActive: car.online_view_available
       }
