@@ -6,11 +6,14 @@ class FeedsController < ApplicationController
 
     base_url = ENV['REACT_APP_BASE_URL']
 
+    # Извлечение части из base_url
+    site_name = base_url.split('//').last.split('.').first.upcase
+
     builder = Nokogiri::XML::Builder.new do |xml|
       xml.yml_catalog(date: Time.now.iso8601) do
         xml.shop do
-          xml.name "YOUAUTO"
-          xml.company "YOUAUTO"
+          xml.name site_name
+          xml.company site_name
           xml.url base_url
           xml.currencies do
             xml.currency(id: "RUR", rate: "1")
@@ -25,19 +28,20 @@ class FeedsController < ApplicationController
             brands.each_with_index do |brand, index|
               xml.set(id: "s#{index + 1}") do
                 xml.name "Автомобили #{brand} с пробегом в Москве"
-                xml.url "#{base_url}cars?brand_name=#{brand}&price_asc=true"
+                xml.url "#{base_url}/cars?brand_name=#{brand}"
               end
             end
           end
           xml.offers do
             cars.each do |car|
-              xml.offer(id: car.unique_id, available: car.online_view_available) do
+              xml.offer(id: car.id, available: car.online_view_available) do
                 xml.name "#{car.brand.name} #{car.model.name}, #{car.year} года"
-                xml.set_ids "s#{car.brand_id}"
-                xml.url "#{base_url}car/#{car.brand.name}/#{car.id}"
+                xml.categoryId car.brand_id
+                xml.send(:"set-ids", "s#{car.brand_id}")
+                xml.url "#{base_url}/car/#{car.brand.name}/#{car.id}"
                 xml.picture car.images.first.url if car.images.any?
                 xml.description car.description
-                xml.param(name: "Конверсия", value: "4.01711")
+                xml.param(name: "Конверсия") { xml.text "4.01711" }
                 xml.price(from: "true") { xml.text car.price }
                 xml.currencyId "RUR"
               end
