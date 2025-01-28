@@ -140,14 +140,12 @@ Rails.application.routes.draw do
   get 'admin/catalog/:id/texnos' => 'cars#add_car'#Добавить автомобиль
   get 'admin/catalog/:id/gallery' => 'cars#add_car'#Добавить автомобиль
   get 'privacy' => 'cars#add_car'#Политика конфиденциальности
-  
-
+  get 'feeds/yandex_feed', to: 'feeds#yandex_feed', defaults: { format: 'xml' }
 
   match "/404", to: "errors#not_found", via: :all
   match "*unmatched", to: "errors#not_found", via: :all
 
   # Обработка всех остальных маршрутов
   match '*path', to: 'application#frontend', via: :all
-  
 end
   
