@@ -79,7 +79,7 @@ class PlexCrmService
       type: "credit",
       source: {
         dealerId: 77,
-        websiteId: 267
+        websiteId: ENV['SITE_ID'].to_i
       },
       dateTime: credit.created_at.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
       externalId: credit.id.to_s, # Внешний ID кредита
@@ -121,7 +121,7 @@ class PlexCrmService
       type: "hire-purchase",
       source: {
         dealerId: 77, # Замените на актуальный ID дилера
-        websiteId: 267, # Замените на актуальный ID сайта
+        websiteId: ENV['SITE_ID'].to_i
       },
       dateTime: installment.created_at.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
       externalId: installment.id.to_s, # Внешний ID заявки
@@ -160,7 +160,7 @@ class PlexCrmService
       type: "buyout",
       source: {
         dealerId: 77,
-        websiteId: 267,
+        websiteId: ENV['SITE_ID'].to_i,
       },
       dateTime: buyout.created_at.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
       externalId: buyout.id.to_s, # Внешний ID заявки
@@ -200,7 +200,7 @@ class PlexCrmService
       type: "trade-in",
       source: {
         dealerId: 77,
-        websiteId: 267
+        websiteId: ENV['SITE_ID'].to_i
       },
       dateTime: exchange.created_at.strftime('%Y-%m-%d %H:%M:%S'), # Текущая дата и время
       values: {
@@ -240,7 +240,7 @@ class PlexCrmService
       type: "callback",
       source: {
         dealerId: 77,
-        websiteId: 267
+        websiteId: ENV['SITE_ID'].to_i
       },
       dateTime: call_request.created_at.strftime('%Y-%m-%d %H:%M:%S'),
       externalId: call_request.id.to_s, # Внешний ID кредита

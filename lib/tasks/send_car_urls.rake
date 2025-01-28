@@ -11,7 +11,7 @@ namespace :plex_api do
 
       {
         id: car.unique_id.to_i,
-        siteId: 627,
+        siteId: ENV['SITE_ID'].to_i,
         externalId: car.id,
         url: car.url,
         isActive: car.online_view_available
