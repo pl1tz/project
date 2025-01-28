@@ -28,7 +28,8 @@ class FeedsController < ApplicationController
             brands.each_with_index do |brand, index|
               xml.set(id: "s#{index + 1}") do
                 xml.name "Автомобили #{brand} с пробегом в Москве"
-                xml.url "#{base_url}/cars?brand_name=#{brand}"
+                # Кодируем URL, заменяя пробелы на %20
+                xml.url "#{base_url}/cars?brand_name=#{CGI.escape(brand)}"
               end
             end
           end
@@ -38,7 +39,8 @@ class FeedsController < ApplicationController
                 xml.name "#{car.brand.name} #{car.model.name}, #{car.year} года"
                 xml.categoryId car.brand_id
                 xml.send(:"set-ids", "s#{car.brand_id}")
-                xml.url "#{base_url}/car/#{car.brand.name}/#{car.id}"
+                # Кодируем URL, заменяя пробелы на %20
+                xml.url "#{base_url}/car/#{CGI.escape(car.brand.name).gsub('+', '%20')}/#{car.id}"
                 xml.picture car.images.first.url if car.images.any?
                 xml.description car.description
                 xml.param(name: "Конверсия") { xml.text "4.01711" }
