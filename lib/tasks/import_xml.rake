@@ -355,22 +355,20 @@ namespace :import do
     # Извлекаем изображения экстерьера
     exterior_images = document.css('.photos .exterior .image img').map { |img| img['src'] }
     exterior_images.each do |image_url|
-      mini_catalog_url = "#{base_url}#{image_url}"
-      catalog_url = mini_catalog_url.gsub!('/mini', '')
+      all_catalog_url = "#{base_url}#{image_url}"
       CarCatalogImage.find_or_create_by!(
         car_catalog_id: car_catalog_id,
-        url: catalog_url
+        url: all_catalog_url
       )
     end
   
     # Извлекаем изображения интерьера
     interior_images = document.css('.photos .interior .image img').map { |img| img['src'] }
     interior_images.each do |image_url|
-      mini_catalog_url = "#{base_url}#{image_url}"
-      catalog_url = mini_catalog_url.gsub!('/mini', '')
+      all_catalog_url = "#{base_url}#{image_url}"
       CarCatalogImage.find_or_create_by!(
         car_catalog_id: car_catalog_id,
-        url: catalog_url
+        url: all_catalog_url
       )
     end
     
