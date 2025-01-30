@@ -779,7 +779,7 @@ namespace :import do
       pledge_status: "Залог не найден",
       pledge_status_info: "Мы проверили базы данных Федеральной нотариальной палаты (ФНП) и Национального бюро кредитных историй (НБКИ).",
       accidents_found: "ДТП не найдены",
-      accidents_found_info: "В отчёт не попадут аварии, которые произошли раньше 2015 года или не оформлял��сь в ГИБДД.",
+      accidents_found_info: "В отчёт не попадут аварии, которые произошли раньше 2015 года или не оформлялись в ГИБДД.",
       repair_estimates_found: "Не найдены расчёты стоимости ремонта",
       repair_estimates_found_info: "Мы проверяем, во сколько эксперты страховых компаний оценили восстановление автомобиля после ДТП. Расчёт не означает, что машину ремонтировали.",
       taxi_usage: "Не найдено разрешение на работу в такси",
@@ -844,4 +844,17 @@ namespace :import do
   end
 
 
+end
+
+namespace :car_catalog do
+  desc "Удаляет '/mini' из всех URL в CarCatalogImage"
+  task remove_mini_from_images: :environment do
+    CarCatalogImage.find_each do |image|
+      if image.url.include?('/mini')
+        image.url.gsub!('/mini', '') # Удаляем '/mini' из URL
+        image.save
+        puts "Обновлено: #{image.url}"
+      end
+    end
+  end
 end
