@@ -356,6 +356,7 @@ namespace :import do
     exterior_images = document.css('.photos .exterior .image img').map { |img| img['src'] }
     exterior_images.each do |image_url|
       all_catalog_url = "#{base_url}#{image_url}"
+      all_catalog_url.gsub!('/mini', '')
       CarCatalogImage.find_or_create_by!(
         car_catalog_id: car_catalog_id,
         url: all_catalog_url
