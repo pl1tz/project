@@ -80,8 +80,8 @@ Rails.application.configure do
   # config.generators.apply_rubocop_autocorrect_after_generate!
 
   # домены оставляем для будущего использования
-  config.hosts << "usecar.ru"
-  config.hosts << "www.usecar.ru"
+  config.hosts << ENV['HOST_NAME']
+  config.hosts << "www.#{ENV['HOST_NAME']}"
   # config.hosts << "usecarmax.ru"
   # config.hosts << "www.usecarmax.ru"
   # config.hosts << "youautoplus.ru"
