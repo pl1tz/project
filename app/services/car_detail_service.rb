@@ -7,10 +7,11 @@ class CarDetailService
   private
 
   def self.fetch_cars(brand_name, model_name, generation_name)
-    Car.joins(:brand, :model, :generation, :color, :body_type, :engine_name_type, :engine_power_type, :engine_capacity_type, :gearbox_type, :drive_type, :history_car)
+    Car.joins(:brand, :model, :generation, :color, :body_type, :engine_name_type, :engine_power_type, :engine_capacity_type, :gearbox_type, :drive_type, :history_cars)
        .includes(:images)
        .where('brands.name = ? AND models.name = ? AND generations.name = ?', brand_name, model_name, generation_name)
        .select(select_fields)
+       .distinct
   end
 
   def self.select_fields

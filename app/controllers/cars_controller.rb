@@ -133,10 +133,7 @@ class CarsController < ApplicationController
 
 
   def car_details
-    brand_name = params[:brand_name]
-    model_name = params[:model_name]
-    generation_name = params[:generation_name]
-    result = CarDetailService.call(brand_name, model_name, generation_name)
+    result = CarFilterService.new(filter_params, 10).call
     render json: result
   end
 
