@@ -276,14 +276,38 @@ namespace :import do
           background = background_match ? background_match[1] : nil
           name = color_node['data-title']&.strip
           image_path = color_node['data-image']
-          image = "#{base_url}#{image_path}"
+          image_url = "#{base_url}#{image_path}"
 
-          CarColor.find_or_create_by!(
-            car_catalog_id: car_catalog.id,
-            background: background,
-            name: name,
-            image: image
-          )
+          # Создаем директорию для сохранения изображений, если она не существует
+          images_directory = Rails.root.join('public', 'uploads', 'images')
+          FileUtils.mkdir_p(images_directory)
+          domain_url = 'http://127.0.0.1:3000' # Ваш домен
+          # Загружаем изображение
+          begin
+            image_data = URI.open(image_url).read
+            image_filename = File.basename(image_path)
+            image_file_path = images_directory.join(image_filename)
+
+            File.open(image_file_path, 'wb') do |file|
+              file.write(image_data)
+            end
+
+            # Сохраняем путь к изображению в базе данных
+            image = "#{domain_url}/uploads/images/#{image_filename}"
+
+            CarColor.find_or_create_by!(
+              car_catalog_id: car_catalog.id,
+              background: background,
+              name: name,
+              image: image
+            )
+
+            puts "Color saved: #{name} with image: #{image}"
+          rescue OpenURI::HTTPError => e
+            puts "Ошибка при загрузке изображения: #{e.message}"
+          rescue StandardError => e
+            puts "Общая ошибка: #{e.message}"
+          end
         end
 
         puts "Car data imported successfully for #{brand} #{model}."
@@ -299,12 +323,35 @@ namespace :import do
     width = techno_image_node.at_css('.techno-width')&.text&.to_i
     height = techno_image_node.at_css('.techno-height')&.text&.to_i
     length = techno_image_node.at_css('.techno-length')&.text&.to_i
-    base_url = 'https://center-auto.ru'
-    image = "#{base_url}#{image_url}"
 
+    base_url = 'https://center-auto.ru'
+    domain_url = 'http://127.0.0.1:3000' # Ваш домен
+    images_directory = Rails.root.join('public', 'uploads', 'images') # Папка для сохранения изображений
+
+    # Создаем директорию, если она не существует
+    FileUtils.mkdir_p(images_directory)
+
+    # Обновляем URL, если он содержит '/mini'
+    if image_url.include?('/mini')
+      image_url.gsub!('/mini', '') # Удаляем '/mini' из URL
+      puts "Обновлено: #{image_url}"
+    end
+
+    all_catalog_url = "#{base_url}#{image_url}"
+
+    # Сохраняем изображение на сервере
+    image_data = URI.open(all_catalog_url).read
+    image_filename = File.basename(image_url)
+    image_path = images_directory.join(image_filename)
+
+    File.open(image_path, 'wb') do |file|
+      file.write(image_data)
+    end
+
+    # Сохраняем путь к изображению в базе данных
     CarCatalogTexno.find_or_create_by!(
       car_catalog_id: car_catalog_id,
-      image: image,
+      image: "#{domain_url}/uploads/images/#{image_filename}",
       width: width,
       height: height,
       length: length
@@ -351,27 +398,76 @@ namespace :import do
 
   def parse_car_images(car_catalog_id, document)
     base_url = 'https://center-auto.ru'
-    
+    domain_url = 'http://127.0.0.1:3000' # Ваш домен
+    images_directory = Rails.root.join('public', 'uploads', 'images') # Папка для сохранения изображений
+
+    # Создаем директорию, если она не существует
+    FileUtils.mkdir_p(images_directory)
+
     # Извлекаем изображения экстерьера
     exterior_images = document.css('.photos .exterior .image img').map { |img| img['src'] }
     exterior_images.each do |image_url|
+      if image_url.include?('/mini')
+        image_url.gsub!('/mini', '') # Удаляем '/mini' из URL
+        puts "Обновлено: #{image_url}"
+      end
       all_catalog_url = "#{base_url}#{image_url}"
-      CarCatalogImage.find_or_create_by!(
-        car_catalog_id: car_catalog_id,
-        url: all_catalog_url
-      )
+
+      # Проверяем, является ли URL валидным
+      begin
+        URI.parse(all_catalog_url) # Проверка на валидность URL
+        # Сохраняем изображение на сервере
+        image_data = URI.open(all_catalog_url).read
+        image_filename = File.basename(image_url)
+        image_path = images_directory.join(image_filename)
+
+        File.open(image_path, 'wb') do |file|
+          file.write(image_data)
+        end
+
+        # Сохраняем путь к изображению в базе данных
+        CarCatalogImage.find_or_create_by!(car_catalog_id: car_catalog_id, url: "#{domain_url}/uploads/images/#{image_filename}")
+      rescue URI::InvalidURIError => e
+        puts "Ошибка: Неверный URL - #{all_catalog_url}: #{e.message}"
+      rescue OpenURI::HTTPError => e
+        puts "Ошибка при загрузке изображения: #{e.message}"
+      rescue StandardError => e
+        puts "Общая ошибка: #{e.message}"
+      end
     end
-  
+
     # Извлекаем изображения интерьера
     interior_images = document.css('.photos .interior .image img').map { |img| img['src'] }
     interior_images.each do |image_url|
+      if image_url.include?('/mini')
+        image_url.gsub!('/mini', '') # Удаляем '/mini' из URL
+        puts "Обновлено: #{image_url}"
+      end
       all_catalog_url = "#{base_url}#{image_url}"
-      CarCatalogImage.find_or_create_by!(
-        car_catalog_id: car_catalog_id,
-        url: all_catalog_url
-      )
+
+      # Проверяем, является ли URL валидным
+      begin
+        URI.parse(all_catalog_url) # Проверка на валидность URL
+        # Сохраняем изображение на сервере
+        image_data = URI.open(all_catalog_url).read
+        image_filename = File.basename(image_url)
+        image_path = images_directory.join(image_filename)
+
+        File.open(image_path, 'wb') do |file|
+          file.write(image_data)
+        end
+
+        # Сохраняем путь к изображению в базе данных
+        CarCatalogImage.find_or_create_by!(car_catalog_id: car_catalog_id, url: "#{domain_url}/uploads/images/#{image_filename}")
+      rescue URI::InvalidURIError => e
+        puts "Ошибка: Неверный URL - #{all_catalog_url}: #{e.message}"
+      rescue OpenURI::HTTPError => e
+        puts "Ошибка при загрузке изображения: #{e.message}"
+      rescue StandardError => e
+        puts "Общая ошибка: #{e.message}"
+      end
     end
-    
+
     puts "Images saved for car catalog: #{car_catalog_id}"
   end
 

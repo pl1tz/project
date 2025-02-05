@@ -79,6 +79,11 @@ class CarCatalogsController < ApplicationController
     render json: result
   end
 
+  def random_car
+    result = CarCatalogService.random_car
+    render json: result
+  end
+
   def cars_by_brand
     brand_name = params[:brand_name]
     result = CarCatalogService.cars_by_brand(brand_name)

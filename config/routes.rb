@@ -13,6 +13,7 @@ Rails.application.routes.draw do
     collection do
       get 'all_catalog'
       get 'cars_by_brand'
+      get 'random_car'
     end
     member do
       get 'compare'
