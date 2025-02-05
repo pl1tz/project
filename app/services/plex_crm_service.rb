@@ -20,12 +20,6 @@ class PlexCrmService
     call_request: ->(request) { "Заявка на обратный звонок#{request.preferred_time ? ", предпочтительное время: #{request.preferred_time}" : ''}" }
   }.freeze
 
-  # Initializes the service with request object for tracking parameters
-  #
-  # @param [ActionDispatch::Request] request Current request object containing UTM parameters
-  #
-  # @example
-  #   PlexCrmService.new(request)
   def initialize(request = nil)
     @token = ENV['PLEX_CRM_TOKEN']
     @headers = {
@@ -35,15 +29,6 @@ class PlexCrmService
     @request = request
   end
 
-  # Generic method for sending applications to Plex CRM
-  #
-  # @param [Symbol] type Type of application (:credit, :installment, :buyout, :exchange, :call_request)
-  # @param [Object] application Application object containing client data
-  # @return [Hash] Response from the API with status and message
-  #
-  # @example
-  #   send_application(:credit, credit_application)
-  #   # => { success: true, data: {...}, status: 200, message: "Successfully sent to Plex CRM" }
   def send_application(type, application)
     payload = send("build_#{type}_values", application)
   
@@ -67,10 +52,6 @@ class PlexCrmService
 
   private
 
-  # Builds values for credit application
-  #
-  # @param [Credit] credit Credit application object
-  # @return [Hash] Formatted credit application values
   def build_credit_values(credit)
     car = Car.find(credit.car_id) # Получаем данные о машине по car_id
     bank = credit.banks_id.present? ? Bank.find_by(id: credit.banks_id) : nil
@@ -110,10 +91,6 @@ class PlexCrmService
     }
   end
 
-  # Builds values for installment application
-  #
-  # @param [Installment] installment Installment application object
-  # @return [Hash] Formatted installment application values
   def build_installment_values(installment)
     car = Car.find(installment.car_id) # Получаем данные о машине по car_id
 
@@ -151,10 +128,6 @@ class PlexCrmService
     }
   end
 
-  # Builds values for buyout application
-  #
-  # @param [Buyout] buyout Buyout application object
-  # @return [Hash] Formatted buyout application values
   def build_buyout_values(buyout)
     {
       type: "buyout",
@@ -189,10 +162,6 @@ class PlexCrmService
     }
   end
 
-  # Builds values for exchange application
-  #
-  # @param [Exchange] exchange Exchange application object
-  # @return [Hash] Formatted exchange application values
   def build_exchange_values(exchange)
     car = Car.find(exchange.car_id) # Получаем данные о машине по car_id
 
@@ -229,10 +198,6 @@ class PlexCrmService
     }
   end
 
-  # Builds values for call request application
-  #
-  # @param [CallRequest] call_request Call request object
-  # @return [Hash] Formatted call request values
   def build_call_request_values(call_request)
     car = Car.find_by(id: call_request.car_id) # Получаем данные о машине по car_id
 
@@ -266,10 +231,6 @@ class PlexCrmService
     }
   end
 
-  # Logs outgoing request details
-  #
-  # @param [Symbol] type Type of application
-  # @param [Hash] payload Request payload
   def log_request(type, payload)
     Rails.logger.info "Sending #{type} request to Plex CRM:"
     Rails.logger.info "URL: #{self.class.base_uri}/contact/form"
@@ -277,22 +238,12 @@ class PlexCrmService
     Rails.logger.info "Payload: #{payload}"
   end
 
-  # Logs incoming response details
-  #
   # @param [HTTParty::Response] response Response from API
   def log_response(response)
     Rails.logger.info "Response from Plex CRM:"
     Rails.logger.info "Status: #{response.code}"
   end
 
-  # Processes API response and formats result
-  #
-  # @param [HTTParty::Response] response Response from API
-  # @return [Hash] Processed response with success status and message
-  #
-  # @example
-  #   handle_response(response)
-  #   # => { success: true, data: {...}, status: 200, message: "Successfully sent to Plex CRM" }
   def handle_response(response)
     success = response.success?
     message = success ? "Successfully sent to Plex CRM" : "Failed to send to Plex CRM: #{response.body}"

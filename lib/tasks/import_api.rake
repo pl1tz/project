@@ -2,16 +2,10 @@ require 'open-uri'
 require 'httparty'
 require 'parallel'
 
-# This Rake task is responsible for importing car data from the Plex CRM API
-# It handles the complete import process including:
-# - Fetching car data from the API
-# - Creating or updating car records
-# - Importing associated data (images, extras, history)
-# - Providing detailed import statistics
 # usecar.ru 267
 # usecarmax.ru 628
 # youautoplus.ru 627
-# @example Run rake import_api:create_cars
+# youautoplus.ru 1543
 namespace :import_api do
   task delete_diff_cars: :environment do
     url = 'https://plex-crm.ru/api/v3/offers/website/' + ENV['SITE_ID'].to_s
@@ -240,19 +234,6 @@ namespace :import_api do
 
   private
 
-  # Creates a new car record from API data
-  #
-  # @param [Hash] car_data Data received from API containing car details
-  #
-  # @return [Car, nil] Returns created Car object or nil if creation fails
-  #
-  # @example
-  #   create_car_from_api_data({ 
-  #     'mark' => { 'name' => 'Toyota' },
-  #     'model' => { 'name' => 'Camry' },
-  #     'year' => 2020,
-  #     ...
-  #   })
   def create_car_from_api_data(car_data)
     brand = Brand.find_or_create_by(name: car_data.dig('mark', 'title'))
     model = Model.find_or_create_by(
@@ -305,19 +286,6 @@ namespace :import_api do
     end
   end
 
-  # Creates history record for imported car
-  #
-  # @param [Car] car Car object to create history for
-  # @param [Hash] car_data API data containing car history information
-  #
-  # @return [HistoryCar] Created history record
-  #
-  # @example
-  #   create_history_for_api_car(car, { 
-  #     'vin' => 'ABC123...',
-  #     'run' => 50000
-  #     ...
-  #   })
   def create_history_for_api_car(car, car_data)
     HistoryCar.create!(
       car: car,
@@ -351,17 +319,6 @@ namespace :import_api do
     )
   end
 
-  # Saves images for imported car
-  #
-  # @param [Car] car Car object to save images for
-  # @param [Hash] car_data API data containing image URLs
-  #
-  # @return [void]
-  #
-  # @example
-  #   save_images_for_api_car(car, { 
-  #     'images' => [{ 'original' => 'http://example.com/image.jpg' }]
-  #   })
   def save_images_for_api_car(car, car_data)
     return unless car_data['images'].is_a?(Array)
 
@@ -374,19 +331,6 @@ namespace :import_api do
     puts "Images saved for car: #{car.id}"
   end
 
-  # Saves extra features/equipment for imported car
-  #
-  # @param [Car] car Car object to save extras for
-  # @param [Hash] car_data API data containing equipment information
-  #
-  # @return [void]
-  #
-  # @example
-  #   save_extras_for_api_car(car, { 
-  #     'equipment' => { 
-  #       'Safety' => ['ABS', 'Airbags']
-  #     }
-  #   })
   def save_extras_for_api_car(car, car_data)
     return unless car_data['equipment'].is_a?(Hash)
 
@@ -431,15 +375,6 @@ namespace :import_api do
     end
   end
 
-  # Finds or creates gearbox type based on API data
-  #
-  # @param [String] gearbox_name Name of the gearbox from API
-  #
-  # @return [GearboxType, nil] Found or created GearboxType object, nil if gearbox_name is nil
-  #
-  # @example find_or_create_gearbox_type_from_api('Автоматическая')
-  #
-  # @example_return #<GearboxType id: 1, name: "Автоматическая", abbreviation: "АКПП">
   def find_or_create_gearbox_type_from_api(gearbox_name)
     return nil unless gearbox_name
 
