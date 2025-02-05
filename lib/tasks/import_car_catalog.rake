@@ -92,7 +92,7 @@ namespace :import_catalog do
           # Создаем директорию для сохранения изображений, если она не существует
           images_directory = Rails.root.join('public', 'uploads', 'images')
           FileUtils.mkdir_p(images_directory)
-          domain_url = 'http://127.0.0.1:3000' # Ваш домен
+          domain_url = 'https://automagnat.ru' # Ваш домен
           # Загружаем изображение
           begin
             image_data = URI.open(image_url).read
@@ -135,7 +135,7 @@ namespace :import_catalog do
     length = techno_image_node.at_css('.techno-length')&.text&.to_i
 
     base_url = 'https://center-auto.ru'
-    domain_url = 'http://127.0.0.1:3000' # Ваш домен
+    domain_url = 'https://automagnat.ru' # Ваш домен
     images_directory = Rails.root.join('public', 'uploads', 'images') # Папка для сохранения изображений
 
     # Создаем директорию, если она не существует
@@ -207,7 +207,7 @@ namespace :import_catalog do
 
   def parse_car_images(car_catalog_id, document)
     base_url = 'https://center-auto.ru'
-    domain_url = 'http://127.0.0.1:3000' # Ваш домен
+    domain_url = 'https://automagnat.ru' # Ваш домен
     images_directory = Rails.root.join('public', 'uploads', 'images') # Папка для сохранения изображений
 
     # Создаем директорию, если она не существует
