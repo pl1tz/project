@@ -159,7 +159,7 @@ class CarsController < ApplicationController
 
   private
     def set_car
-      @car = Car.find_by(id: params[:id])
+      @car = Car.find_by(unique_id: params[:unique_id])
       if @car.nil?
         render file: "#{Rails.root}/public/404.html", status: :not_found, layout: false
       end

@@ -66,7 +66,7 @@ Rails.application.routes.draw do
   resources :models
   resources :history_cars
   resources :call_requests
-  resources :cars do
+  resources :cars, except: [:show] do
     collection do
       get :total_pages
     end
@@ -93,7 +93,7 @@ Rails.application.routes.draw do
   get 'last_cars' => 'cars#last_cars'#Последние 20 автомобилей
   get 'cars_count' => 'cars#cars_count'#Количество автомобилей
   get 'car_details' => 'cars#car_details'#Детали автомобиля
-  get 'cars/:id' => 'cars#show'#Показать автомобиль
+  get 'cars/:unique_id' => 'cars#show'#Показать автомобиль
   get 'filters', to: 'cars#filters'#Фильтры для автомобилей
   get 'car_ids', to: 'cars#car_ids'#Список идентификаторов автомобилей
   get 'exchange' => 'exchanges#index'#Обмен
@@ -112,7 +112,7 @@ Rails.application.routes.draw do
   post 'credit' => 'credits#create'#Создать программу
   get 'credit/:id' => 'credits#show'#Показать программу
   get 'about' => 'about_companies#index'#О компании
-  get 'car/:brand/:id' => 'cars#add_car'#Показать автомобиль
+  get 'car/:brand/:unique_id' => 'cars#add_car'#Показать автомобиль
 
   get 'catalog/:brand/:model_id' => 'cars#add_car'#Показать автомобиль
   get 'catalog/:brand_name' => 'cars#add_car'#Показать автомобиль

@@ -266,7 +266,7 @@ namespace :import_api do
     )
   
     if car.save
-      car.update(url: "#{ENV['REACT_APP_BASE_URL']}/car/#{brand.name}/#{car.id}")
+      car.update(url: "#{ENV['REACT_APP_BASE_URL']}/car/#{brand.name}/#{car.unique_id}")
 
       # Добавляем историю автомобиля
       create_history_for_api_car(car, car_data)
@@ -403,7 +403,7 @@ namespace :import_api do
       gearbox_type: find_or_create_gearbox_type_from_api(car_data.dig('gearbox', 'title') || 'Неизвестно'),
       drive_type: DriveType.find_or_create_by(name: car_data.dig('driveType', 'title') || "Полный"),
       complectation_name: car_data['complectation'],
-      url: "#{ENV['REACT_APP_BASE_URL']}/car/#{existing_car.brand.name}/#{existing_car.id}"
+      url: "#{ENV['REACT_APP_BASE_URL']}/car/#{existing_car.brand.name}/#{existing_car.unique_id}"
     )
   end
 
