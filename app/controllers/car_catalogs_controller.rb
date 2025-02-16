@@ -4,7 +4,11 @@ class CarCatalogsController < ApplicationController
 
   # GET /car_catalogs or /car_catalogs.json
   def index
-    @car_catalogs = CarCatalog.all
+    if params[:admin] == "true"
+      @car_catalogs = CarCatalog.all
+    else
+      @car_catalogs = CarCatalog.where(visibility: true)
+    end
     render json: @car_catalogs
   end
 
@@ -111,6 +115,6 @@ class CarCatalogsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def car_catalog_params
-      params.require(:car_catalog).permit(:brand, :model, :power, :acceleration, :consumption, :max_speed)
+      params.require(:car_catalog).permit(:brand, :model, :power, :acceleration, :consumption, :max_speed, :visibility)
     end
 end
