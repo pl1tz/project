@@ -137,6 +137,7 @@ class CarCatalogService
                 transmission: config.transmission,
                 power: config.power,
                 price: config.price,
+                car_catalog_id: config.car_catalog_id,
                 credit_discount: config.credit_discount,
                 trade_in_discount: config.trade_in_discount,
                 recycling_discount: config.recycling_discount,

@@ -9,7 +9,8 @@ class PlexCrmService
     installment: 'hire-purchase',
     buyout: 'buyout',
     exchange: 'trade-in',
-    call_request: 'callback'
+    call_request: 'callback',
+    car_catalog: 'unknown'
   }.freeze
 
   COMMENTS = {
@@ -17,7 +18,8 @@ class PlexCrmService
     installment: 'Заявка на рассрочку',
     buyout: 'Заявка на выкуп автомобиля',
     exchange: 'Заявка на обмен автомобиля (Trade-in)',
-    call_request: ->(request) { "Заявка на обратный звонок#{request.preferred_time ? ", предпочтительное время: #{request.preferred_time}" : ''}" }
+    call_request: ->(request) { "Заявка на обратный звонок#{request.preferred_time ? ", предпочтительное время: #{request.preferred_time}" : ''}" },
+    car_catalog: 'Заявка на покупку автомобиля из каталога'
   }.freeze
 
   def initialize(request = nil)
@@ -214,6 +216,38 @@ class PlexCrmService
         clientPhone: call_request.phone, # Телефон клиента
         offerId: car&.unique_id.to_i,
         comment: COMMENTS[:call_request].call(call_request)
+      },
+      tracking: {
+        utm_source: @request&.params[:utm_source],
+        utm_medium: @request&.params[:utm_medium],
+        utm_campaign: @request&.params[:utm_campaign],
+        utm_content: @request&.params[:utm_content],
+        utm_term: @request&.params[:utm_term],
+        gclid: @request&.params[:gclid],
+        yclid: @request&.params[:yclid],
+        fbclid: @request&.params[:fbclid],
+        rb_clickid: @request&.params[:rb_clickid],
+        ym_goal: @request&.params[:ym_goal],
+        roistat_visit: @request&.params[:roistat_visit]
+      }
+    }
+  end
+
+  def build_car_catalog_values(car_catalog_order)
+    car_catalog = CarCatalog.find(car_catalog_order.car_catalog_id)
+
+    {
+      type: "unknown",
+      source: {
+        dealerId: 77,
+        websiteId: ENV['SITE_ID'].to_i
+      },
+      dateTime: car_catalog_order.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+      values: {
+        clientName: car_catalog_order.name.to_s,
+        clientPhone: car_catalog_order.phone,
+        offerId: car_catalog_order.id.to_i,
+        comment: COMMENTS[:car_catalog],
       },
       tracking: {
         utm_source: @request&.params[:utm_source],
