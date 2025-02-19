@@ -38,7 +38,7 @@ namespace :generate do
               xml.offer(id: car.unique_id, available: car.online_view_available) do
                 xml.name "#{car.brand.name} #{car.model.name}, #{car.year} года"
                 xml.set_ids "s#{car.brand_id}"
-                xml.url "#{base_url}/car/#{car.brand.name}/#{car.id}"
+                xml.url "#{base_url}/car/#{car.brand.name}/#{car.unique_id}"
                 xml.picture car.images.first.url if car.images.any?
                 xml.description car.description
                 xml.price(from: "true") { xml.text car.price }
