@@ -35,12 +35,12 @@ class FeedsController < ApplicationController
           end
           xml.offers do
             cars.each do |car|
-              xml.offer(id: car.id, available: car.online_view_available) do
+              xml.offer(id: car.unique_id, available: car.online_view_available) do
                 xml.name "#{car.brand.name} #{car.model.name}, #{car.year} года"
                 xml.categoryId car.brand_id
                 xml.send(:"set-ids", "s#{car.brand_id}")
                 # Кодируем URL, заменяя пробелы на %20
-                xml.url "#{base_url}/car/#{CGI.escape(car.brand.name).gsub('+', '%20')}/#{car.id}"
+                xml.url "#{base_url}/car/#{CGI.escape(car.brand.name).gsub('+', '%20')}/#{car.unique_id}"
                 xml.picture car.images.first.url if car.images.any?
                 xml.description car.description
                 xml.param(name: "Конверсия") { xml.text "4.01711" }
