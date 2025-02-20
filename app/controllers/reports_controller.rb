@@ -49,9 +49,9 @@ class ReportsController < ApplicationController
 
       # Создание данных для таблицы
       table_data = [
-        ["VIN:", "#{car.history_car.vin[0..5]}*****#{car.history_car.vin[-4..-1]}"], # Скрываем часть VIN
-        ["Госномер:", car.history_car.registration_number || 'Отсутствует'],
-        ["Номер кузова:", car.history_car.vin],
+        ["VIN:", "#{car.history_cars.first.vin[0..5]}*****#{car.history_cars.first.vin[-4..-1]}"], # Скрываем часть VIN
+        ["Госномер:", car.history_cars.first.registration_number || 'Отсутствует'],
+        ["Номер кузова:", car.history_cars.first.vin],
         ["Год выпуска:", car.year],
         ["Тип ТС:", car.body_type.name],
         ["Цвет:", car.color.name],
@@ -77,53 +77,53 @@ class ReportsController < ApplicationController
       move_down 5
 
       # Пример сводки
-      text "#{car.history_car.registration_restrictions}", size: 12, style: :bold
+      text "#{car.history_cars.first.registration_restrictions}", size: 12, style: :bold
       move_down 5
-      text "#{car.history_car.registration_restrictions_info}", size: 9
+      text "#{car.history_cars.first.registration_restrictions_info}", size: 9
       move_down 10
-      text "#{car.history_car.wanted_status}", size: 12, style: :bold
+      text "#{car.history_cars.first.wanted_status}", size: 12, style: :bold
       move_down 5
-      text "#{car.history_car.wanted_status_info}", size: 9
+      text "#{car.history_cars.first.wanted_status_info}", size: 9
       move_down 10
-      text "#{car.history_car.pledge_status}", size: 12, style: :bold
+      text "#{car.history_cars.first.pledge_status}", size: 12, style: :bold
       move_down 5
-      text "#{car.history_car.pledge_status_info}", size: 9
+      text "#{car.history_cars.first.pledge_status_info}", size: 9
       move_down 10
-      text "#{car.history_car.previous_owners} владельцев по ПТС", size: 12, style: :bold
+      text "#{car.history_cars.first.previous_owners} владельцев по ПТС", size: 12, style: :bold
       move_down 10
-      text "#{car.history_car.accidents_found}", size: 12, style: :bold
+      text "#{car.history_cars.first.accidents_found}", size: 12, style: :bold
       move_down 5
-      text "#{car.history_car.accidents_found_info}", size: 9
+      text "#{car.history_cars.first.accidents_found_info}", size: 9
       move_down 10
-      text "#{car.history_car.repair_estimates_found}", size: 12, style: :bold
+      text "#{car.history_cars.first.repair_estimates_found}", size: 12, style: :bold
       move_down 5
-      text "#{car.history_car.repair_estimates_found_info}", size: 9
+      text "#{car.history_cars.first.repair_estimates_found_info}", size: 9
       move_down 10
-      text "#{car.history_car.taxi_usage}", size: 12, style: :bold
+      text "#{car.history_cars.first.taxi_usage}", size: 12, style: :bold
       move_down 5
-      text "#{car.history_car.taxi_usage_info}", size: 9
+      text "#{car.history_cars.first.taxi_usage_info}", size: 9
       move_down 10
-      text "#{car.history_car.carsharing_usage}", size: 12, style: :bold
+      text "#{car.history_cars.first.carsharing_usage}", size: 12, style: :bold
       move_down 5
-      text "#{car.history_car.carsharing_usage_info}", size: 9
+      text "#{car.history_cars.first.carsharing_usage_info}", size: 9
       move_down 10
-      text "#{car.history_car.diagnostics_found}", size: 12, style: :bold
+      text "#{car.history_cars.first.diagnostics_found}", size: 12, style: :bold
       move_down 5
-      text "#{car.history_car.diagnostics_found_info}", size: 9
+      text "#{car.history_cars.first.diagnostics_found_info}", size: 9
       move_down 10
-      text "#{car.history_car.technical_inspection_found}", size: 12, style: :bold
+      text "#{car.history_cars.first.technical_inspection_found}", size: 12, style: :bold
       move_down 5
-      text "#{car.history_car.technical_inspection_found_info}", size: 9
+      text "#{car.history_cars.first.technical_inspection_found_info}", size: 9
       move_down 10
-      text "#{car.history_car.imported}", size: 12, style: :bold
+      text "#{car.history_cars.first.imported}", size: 12, style: :bold
       move_down 5
-      text "#{car.history_car.imported_info}", size: 9
+      text "#{car.history_cars.first.imported_info}", size: 9
       move_down 10
-      text "#{car.history_car.insurance_found}", size: 12, style: :bold
+      text "#{car.history_cars.first.insurance_found}", size: 12, style: :bold
       move_down 10
-      text "#{car.history_car.recall_campaigns_found}", size: 12, style: :bold
+      text "#{car.history_cars.first.recall_campaigns_found}", size: 12, style: :bold
       move_down 5
-      text "#{car.history_car.recall_campaigns_found_info}", size: 9
+      text "#{car.history_cars.first.recall_campaigns_found_info}", size: 9
       move_down 20
 
       # Заключение
