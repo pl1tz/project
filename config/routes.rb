@@ -110,7 +110,6 @@ Rails.application.routes.draw do
   get 'credit' => 'credits#top_programs'#Топ программ
   get 'credits' => 'credits#index '#Список программ
   post 'credit' => 'credits#create'#Создать программу
-  get 'credit/:id' => 'credits#show'#Показать программу
   get 'about' => 'about_companies#index'#О компании
   get 'car/:brand/:unique_id' => 'cars#add_car'#Показать автомобиль
 
