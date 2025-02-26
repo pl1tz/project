@@ -142,6 +142,8 @@ Rails.application.routes.draw do
   get 'privacy' => 'cars#add_car'#Политика конфиденциальности
   get 'feeds/yandex_feed', to: 'feeds#yandex_feed', defaults: { format: 'xml' }
 
+  post 'run_task', to: 'tasks#run_task'
+
   match "/404", to: "errors#not_found", via: :all
   match "*unmatched", to: "errors#not_found", via: :all
 
