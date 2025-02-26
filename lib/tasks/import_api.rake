@@ -8,6 +8,8 @@ require 'parallel'
 # youautoplus.ru 1543
 namespace :import_api do
   task delete_diff_cars: :environment do
+    task = Task.create(name: 'delete diff cars', status: 'running')
+
     url = 'https://plex-crm.ru/api/v3/offers/website/' + ENV['SITE_ID'].to_s
     token = ENV['PLEX_CRM_TOKEN']
     
@@ -48,9 +50,14 @@ namespace :import_api do
     else
       puts "No cars to remove."
     end
+
+    # Обновляем задачу после выполнения
+    task.update(status: 'completed')
   end
 
   task create_cars: :environment do
+    task = Task.create(name: 'create cars', status: 'running')
+
     url = 'https://plex-crm.ru/api/v3/offers/website/' + ENV['SITE_ID'].to_s
     token = ENV['PLEX_CRM_TOKEN']
     
@@ -141,9 +148,14 @@ namespace :import_api do
     end_time = Time.now
     duration = (end_time - start_time) / 60
     puts "Total import time: #{duration.round(2)} minutes"
+
+    # Обновляем задачу после выполнения
+    task.update(status: 'completed')
   end
 
   task update_cars: :environment do
+    task = Task.create(name: 'update cars', status: 'running')
+
     url = 'https://plex-crm.ru/api/v3/offers/website/' + ENV['SITE_ID'].to_s
     token = ENV['PLEX_CRM_TOKEN']
     
@@ -230,6 +242,8 @@ namespace :import_api do
     end_time = Time.now
     duration = (end_time - start_time) / 60
     puts "Total update time: #{duration.round(2)} minutes"
+
+    task.update(status: 'completed')
   end
 
   private
