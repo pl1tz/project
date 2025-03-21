@@ -102,16 +102,17 @@ class CarsController < ApplicationController
   end
 
   def last_cars
-    @cars = Car.includes(:brand, :model, :body_type, :engine_name_type, :engine_power_type, :engine_capacity_type, :gearbox_type, :drive_type, :history_cars, :images)
+    @cars = Car.includes(:brand, :model, :generation, :body_type, :engine_name_type, :engine_power_type, :engine_capacity_type, :gearbox_type, :drive_type, :history_cars, :images)
                .order(created_at: :desc)
                .limit(3)
   
     render json: @cars.map { |car|
       car.as_json(
-        only: [:id, :year, :price, :online_view_available],
+        only: [:id, :unique_id, :year, :price, :online_view_available],
         include: {
           brand: { only: [:name] },
           model: { only: [:name] },
+          generation: { only: [:name] },
           body_type: { only: [:name] },
           engine_name_type: { only: [:name] },
           engine_power_type: { only: [:power] },
@@ -125,9 +126,7 @@ class CarsController < ApplicationController
   end  
 
   def cars_count
-    compact = params[:compact] == 'true'
-
-    result = BrandModelGenerationCountService.call(compact)
+    result = BrandModelGenerationCountService.call
     render json: result
   end
 
