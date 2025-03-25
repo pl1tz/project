@@ -51,7 +51,7 @@ class ReportsController < ApplicationController
       table_data = [
         ["VIN:", "#{car.history_cars.first.vin[0..5]}*****#{car.history_cars.first.vin[-4..-1]}"], # Скрываем часть VIN
         ["Госномер:", car.history_cars.first.registration_number || 'Отсутствует'],
-        ["Номер кузова:", car.history_cars.first.vin],
+        ["Номер кузова:", "#{car.history_cars.first.vin[0..5]}*****#{car.history_cars.first.vin[-4..-1]}"],
         ["Год выпуска:", car.year],
         ["Тип ТС:", car.body_type.name],
         ["Цвет:", car.color.name],
@@ -67,7 +67,7 @@ class ReportsController < ApplicationController
         self.row_colors = ['FFFFFF', 'F0F0F0'] # Чередование цветов строк
       end
 
-      text "VIN скрыт для из соображений безопасности", size: 12, align: :left
+      text "VIN скрыт из соображений безопасности", size: 12, align: :left
       move_down 20
 
       start_new_page
