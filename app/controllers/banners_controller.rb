@@ -5,19 +5,19 @@ class BannersController < ApplicationController
   # GET /banners or /banners.json
   def index
     @banners = Banner.active
-    render json: @banners
+    render json: @banners.map { |banner| banner_with_images(banner) }
   end
 
   # GET /banners/1 or /banners/1.json
   def show
-    render json: @banner
+    render json: banner_with_images(@banner)
   end
 
   # POST /banners or /banners.json
   def create
     @banner = Banner.new(banner_params)
     if @banner.save
-      render json: @banner, status: :ok
+      render json: banner_with_images(@banner), status: :ok
     else
       render json: @banner.errors, status: :unprocessable_entity
     end
@@ -56,8 +56,12 @@ class BannersController < ApplicationController
       render json: { error: 'Баннер не найден' }, status: :not_found
     end
 
+    def banner_with_images(banner)
+      banner.as_json.merge(image_urls: banner.images.map { |img| url_for(img) })
+    end
+
     # Only allow a list of trusted parameters through.
     def banner_params
-      params.require(:banner).permit(:image, :image2, :status, :main_text, :second_text)
+      params.require(:banner).permit(:image, :image2, :status, :main_text, :second_text, images: [])
     end
 end
