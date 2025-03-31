@@ -30,7 +30,7 @@ namespace :plex_api do
     items.each_slice(1000) do |items_batch|
       body = { items: items_batch }
 
-      response = HTTParty.post('https://plex-crm.ru/api/v3/offers/urls', 
+      response = HTTParty.post('https://app.plex-crm.ru/api/v3/offers/urls', 
         headers: {
           'Authorization' => "Bearer #{ENV['PLEX_CRM_TOKEN']}",
           'Content-Type' => 'application/json'

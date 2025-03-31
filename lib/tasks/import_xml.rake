@@ -5,7 +5,7 @@ require 'httparty'
 namespace :import do
 
   task create_cars: :environment do
-    xml_data = URI.open('https://plex-crm.ru/xml/usecarmax/hpbz0dmc').read
+    xml_data = URI.open('https://app.plex-crm.ru/xml/usecarmax/hpbz0dmc').read
     doc = Nokogiri::XML(xml_data)
 
     ActiveRecord::Base.transaction do
@@ -73,7 +73,7 @@ namespace :import do
   end
 
   task delete_diff_cars: :environment do
-    xml_data = URI.open('https://plex-crm.ru/xml/usecarmax/hpbz0dmc').read
+    xml_data = URI.open('https://app.plex-crm.ru/xml/usecarmax/hpbz0dmc').read
     doc = Nokogiri::XML(xml_data)
     xml_unique_ids = doc.xpath('//car/unique_id').map(&:text)
 
@@ -82,7 +82,7 @@ namespace :import do
   end
 
   task update_cars: :environment do
-    xml_data = URI.open('https://plex-crm.ru/xml/usecarmax/hpbz0dmc').read
+    xml_data = URI.open('https://app.plex-crm.ru/xml/usecarmax/hpbz0dmc').read
     doc = Nokogiri::XML(xml_data)
 
     ActiveRecord::Base.transaction do
@@ -107,7 +107,7 @@ namespace :import do
   end
 
   task update_all_cars: :environment do
-    xml_data = URI.open('https://plex-crm.ru/xml/usecarmax/hpbz0dmc').read
+    xml_data = URI.open('https://app.plex-crm.ru/xml/usecarmax/hpbz0dmc').read
     doc = Nokogiri::XML(xml_data)
 
     ActiveRecord::Base.transaction do

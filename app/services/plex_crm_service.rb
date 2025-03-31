@@ -2,7 +2,7 @@
 # Handles sending applications/requests to the CRM system
 class PlexCrmService
   include HTTParty
-  base_uri 'https://plex-crm.ru/api/v3'
+  base_uri 'https://app.plex-crm.ru/api/v3'
 
   APPLICATION_TYPES = {
     credit: 'credit',

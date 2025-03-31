@@ -10,7 +10,7 @@ namespace :import_api do
   task delete_diff_cars: :environment do
     task = Task.create(name: 'delete diff cars', status: 'running')
 
-    url = 'https://plex-crm.ru/api/v3/offers/website/' + ENV['SITE_ID'].to_s
+    url = 'https://app.plex-crm.ru/api/v3/offers/website/' + ENV['SITE_ID'].to_s
     token = ENV['PLEX_CRM_TOKEN']
     
     puts "Fetching cars from API..."
@@ -58,7 +58,7 @@ namespace :import_api do
   task create_cars: :environment do
     task = Task.create(name: 'create cars', status: 'running')
 
-    url = 'https://plex-crm.ru/api/v3/offers/website/' + ENV['SITE_ID'].to_s
+    url = 'https://app.plex-crm.ru/api/v3/offers/website/' + ENV['SITE_ID'].to_s
     token = ENV['PLEX_CRM_TOKEN']
     
     total_successful_imports = 0
@@ -156,7 +156,7 @@ namespace :import_api do
   task update_cars: :environment do
     task = Task.create(name: 'update cars', status: 'running')
 
-    url = 'https://plex-crm.ru/api/v3/offers/website/' + ENV['SITE_ID'].to_s
+    url = 'https://app.plex-crm.ru/api/v3/offers/website/' + ENV['SITE_ID'].to_s
     token = ENV['PLEX_CRM_TOKEN']
     
     total_successful_updates = 0
