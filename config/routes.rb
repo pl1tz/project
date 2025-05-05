@@ -21,8 +21,11 @@ Rails.application.routes.draw do
   end
   resources :banners do 
     collection do 
-    get :banner_all
-    end 
+      get :banner_all
+    end
+    member do
+      delete :delete_image
+    end
   end 
   resources :engine_capacity_types
   resources :engine_power_types
@@ -143,11 +146,12 @@ Rails.application.routes.draw do
   get 'feeds/yandex_feed', to: 'feeds#yandex_feed', defaults: { format: 'xml' }
 
   post 'run_task', to: 'tasks#run_task'
+end
 
+Rails.application.routes.append do
   match "/404", to: "errors#not_found", via: :all
   match "*unmatched", to: "errors#not_found", via: :all
 
   # Обработка всех остальных маршрутов
   match '*path', to: 'application#frontend', via: :all
 end
-  

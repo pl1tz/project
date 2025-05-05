@@ -36,3 +36,5 @@
 /config/master.key
 
 /public/yandex_feed.xml
+
+/.ruby-version

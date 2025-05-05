@@ -87,4 +87,14 @@ Rails.application.configure do
   # config.hosts << "youautoplus.ru"
   # config.hosts << "www.youautoplus.ru"
 
+  # Конфигурация для Active Storage
+  config.active_storage.service = :local
+  config.active_storage.resolve_model_to_route = :rails_storage_proxy
+  config.active_storage.urls_expire_in = 1.hour
+  
+  # Добавляем default_url_options
+  Rails.application.routes.default_url_options = {
+    host: 'localhost',
+    port: 3000
+  }
 end
