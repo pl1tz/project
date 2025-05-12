@@ -23,9 +23,6 @@ Rails.application.routes.draw do
     collection do 
       get :banner_all
     end
-    member do
-      delete :delete_image
-    end
   end 
   resources :engine_capacity_types
   resources :engine_power_types

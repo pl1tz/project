@@ -35,30 +35,3 @@ class BannerService
     }
   end
 end
-
-
-
-
-# # Считываем содержимое файла
-
-
-# # Кодируем содержимое в base64
-# base64_content = Base64.strict_encode64(file_content)
-
-# # Собираем thumbUrl
-# thumb_url = "data:#{blob.content_type};base64,#{base64_content}"
-
-# # Собираем весь объект
-# result = {
-#   uid: "rc-upload-#{blob.id}-#{SecureRandom.hex(4)}",
-#   name: blob.filename.to_s,
-#   status: "done",
-#   thumbUrl: thumb_url,
-#   type: blob.content_type,
-#   size: blob.byte_size,
-#   percent: 100,
-#   originFileObj: {} # если нужно что-то изначальное, можно дополнить
-# }
-
-# puts result
-
