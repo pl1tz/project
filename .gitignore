@@ -38,3 +38,5 @@
 /public/yandex_feed.xml
 
 /.ruby-version
+/node_modules/*
+/public/vite-dev/*
