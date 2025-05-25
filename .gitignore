@@ -38,5 +38,15 @@
 /public/yandex_feed.xml
 
 /.ruby-version
-/node_modules/*
-/public/vite-dev/*
+
+# Vite Ruby
+node_modules
+
+# Vite Ruby
+/public/vite*
+node_modules
+# Vite uses dotenv and suggests to ignore local-only env files. See
+# https://vitejs.dev/guide/env-and-mode.html#env-files
+*.local
+
+.DS_Store

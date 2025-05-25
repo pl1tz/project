@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "target": "esnext",
+    "module": "ESNext",
+    "lib": ["ES6", "DOM", "DOM.Iterable", "ScriptHost"],
+    "jsx": "react-jsx",
+    "noEmit": false,
+    "isolatedModules": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictFunctionTypes": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "moduleResolution": "node",
+    "baseUrl": "./app/frontend",
+    "paths": {
+      "helpers/*": ["./components/helpers/*"],
+      "layout/*": ["./components/layout/*"],
+      "main/*": ["./components/main/*"],
+      "svg/*": ["./components/svg/*"],
+      "functions/*": ["./functions/*"],
+      "redux/*": ["./redux/*"]
+    },
+    "typeRoots": ["./frontend/types", "./node_modules/@types"],
+    "types": ["node", "jest"],
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "exclude": [
+    "node_modules", "app/assets", "config", "tmp", ".git", "public", "vendor"
+  ],
+  "include": [
+    "eslint.config.mjs",
+    "**/*.ts",
+    "**/*.tsx"
+  ]
+}

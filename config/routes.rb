@@ -143,12 +143,10 @@ Rails.application.routes.draw do
   get 'feeds/yandex_feed', to: 'feeds#yandex_feed', defaults: { format: 'xml' }
 
   post 'run_task', to: 'tasks#run_task'
+
+  root to: 'application#react_page'
 end
 
 Rails.application.routes.append do
-  match "/404", to: "errors#not_found", via: :all
-  match "*unmatched", to: "errors#not_found", via: :all
-
-  # Обработка всех остальных маршрутов
-  match '*path', to: 'application#frontend', via: :all
+  get '*path', to: 'application#react_page'
 end
