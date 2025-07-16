@@ -29,7 +29,13 @@ namespace :import_api do
         }
       })
 
-      break unless response.success?
+      unless response.success?
+        puts "[#{Time.now}]\n========== REQUEST FAILED =========="
+        puts "[#{Time.now}] Status Code: #{response.code}"
+        puts "[#{Time.now}] Response Body: #{response.body}"
+        puts "[#{Time.now}] Error: #{response.message}" if response.message
+        break
+      end
       
       data = response.parsed_response
       cars_data = data['items']
@@ -40,15 +46,21 @@ namespace :import_api do
       current_page += 1
     end
 
-    # Удаляем машины, которых нет в API
-    cars_to_delete = Car.where.not(unique_id: api_ids)
-    count = cars_to_delete.count
-    
-    if count > 0
-      cars_to_delete.destroy_all
-      puts "Removed #{count} cars that are not present in the API."
+    if !api_ids.empty?
+      # Удаляем машины, которых нет в API
+      cars_to_delete = Car.where.not(unique_id: api_ids)
+      count = cars_to_delete.count
+      
+      if count > 0
+        cars_to_delete.destroy_all
+        puts "[#{Time.now}] Removed #{count} cars that are not present in the API."
+      else
+        puts "[#{Time.now}] No cars to remove."
+      end
     else
-      puts "No cars to remove."
+      puts "[#{Time.now}] ================API IDS IS EMPTY==================="
+      puts "[#{Time.now}] ===========SOMETHING WRONG WITH API================"
+      puts "[#{Time.now}] No cars to remove."
     end
 
     # Обновляем задачу после выполнения
@@ -80,7 +92,13 @@ namespace :import_api do
         }
       })
 
-      break unless response.success?
+      unless response.success?
+        puts "[#{Time.now}]\n========== REQUEST FAILED =========="
+        puts "[#{Time.now}] Status Code: #{response.code}"
+        puts "[#{Time.now}] Response Body: #{response.body}"
+        puts "[#{Time.now}] Error: #{response.message}" if response.message
+        break
+      end
 
       data = response.parsed_response
       cars_data = data['items']
@@ -92,10 +110,10 @@ namespace :import_api do
       total_items = pagination['totalItems']
 
       if current_page == 1
-        puts "\nStarting import of #{total_items} cars (#{total_pages} pages)..."
+        puts "[#{Time.now}]\nStarting import of #{total_items} cars (#{total_pages} pages)..."
       end
       
-      puts "\nProcessing page #{current_page}/#{total_pages}..."
+      puts "[#{Time.now}]\nProcessing page #{current_page}/#{total_pages}..."
       
       page_successful = 0
       page_failed = 0
@@ -106,15 +124,14 @@ namespace :import_api do
           existing_car = Car.find_by(unique_id: car_data['id'])
           
           if existing_car
-            # Пропускаем существующую машину
-            puts "Car already exists, skipping: #{existing_car.brand.name} #{existing_car.model.name}"
+            puts "[#{Time.now}] Car already exists, skipping: #{existing_car.brand.name} #{existing_car.model.name}"
           else
             # Создаем новую машину
             car = create_car_from_api_data(car_data)
             if car
               page_successful += 1
               total_successful_imports += 1
-              puts "New car created: #{car.brand.name} #{car.model.name}"
+              puts "[#{Time.now}] New car created: #{car.brand.name} #{car.model.name}"
             else
               page_failed += 1
               total_failed_imports += 1
@@ -124,19 +141,18 @@ namespace :import_api do
         end
       end
 
-      puts "\nPage #{current_page} results:"
-      puts "Successfully imported: #{page_successful}"
-      puts "Failed to import: #{page_failed}"
+      puts "[#{Time.now}] Successfully imported: #{page_successful}"
+      puts "[#{Time.now}] Failed to import: #{page_failed}"
 
       break if current_page >= total_pages
       current_page += 1
     end
 
     # Итоговая статистика
-    puts "\n========== Final Import Summary =========="
-    puts "Total cars processed: #{total_successful_imports + total_failed_imports}"
-    puts "Successfully imported: #{total_successful_imports}"
-    puts "Failed to import: #{total_failed_imports}"
+    puts "[#{Time.now}] =========== Final Import Summary =========="
+    puts "[#{Time.now}] Total cars processed: #{total_successful_imports + total_failed_imports}"
+    puts "[#{Time.now}] Successfully imported: #{total_successful_imports}"
+    puts "[#{Time.now}] Failed to import: #{total_failed_imports}"
     
     if total_failed_imports > 0
       puts "\nFailed cars:"
@@ -147,7 +163,7 @@ namespace :import_api do
 
     end_time = Time.now
     duration = (end_time - start_time) / 60
-    puts "Total import time: #{duration.round(2)} minutes"
+    puts "[#{Time.now}] Total import time: #{duration.round(2)} minutes"
 
     # Обновляем задачу после выполнения
     task.update(status: 'completed')
@@ -178,7 +194,13 @@ namespace :import_api do
         }
       })
 
-      break unless response.success?
+      unless response.success?
+        puts "[#{Time.now}]\n========== REQUEST FAILED =========="
+        puts "[#{Time.now}] Status Code: #{response.code}"
+        puts "[#{Time.now}] Response Body: #{response.body}"
+        puts "[#{Time.now}] Error: #{response.message}" if response.message
+        break
+      end
 
       data = response.parsed_response
       cars_data = data['items']
@@ -188,7 +210,7 @@ namespace :import_api do
 
       total_pages = pagination['totalPages']
 
-      puts "\nProcessing page #{current_page}/#{total_pages}..."
+      puts "[#{Time.now}]\nProcessing page #{current_page}/#{total_pages}..."
       
       page_successful = 0
       page_failed = 0
@@ -206,31 +228,31 @@ namespace :import_api do
               update_extras_for_api_car(existing_car, car_data)
               page_successful += 1
               total_successful_updates += 1
-              puts "Car updated: #{existing_car.brand.name} #{existing_car.model.name}"
+              puts "[#{Time.now}] Car updated: #{existing_car.brand.name} #{existing_car.model.name}"
             else
               page_failed += 1
               total_failed_updates += 1
               failed_cars << "#{car_data.dig('mark', 'name')} #{car_data.dig('model', 'name')} (ID: #{car_data['id']})"
             end
           else
-            puts "Car not found for update, skipping: #{car_data.dig('mark', 'name')} #{car_data.dig('model', 'name')}"
+            puts "[#{Time.now}] Car not found for update, skipping: #{car_data.dig('mark', 'name')} #{car_data.dig('model', 'name')}"
           end
         end
       end
 
-      puts "\nPage #{current_page} results:"
-      puts "Successfully updated: #{page_successful}"
-      puts "Failed to update: #{page_failed}"
+      puts "[#{Time.now}]\nPage #{current_page} results:"
+      puts "[#{Time.now}] Successfully updated: #{page_successful}"
+      puts "[#{Time.now}] Failed to update: #{page_failed}"
 
       break if current_page >= total_pages
       current_page += 1
     end
 
     # Итоговая статистика
-    puts "\n========== Final Update Summary =========="
-    puts "Total cars processed: #{total_successful_updates + total_failed_updates}"
-    puts "Successfully updated: #{total_successful_updates}"
-    puts "Failed to update: #{total_failed_updates}"
+    puts "[#{Time.now}] =========== Final Update Summary =========="
+    puts "[#{Time.now}] Total cars processed: #{total_successful_updates + total_failed_updates}"
+    puts "[#{Time.now}] Successfully updated: #{total_successful_updates}"
+    puts "[#{Time.now}] Failed to update: #{total_failed_updates}"
     
     if total_failed_updates > 0
       puts "\nFailed cars:"
@@ -241,7 +263,7 @@ namespace :import_api do
 
     end_time = Time.now
     duration = (end_time - start_time) / 60
-    puts "Total update time: #{duration.round(2)} minutes"
+    puts "[#{Time.now}] Total update time: #{duration.round(2)} minutes"
 
     task.update(status: 'completed')
   end
@@ -291,11 +313,11 @@ namespace :import_api do
       # Сохраняем дополнительные опции
       save_extras_for_api_car(car, car_data)
   
-      puts "New car created with full details: #{car.brand.name} #{car.model.name}"
+      puts "[#{Time.now}] New car created with full details: #{car.brand.name} #{car.model.name}"
       car
     else
-      puts "\nFailed to create car: #{car_data.dig('mark', 'title')} #{car_data.dig('model', 'title')}"
-      puts "Errors: #{car.errors.full_messages.join(', ')}"
+      puts "[#{Time.now}]\nFailed to create car: #{car_data.dig('mark', 'title')} #{car_data.dig('model', 'title')}"
+      puts "[#{Time.now}] Errors: #{car.errors.full_messages.join(', ')}"
       nil
     end
   end
@@ -342,7 +364,7 @@ namespace :import_api do
         url: image_data['original']
       )
     end
-    puts "Images saved for car: #{car.id}"
+    puts "[#{Time.now}] Images saved for car: #{car.id}"
   end
 
   def save_extras_for_api_car(car, car_data)
@@ -365,7 +387,7 @@ namespace :import_api do
       extra_name = ExtraName.find_or_create_by(name: extra_value)
       Extra.create(car: car, category: category, extra_name: extra_name)
     end
-    puts "Extras saved for car: #{car.id}"
+    puts "[#{Time.now}] Extras saved for car: #{car.id}"
   end
 
   def determine_category(extra)
