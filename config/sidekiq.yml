@@ -1,0 +1,52 @@
+:queues:
+  - default
+
+development:
+  :logfile: ./log/sidekiq.log
+  :verbose: true
+  :pidfile: ./tmp/pids/sidekiq.pid
+  :concurrency: 1
+  :scheduler:
+    :schedule:
+      create_cars:
+        cron: "*/30 * * * *" 
+        class: "CreateCarsJob"
+        queue: default
+      update_cars:
+        cron: "*/20 * * * *" 
+        class: "UpdateCarsJob"
+        queue: default
+      send_cars_urls:
+        cron: "*/35 * * * *" 
+        class: "SendCarsUrlsJob"
+        queue: default
+      test_job:
+        cron: "*/1 * * * *" 
+        class: "TestJob"
+        queue: default
+
+production:
+  :logfile: ./log/sidekiq.log
+  :verbose: true
+  :pidfile: ./tmp/pids/sidekiq.pid
+  :concurrency: 5
+  :scheduler:
+    :schedule:
+      create_cars:
+        cron: "*/30 * * * *" 
+        class: "CreateCarsJob"
+        queue: default
+      update_cars:
+        cron: "*/20 * * * *" 
+        class: "UpdateCarsJob"
+        queue: default
+      send_cars_urls:
+        cron: "*/35 * * * *" 
+        class: "SendCarsUrlsJob"
+        queue: default
+
+stage:
+  :logfile: ./log/sidekiq.log
+  :verbose: true
+  :pidfile: ./tmp/pids/sidekiq.pid
+  :concurrency: 1

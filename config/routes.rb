@@ -1,4 +1,11 @@
+require 'sidekiq/web'
+
 Rails.application.routes.draw do
+  Sidekiq::Web.use Rack::Auth::Basic do |username, password|
+    username == ENV['SIDEKIQ_USERNAME'] && password == ENV['SIDEKIQ_PASSWORD']
+  end
+  mount Sidekiq::Web => '/sidekiq'
+
   resources :car_catalog_orders
   resources :car_catalog_extras
   resources :car_catalog_extra_names
