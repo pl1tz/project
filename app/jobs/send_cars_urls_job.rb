@@ -1,4 +1,4 @@
-# 
+# frozen_string_literal: true
 
 class SendCarsUrlsJob
   include Sidekiq::Job
@@ -23,7 +23,7 @@ class SendCarsUrlsJob
 
     if items.empty?
       puts "No valid URLs to send."
-      next
+      return
     end
 
     # Разбиваем массив на части по 1000 элементов
