@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ImportCarsService
+  PER_PAGE = 500
+
   attr_reader :token, :site_id
 
   def initialize
@@ -24,7 +26,7 @@ class ImportCarsService
         },
         query: {
           page: current_page,
-          per_page: 50
+          limit: PER_PAGE
         }
       })
 
@@ -82,7 +84,7 @@ class ImportCarsService
         },
         query: {
           page: current_page,
-          per_page: 50
+          limit: PER_PAGE
         }
       })
 
@@ -179,7 +181,7 @@ class ImportCarsService
         },
         query: {
           page: current_page,
-          per_page: 50
+          limit: PER_PAGE
         }
       })
 
