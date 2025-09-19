@@ -1,5 +1,6 @@
 :queues:
-  - default
+  - [default, 5]
+  - [heavy, 1] 
 
 development:
   :logfile: ./log/sidekiq.log
@@ -29,19 +30,19 @@ production:
   :logfile: ./log/sidekiq.log
   :verbose: true
   :pidfile: ./tmp/pids/sidekiq.pid
-  :concurrency: 5
+  :concurrency: 10
   :scheduler:
     :schedule:
       create_cars:
-        cron: "*/30 * * * *" 
+        cron: "*/20 * * * *" 
         class: "CreateCarsJob"
         queue: default
       update_cars:
-        cron: "*/20 * * * *" 
+        cron: "*/30 * * * *" 
         class: "UpdateCarsJob"
-        queue: default
+        queue: heavy
       send_cars_urls:
-        cron: "*/35 * * * *" 
+        cron: "*/25 * * * *" 
         class: "SendCarsUrlsJob"
         queue: default
 
