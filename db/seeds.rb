@@ -71,17 +71,3 @@ Contact.create([
     auto_address: 'г. Москва, Ореховый бульвар, 26к1'},
 ])
 puts "Contact created successfully"
-
-Banner.create([
-  { image: 'https://raw.githubusercontent.com/pl1tz/project/refs/heads/master/app/assets/images/main.webp',
-    status: true,
-    main_text: 'АВТОКРЕДИТ ОТ 4,5%',
-    second_text: 'со скидкой до 300.000р.'
-  },
-  { image: 'https://raw.githubusercontent.com/pl1tz/project/refs/heads/master/app/assets/images/main.webp',
-    status: false,
-    main_text: 'TRADE-IN',
-    second_text: 'со скидкой до 150.000р.'
-  },
-])
-puts "Banner created successfully"
