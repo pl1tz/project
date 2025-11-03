@@ -152,7 +152,7 @@ class CarsController < ApplicationController
 
 
   def car_details
-    result = CarFilterService.new(filter_params, 10).call
+    result = CarFilterService.new(filter_params, 10).call.limit(3)
     render json: result
   end
 
