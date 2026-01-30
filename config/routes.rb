@@ -147,7 +147,7 @@ Rails.application.routes.draw do
   get 'admin/catalog/:id/texnos' => 'cars#add_car'#Добавить автомобиль
   get 'admin/catalog/:id/gallery' => 'cars#add_car'#Добавить автомобиль
   get 'privacy' => 'cars#add_car'#Политика конфиденциальности
-  get 'feeds/yandex_feed', to: 'feeds#yandex_feed', defaults: { format: 'xml' }
+  get 'analytics/yandex_feed', to: 'feeds#yandex_feed', defaults: { format: 'xml' }
 
   post 'run_task', to: 'tasks#run_task'
 end

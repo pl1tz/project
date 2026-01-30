@@ -53,4 +53,4 @@ namespace :generate do
     File.write(Rails.root.join('public', 'yandex_feed.xml'), builder.to_xml)
     puts "Yandex feed generated successfully."
   end
-end 
+end
