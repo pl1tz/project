@@ -82,46 +82,46 @@ namespace :import_catalog do
 
         parse_car_configuration_and_extra(car_catalog.id, document)
 
-        document.css('.top__car-color .thumbnail').each do |color_node|
-          background_match = color_node['style']&.match(/background: (#[0-9a-fA-F]{6})/)
-          background = background_match ? background_match[1] : nil
-          name = color_node['data-title']&.strip
-          image_path = color_node['data-image']
-          image_url = "#{base_url}#{URI::DEFAULT_PARSER.escape(image_path)}"
-
-          # Создаем директорию для сохранения изображений, если она не существует
-          images_directory = Rails.root.join('public', 'uploads', 'images')
-          FileUtils.mkdir_p(images_directory)
-          domain_url = 'https://automagnat.ru' # Ваш домен
-          # Загружаем изображение
-          begin
-            image_data = URI.open(image_url).read
-            image_filename = File.basename(image_path)
-            image_file_path = images_directory.join(image_filename)
-
-            File.open(image_file_path, 'wb') do |file|
-              file.write(image_data)
-            end
-
-            # Сохраняем путь к изображению в базе данных
-            image = "#{domain_url}/uploads/images/#{image_filename}"
-
-            CarColor.find_or_create_by!(
-              car_catalog_id: car_catalog.id,
-              background: background,
-              name: name,
-              image: image
-            )
-
-          rescue OpenURI::HTTPError => e
-            puts "Ошибка при загрузке изображения: #{e.message}"
-          rescue StandardError => e
-            puts "Общая ошибка: #{e.message}"
-          end
-        end
+        save_car_colors(car_catalog.id, document)
 
         puts "Car data imported successfully for #{brand} #{model}."
       end
+    end
+  end
+
+  # Скачивает только картинки для машин, которые уже есть в БД. Новые машины не добавляет.
+  task refresh_images: :environment do
+    base_url = 'https://center-auto.ru'
+    catalog_url = "#{base_url}/katalog"
+
+    catalog_response = HTTParty.get(catalog_url)
+    catalog_document = Nokogiri::HTML(catalog_response.body)
+    car_links = catalog_document.css('.catalog .item ul li a').map { |link| link['href'] }
+
+    car_links.each do |car_link|
+      car_url = car_link.start_with?('http') ? car_link : "#{base_url}#{car_link}"
+      response = HTTParty.get(car_url)
+      document = Nokogiri::HTML(response.body)
+
+      data_name = document.at_css('h1')&.text&.strip
+      next unless data_name
+
+      first_word, *remaining_words = data_name.split
+      remaining_text = remaining_words.join(' ')
+      brand = first_word
+      model = remaining_text
+
+      car_catalog = CarCatalog.find_by(brand: brand, model: model)
+      unless car_catalog
+        puts "Пропуск (нет в БД): #{brand} #{model}"
+        next
+      end
+
+      save_techno_data_for_car(car_catalog.id, document)
+      parse_car_images(car_catalog.id, document)
+      save_car_colors(car_catalog.id, document)
+
+      puts "Картинки обновлены: #{brand} #{model}."
     end
   end
 
@@ -167,6 +167,42 @@ namespace :import_catalog do
     )
 
     puts "Techno data saved for car catalog: #{car_catalog_id}"
+  end
+
+  def save_car_colors(car_catalog_id, document)
+    base_url = 'https://center-auto.ru'
+    domain_url = 'https://automagnat.ru'
+    images_directory = Rails.root.join('public', 'uploads', 'images')
+    FileUtils.mkdir_p(images_directory)
+
+    document.css('.top__car-color .thumbnail').each do |color_node|
+      background_match = color_node['style']&.match(/background: (#[0-9a-fA-F]{6})/)
+      background = background_match ? background_match[1] : nil
+      name = color_node['data-title']&.strip
+      image_path = color_node['data-image']
+      next unless image_path
+
+      image_url = "#{base_url}#{URI::DEFAULT_PARSER.escape(image_path)}"
+      begin
+        image_data = URI.open(image_url).read
+        image_filename = File.basename(image_path)
+        image_file_path = images_directory.join(image_filename)
+
+        File.open(image_file_path, 'wb') { |file| file.write(image_data) }
+        image = "#{domain_url}/uploads/images/#{image_filename}"
+
+        CarColor.find_or_create_by!(
+          car_catalog_id: car_catalog_id,
+          background: background,
+          name: name,
+          image: image
+        )
+      rescue OpenURI::HTTPError => e
+        puts "Ошибка при загрузке изображения: #{e.message}"
+      rescue StandardError => e
+        puts "Общая ошибка: #{e.message}"
+      end
+    end
   end
 
   def import_engine_data(car_catalog_id, document)
